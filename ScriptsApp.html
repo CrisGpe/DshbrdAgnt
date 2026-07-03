@@ -373,14 +373,27 @@
             const fechaIniStr = window.AppStore.filtroFechaInicio.value;
             const fechaFinStr = window.AppStore.filtroFechaFin.value;
 
-            if (fechaIniStr && fechaFinStr) {
-              // Normalización a medianoche de inicio y último segundo de fin
-              const msInicio = new Date(fechaIniStr + "T00:00:00").getTime();
-              const msFin = new Date(fechaFinStr + "T23:59:59").getTime();
+            if (fechaIniStr || fechaFinStr) {
+              // Permitir búsquedas de "desde tal fecha" o "hasta tal fecha"
+              const msInicio = fechaIniStr ? new Date(fechaIniStr + "T00:00:00").getTime() : 0;
+              const msFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
 
               filtered = filtered.filter(row => {
                 if (!row[0]) return false; // Fila sin fecha válida en la columna 0 de OATC
-                const msTarjeta = new Date(row[0]).getTime();
+                
+                let msTarjeta = new Date(row[0]).getTime();
+                
+                // Fallback por si Google Sheets devuelve texto "DD/MM/YYYY" en lugar de objeto Date
+                if (isNaN(msTarjeta) && typeof row[0] === 'string' && row[0].includes('/')) {
+                  const partes = row[0].split(/[/\s:-]/);
+                  if (partes.length >= 3) {
+                    // Interpretar como DD/MM/YYYY
+                    msTarjeta = new Date(partes[2], partes[1] - 1, partes[0]).getTime();
+                  }
+                }
+
+                if (isNaN(msTarjeta)) return false; // Ignorar filas corruptas
+
                 return (msTarjeta >= msInicio && msTarjeta <= msFin);
               });
             }
