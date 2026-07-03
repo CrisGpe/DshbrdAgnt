@@ -82,7 +82,7 @@
         };
 
         const abrirModalDetalles = (cardData) => {
-          window.AppStore.modalDetalles.value = { visible: true, card: cardData };
+          window.AppStore.modalDetalles.value = { visible: true, card: cardData, origen: window.AppStore.pestanaActiva.value };
         };
 
         const cerrarModalDetalles = () => {

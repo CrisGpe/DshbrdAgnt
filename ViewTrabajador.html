@@ -208,23 +208,19 @@
         >
           <!-- Cabecera de la Tarjeta con Badges Semánticos -->
           <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/60 pb-2 mb-1">
-            <span class="text-xs font-black text-indigo-400 font-mono">
-              ID: {{ card.length === 22 ? (card[14] || '---') : (card[1] || '---') }}
-            </span>
-            
-            <!-- Badge Dinámico de Estado formateado con clases de Tailwind CSS -->
-            <span 
-              class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase font-mono tracking-wider border"
-              :class="obtenerClaseEstadoCSS(card.length === 22 ? card[20] : card[7])"
-            >
-              {{ (card.length === 22 ? card[20] : card[7]) || 'Desconocido' }}
-            </span>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-black text-slate-400 font-mono bg-slate-100 dark:bg-slate-900 px-2 py-0.5 rounded-md">#{{ AppStore.pestanaActiva.value === 'Mis Atenciones' ? (card[14] || '---') : (card[1] || '---') }}</span>
+              <span class="text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider" 
+                    :class="AppStore.pestanaActiva.value === 'Mis Atenciones' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400'">
+                {{ AppStore.pestanaActiva.value === 'Mis Atenciones' ? (card[20] || 'En Proceso') : (card[7] || 'Finalizado') }}
+              </span>
+            </div>
           </div>
 
           <!-- Bloque de Contenido Detallado con Formateo Localizado -->
           <div class="space-y-1.5 text-xs">
             <!-- Estructura optimizada para "Mis Atenciones" (Borrador) - VISTA RESUMIDA UX -->
-            <template v-if="card.length === 22">
+            <template v-if="AppStore.pestanaActiva.value === 'Mis Atenciones'">
               <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[17] || 'Anónimo' }}</span></p>
               <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
                 <span class="flex items-center gap-1">🕒 Hora: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[13], true) }}</strong></span>
@@ -236,7 +232,7 @@
             </template>
 
             <!-- Estructura optimizada para "Mi Historial" (OATC) - VISTA RESUMIDA UX -->
-            <template v-else-if="card.length === 9">
+            <template v-else-if="AppStore.pestanaActiva.value === 'Mi Historial'">
               <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[4] || 'Anónimo' }}</span></p>
               <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-xs text-slate-600 dark:text-slate-400">
                 <span class="flex items-center gap-1.5">⏱️ Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[0], false) }}</strong></span>
@@ -351,7 +347,7 @@
         <div class="bg-slate-50 dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <h3 class="text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">Detalles de Atención</h3>
-            <p class="text-[10px] text-slate-500 font-mono mt-0.5">ID: {{ AppStore.modalDetalles.value.card.length === 22 ? AppStore.modalDetalles.value.card[14] : AppStore.modalDetalles.value.card[1] }}</p>
+            <p class="text-[10px] text-slate-500 font-mono mt-0.5">ID: {{ AppStore.modalDetalles.value.origen === 'Mis Atenciones' ? AppStore.modalDetalles.value.card[14] : AppStore.modalDetalles.value.card[1] }}</p>
           </div>
           <button @click="cerrarModalDetalles" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-rose-100 hover:text-rose-500 transition-colors">
             ✕
@@ -362,7 +358,7 @@
         <div class="p-5 space-y-3 text-xs">
           
           <!-- SECCIÓN: BORRADOR (Mis Atenciones) -->
-          <template v-if="AppStore.modalDetalles.value.card.length === 22">
+          <template v-if="AppStore.modalDetalles.value.origen === 'Mis Atenciones'">
             <div>
               <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente</label>
               <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[17] || 'Anónimo' }}</div>
@@ -382,7 +378,7 @@
           </template>
 
           <!-- SECCIÓN: OATC (Mi Historial) -->
-          <template v-else-if="AppStore.modalDetalles.value.card.length === 9">
+          <template v-else-if="AppStore.modalDetalles.value.origen === 'Mi Historial'">
             <div>
               <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente Registrado</label>
               <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[4] || 'Anónimo' }}</div>
