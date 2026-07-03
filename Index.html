@@ -7,7 +7,7 @@
   <!-- Inyección de Estilos y Tailwind CSS -->
   <?!= include('Styles.html'); ?>
 </head>
-<body class="bg-slate-900 font-sans text-slate-100 min-h-screen antialiased flex flex-col pb-20 select-none">
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 font-sans min-h-screen antialiased flex flex-col pb-20 select-none transition-colors duration-300">
 
   <!-- Contenedor Raíz Máster protegido por v-cloak -->
   <div id="app" v-cloak class="flex-1 flex flex-col w-full">
@@ -49,6 +49,24 @@
     <!-- PANTALLA DE ACCESO: Si no cuenta con Handshake de autenticación activo -->
     <div v-else class="min-h-screen flex flex-col justify-center animate-fadeIn">
       <?!= include('ViewLogin.html'); ?>
+    </div>
+
+    <!-- SISTEMA GLOBAL DE TOASTS -->
+    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm">
+      <transition-group name="toast">
+        <div v-for="t in AppStore.toasts.value" :key="t.id"
+             class="px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-auto transform transition-all font-bold text-xs"
+             :class="{
+               'bg-emerald-500 text-white': t.tipo === 'success',
+               'bg-rose-500 text-white': t.tipo === 'error',
+               'bg-indigo-500 text-white': t.tipo === 'info'
+             }">
+          <span v-if="t.tipo === 'success'">✅</span>
+          <span v-if="t.tipo === 'error'">⚠️</span>
+          <span v-if="t.tipo === 'info'">ℹ️</span>
+          {{ t.mensaje }}
+        </div>
+      </transition-group>
     </div>
 
   </div>

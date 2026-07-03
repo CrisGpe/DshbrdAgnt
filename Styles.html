@@ -8,6 +8,14 @@
   mediante el blindaje de la directiva v-cloak para evitar el parpadeo de carga.
 -->
 <script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class', // Habilitar modo oscuro por clase
+    theme: {
+      extend: {}
+    }
+  }
+</script>
 
 <style>
   /* Previene el parpadeo de plantillas de Vue antes del montaje definitivo del DOM */
@@ -25,5 +33,25 @@
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 4px;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-track {
+    background: #0f172a;
+  }
+  .dark .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #334155;
+  }
+
+  /* Animaciones Toast */
+  .toast-enter-active,
+  .toast-leave-active {
+    transition: all 0.3s ease;
+  }
+  .toast-enter-from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  .toast-leave-to {
+    opacity: 0;
+    transform: translateY(-20px);
   }
 </style>

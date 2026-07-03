@@ -31,7 +31,11 @@
       cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
       cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
       filtroFechaInicio: Vue.ref(''),
-      filtroFechaFin: Vue.ref('')
+      filtroFechaFin: Vue.ref(''),
+      
+      // NUEVO: Sistema Toast y Tema
+      toasts: Vue.ref([]),
+      tema: Vue.ref(localStorage.getItem('workerview_theme') || 'oscuro')
     };
 
     const app = Vue.createApp({
@@ -40,6 +44,27 @@
         /**
          * Enrutador de Caché e I/O Atómico.
          */
+        const mostrarToast = (mensaje, tipo = 'info') => {
+          const id = Date.now();
+          window.AppStore.toasts.value.push({ id, mensaje, tipo });
+          setTimeout(() => {
+            window.AppStore.toasts.value = window.AppStore.toasts.value.filter(t => t.id !== id);
+          }, 4000);
+        };
+
+        const alternarTema = () => {
+          window.AppStore.tema.value = window.AppStore.tema.value === 'oscuro' ? 'claro' : 'oscuro';
+          localStorage.setItem('workerview_theme', window.AppStore.tema.value);
+          aplicarTemaAlHTML();
+        };
+
+        const aplicarTemaAlHTML = () => {
+          if (window.AppStore.tema.value === 'oscuro') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        };
         const cambiarPestana = (nuevaPestana) => {
           window.AppStore.pestanaActiva.value = nuevaPestana;
           if (nuevaPestana === 'Botonera') return;
@@ -79,9 +104,12 @@
           google.script.run
             .withSuccessHandler(() => {
               window.AppStore.procesandoAlerta.value = false;
-              alert("🚨 Alerta '" + tipoAlerta + "' registrada con éxito.");
+              mostrarToast("🚨 Alerta '" + tipoAlerta + "' registrada con éxito.", "success");
             })
-            .withFailureHandler(() => { window.AppStore.procesandoAlerta.value = false; })
+            .withFailureHandler((err) => { 
+              window.AppStore.procesandoAlerta.value = false;
+              mostrarToast("⚠️ Error al registrar alerta: " + (err.message || err), "error");
+            })
             .registrarAlertaBotonera(window.AppStore.agente.value.nickname, tipoAlerta, window.AppStore.agente.value.sede);
         };
 
@@ -97,7 +125,7 @@
 
         const ejecutarLogin = () => {
           const form = window.AppStore.loginForm.value;
-          if (!form.nickname || !form.pin) return alert("Completa los campos.");
+          if (!form.nickname || !form.pin) return mostrarToast("Completa los campos.", "error");
 
           window.AppStore.cargando.value = true;
 
@@ -116,10 +144,13 @@
                   cambiarPestana('Borrador'); // Arranque estándar por tabla para Admin/Jefe
                 }
               } else {
-                alert(res.mensaje || "PIN incorrecto.");
+                mostrarToast(res.mensaje || "PIN incorrecto.", "error");
               }
             })
-            .withFailureHandler(() => { window.AppStore.cargando.value = false; })
+            .withFailureHandler((err) => { 
+              window.AppStore.cargando.value = false; 
+              mostrarToast("Error de conexión: " + (err.message || err), "error");
+            })
             .loginAgente(form.nickname, form.pin, form.sede);
         };
 
@@ -166,6 +197,7 @@
         };
 
         Vue.onMounted(() => {
+          aplicarTemaAlHTML(); // Aplicar tema al iniciar
           const sesion = localStorage.getItem('workerview_session');
           if (sesion) {
             window.AppStore.agente.value = JSON.parse(sesion);
@@ -304,6 +336,11 @@
           cerrarSesion,
           forzarRefrescoDatos,
           limpiarFiltroFechas,
+          
+          mostrarToast,
+          alternarTema,
+          aplicarTemaAlHTML,
+          
           // Formateadores y utilitarios existentes
           formatearFechaUHoraVisual,
           obtenerClaseEstadoCSS,
