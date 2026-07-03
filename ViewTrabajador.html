@@ -4,18 +4,18 @@
 <div v-if="AppStore.agente.value.autenticado" class="flex-1 flex flex-col w-full animate-fadeIn">
       
   <!-- Mini Header Superior de Estado Fijo -->
-  <header class="bg-slate-950/90 border-b border-slate-800/80 sticky top-0 z-50 px-4 py-3 backdrop-blur-md shadow-lg shrink-0">
+  <header class="bg-white/90 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800/80 sticky top-0 z-50 px-4 py-3 backdrop-blur-md shadow-md dark:shadow-lg shrink-0 transition-colors duration-300">
     <div class="max-w-md mx-auto flex items-center justify-between gap-2">
       <div class="flex items-center gap-2.5 min-w-0">
         <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-black text-xs text-white shadow-md border border-indigo-400/20 shrink-0">
           {{ AppStore.agente.value.nombre.charAt(0) }}
         </div>
         <div class="min-w-0">
-          <h2 class="text-xs font-black text-white truncate tracking-tight">{{ AppStore.agente.value.nombre }}</h2>
-          <p class="text-[10px] text-slate-400 truncate mt-0.5">@{{ AppStore.agente.value.nickname }} • Sede {{ AppStore.agente.value.sede }}</p>
+          <h2 class="text-xs font-black text-slate-900 dark:text-white truncate tracking-tight">{{ AppStore.agente.value.nombre }}</h2>
+          <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5">@{{ AppStore.agente.value.nickname }} • Sede {{ AppStore.agente.value.sede }}</p>
         </div>
       </div>
-      <button @click="cerrarSesion" class="text-[11px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 rounded-xl active:scale-95 transition-all shrink-0">
+      <button @click="cerrarSesion" class="text-[11px] font-bold text-rose-500 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 rounded-xl active:scale-95 transition-all shrink-0">
         Salir
       </button>
     </div>
@@ -328,10 +328,10 @@
   </main>
 
   <!-- BARRA DE NAVEGACIÓN INFERIOR -->
-  <nav class="bg-slate-950 border-t border-slate-800/80 fixed bottom-0 left-0 right-0 z-50 px-2 py-1.5 shadow-2xl flex items-center justify-around max-w-md mx-auto rounded-t-2xl">
+  <nav class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 fixed bottom-0 left-0 right-0 z-50 px-2 py-1.5 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-2xl flex items-center justify-around max-w-md mx-auto rounded-t-2xl transition-colors duration-300">
     <button v-for="tab in ['Botonera', 'Mis Atenciones', 'Mi Historial', 'Mi Perfil']" :key="tab" @click="cambiarPestana(tab)"
-      class="flex flex-col items-center justify-center w-20 h-[48px] active:scale-90"
-      :class="AppStore.pestanaActiva.value === tab ? 'text-indigo-400 font-black bg-indigo-500/5' : 'text-slate-500 font-medium'">
+      class="flex flex-col items-center justify-center w-20 h-[48px] active:scale-90 transition-all rounded-xl"
+      :class="AppStore.pestanaActiva.value === tab ? 'text-indigo-600 dark:text-indigo-400 font-black bg-indigo-500/10' : 'text-slate-500 dark:text-slate-500 font-medium hover:text-indigo-500'">
       <span class="text-lg">{{ tab === 'Botonera' ? '🚨' : tab === 'Mis Atenciones' ? '⚡' : tab === 'Mi Historial' ? '📜' : '👤' }}</span>
       <span class="text-[9px] mt-0.5 tracking-tight">{{ tab }}</span>
     </button>
