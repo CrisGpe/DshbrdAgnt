@@ -262,17 +262,26 @@
           </div>
           
           <div class="space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/80">
-            <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl">
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
               <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Apodo (Nickname)</span>
-              <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.nickname || '---' }}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.nickname || '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
             </div>
-            <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl">
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
               <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">PIN Secreto</span>
-              <span class="font-black font-mono text-slate-800 dark:text-slate-200 tracking-[0.2em]">{{ AppStore.agente.value.pin ? '****' : '---' }}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black font-mono text-slate-800 dark:text-slate-200 tracking-[0.2em]">{{ AppStore.agente.value.pin ? '****' : '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
             </div>
-            <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl">
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
               <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Día de Descanso</span>
-              <span class="font-black text-emerald-600 dark:text-emerald-400 capitalize">{{ AppStore.agente.value.diaDescanso || 'No asignado' }}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-emerald-600 dark:text-emerald-400 capitalize">{{ AppStore.agente.value.diaDescanso || 'No asignado' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
             </div>
           </div>
         </div>
