@@ -39,7 +39,10 @@
       
       // NUEVO: Sistema Toast y Tema
       toasts: Vue.ref([]),
-      tema: Vue.ref(localStorage.getItem('workerview_theme') || 'oscuro')
+      tema: Vue.ref(localStorage.getItem('workerview_theme') || 'oscuro'),
+      
+      // UX Modal Detalles
+      modalDetalles: Vue.ref({ visible: false, card: null })
     };
 
     const app = Vue.createApp({
@@ -69,6 +72,16 @@
             document.documentElement.classList.remove('dark');
           }
         };
+
+        const abrirModalDetalles = (cardData) => {
+          window.AppStore.modalDetalles.value = { visible: true, card: cardData };
+        };
+
+        const cerrarModalDetalles = () => {
+          window.AppStore.modalDetalles.value.visible = false;
+          setTimeout(() => { window.AppStore.modalDetalles.value.card = null; }, 300); // Dar tiempo a la animación
+        };
+
         const cambiarPestana = (nuevaPestana) => {
           window.AppStore.pestanaActiva.value = nuevaPestana;
           if (nuevaPestana === 'Botonera') return;
@@ -344,6 +357,8 @@
           mostrarToast,
           alternarTema,
           aplicarTemaAlHTML,
+          abrirModalDetalles,
+          cerrarModalDetalles,
           
           // Formateadores y utilitarios existentes
           formatearFechaUHoraVisual,

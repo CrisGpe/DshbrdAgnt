@@ -203,7 +203,9 @@
         <div 
           v-for="(card, idx) in obtenerDatosVisualizables" 
           :key="'card-'+idx"
-          class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col gap-1.5 transition-all active:bg-slate-50 dark:active:bg-slate-900/40"
+          @click="card.length === 9 ? abrirModalDetalles(card) : null"
+          class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col gap-1.5 transition-all"
+          :class="card.length === 9 ? 'cursor-pointer active:bg-indigo-50 dark:active:bg-indigo-900/20 active:scale-[0.98]' : 'active:bg-slate-50 dark:active:bg-slate-900/40'"
         >
           <!-- Cabecera de la Tarjeta con Badges Semánticos -->
           <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/60 pb-2 mb-1">
@@ -232,13 +234,12 @@
               </div>
             </template>
 
-            <!-- Estructura optimizada para "Mi Historial" (OATC) -->
+            <!-- Estructura optimizada para "Mi Historial" (OATC) - VISTA RESUMIDA UX -->
             <template v-else-if="card.length === 9">
               <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[4] || 'Anónimo' }}</span></p>
-              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">📍 Partida:</span> <span class="font-medium text-slate-900 dark:text-slate-200 text-right max-w-[180px] truncate">{{ card[2] || '---' }}</span></p>
-              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">⚡ Demanda:</span> <span class="font-medium text-slate-900 dark:text-slate-200 text-right max-w-[180px] truncate">{{ card[5] || '---' }}</span></p>
               <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-xs text-slate-600 dark:text-slate-400">
-                <span class="flex items-center gap-1.5">⏱️ Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[0], false) }} • {{ formatearFechaUHoraVisual(card[0], true) }}</strong></span>
+                <span class="flex items-center gap-1.5">⏱️ Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[0], false) }}</strong></span>
+                <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Ver Más &rarr;</span>
               </div>
             </template>
           </div>
@@ -272,5 +273,45 @@
       <span class="text-[9px] mt-0.5 tracking-tight">{{ tab }}</span>
     </button>
   </nav>
+
+  <!-- UX MODAL DETALLES OATC -->
+  <transition name="toast">
+    <div v-if="AppStore.modalDetalles.value.visible && AppStore.modalDetalles.value.card" 
+         class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         @click.self="cerrarModalDetalles">
+      <div class="bg-white dark:bg-slate-950 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800/80 flex flex-col transform transition-all">
+        <!-- Header del Modal -->
+        <div class="bg-slate-50 dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
+          <div>
+            <h3 class="text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">Detalles de Atención</h3>
+            <p class="text-[10px] text-slate-500 font-mono mt-0.5">ID: {{ AppStore.modalDetalles.value.card[1] }}</p>
+          </div>
+          <button @click="cerrarModalDetalles" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-rose-100 hover:text-rose-500 transition-colors">
+            ✕
+          </button>
+        </div>
+        
+        <!-- Cuerpo del Modal (Los datos expandidos) -->
+        <div class="p-5 space-y-3 text-xs">
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente Registrado</label>
+            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[4] || 'Anónimo' }}</div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📍 Punto de Partida</label>
+            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[2] || '---' }}</div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⚡ Tipo de Demanda</label>
+            <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[5] || '---' }}</div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⏱️ Registro de Orden</label>
+            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], false) }} • {{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], true) }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
 
 </div>
