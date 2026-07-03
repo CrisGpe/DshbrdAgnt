@@ -1,0 +1,326 @@
+<!-- 
+  =========================================================================
+  SISTEMA CENTRAL DE CONTROL REACTIVO: ScriptsApp.html
+  =========================================================================
+  Desarrollado por: Programador GAS
+  
+  Administra el motor de estados. Implementa la carga diferida condicional 
+  para interceptar el auto-login resguardando las claves por rol.
+-->
+<script>
+  (function() {
+    console.log("[SISTEMA MÁSTER] Inicializando orquestador reactivo de permisos...");
+
+    // 1. Estructuración del Almacén Máster en window
+    window.AppStore = {
+      pestanaActiva: Vue.ref('Borrador'), // Será gobernada dinámicamente por la vista inyectada
+      cargando: Vue.ref(false),
+      procesandoAlerta: Vue.ref(false),
+      
+      agente: Vue.ref({
+        filaOriginal: null,
+        sede: '',
+        nombre: '',
+        nickname: '',
+        especialidad: '', // Campo pivote del enrutador de Index.html
+        autenticado: false
+      }),
+      
+      loginForm: Vue.ref({ nickname: '', pin: '', sede: 'RD' }),
+      listaNicknamesDisponibles: Vue.ref([]),
+      cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
+      cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
+      filtroFechaInicio: Vue.ref(''),
+      filtroFechaFin: Vue.ref('')
+    };
+
+    const app = Vue.createApp({
+      setup() {
+
+        /**
+         * Enrutador de Caché e I/O Atómico.
+         */
+        const cambiarPestana = (nuevaPestana) => {
+          window.AppStore.pestanaActiva.value = nuevaPestana;
+          if (nuevaPestana === 'Botonera') return;
+
+          let hojaReal = "";
+          if (nuevaPestana === "Mis Atenciones") hojaReal = "Borrador";
+          else if (nuevaPestana === "Mi Historial") hojaReal = "OATC";
+          else if (nuevaPestana === "Mi Perfil") hojaReal = "Agentes";
+          else hojaReal = nuevaPestana; // Habilita compatibilidad para las nuevas vistas de Admin/Jefe
+
+          const dataExistente = window.AppStore.cacheDatos.value[hojaReal];
+          if (!dataExistente || dataExistente.length === 0) {
+            solicitarMatrizAlServidor(hojaReal);
+          }
+        };
+
+        const solicitarMatrizAlServidor = (nombreHojaReal) => {
+          const sede = window.AppStore.agente.value.sede;
+          window.AppStore.cargando.value = true;
+
+          google.script.run
+            .withSuccessHandler((resultadoRaw) => {
+              window.AppStore.cargando.value = false;
+              if (resultadoRaw && resultadoRaw.exito && resultadoRaw.matriz.length > 0) {
+                window.AppStore.cacheEncabezados.value[nombreHojaReal] = resultadoRaw.matriz[0];
+                window.AppStore.cacheDatos.value[nombreHojaReal] = resultadoRaw.matriz.slice(1);
+              }
+            })
+            .withFailureHandler((err) => { window.AppStore.cargando.value = false; })
+            .obtenerMatrizPestanaPolimorfica(sede, nombreHojaReal);
+        };
+
+        const dispararAlertaBotonera = (tipoAlerta) => {
+          if (window.AppStore.procesandoAlerta.value) return;
+          window.AppStore.procesandoAlerta.value = true;
+
+          google.script.run
+            .withSuccessHandler(() => {
+              window.AppStore.procesandoAlerta.value = false;
+              alert("🚨 Alerta '" + tipoAlerta + "' registrada con éxito.");
+            })
+            .withFailureHandler(() => { window.AppStore.procesandoAlerta.value = false; })
+            .registrarAlertaBotonera(window.AppStore.agente.value.nickname, tipoAlerta, window.AppStore.agente.value.sede);
+        };
+
+        const cargarNicknamesSede = () => {
+          const sedeSeleccionada = window.AppStore.loginForm.value.sede || "RD";
+          window.AppStore.loginForm.value.nickname = "";
+          window.AppStore.listaNicknamesDisponibles.value = [];
+
+          google.script.run
+            .withSuccessHandler((res) => { window.AppStore.listaNicknamesDisponibles.value = res || []; })
+            .obtenerNicknamesPorSede(sedeSeleccionada);
+        };
+
+        const ejecutarLogin = () => {
+          const form = window.AppStore.loginForm.value;
+          if (!form.nickname || !form.pin) return alert("Completa los campos.");
+
+          window.AppStore.cargando.value = true;
+
+          google.script.run
+            .withSuccessHandler((res) => {
+              window.AppStore.cargando.value = false;
+              if (res && res.exito) {
+                res.autenticado = true;
+                window.AppStore.agente.value = res;
+                localStorage.setItem('workerview_session', JSON.stringify(res));
+                
+                // Inicializador dinámico de pestaña de arranque según especialidad
+                if (res.especialidad === 'Estilismo' || res.especialidad === 'Cosmiatría') {
+                  cambiarPestana('Botonera');
+                } else {
+                  cambiarPestana('Borrador'); // Arranque estándar por tabla para Admin/Jefe
+                }
+              } else {
+                alert(res.mensaje || "PIN incorrecto.");
+              }
+            })
+            .withFailureHandler(() => { window.AppStore.cargando.value = false; })
+            .loginAgente(form.nickname, form.pin, form.sede);
+        };
+
+        const cerrarSesion = () => {
+          localStorage.removeItem('workerview_session');
+          window.AppStore.agente.value = { filaOriginal: null, sede: '', nombre: '', nickname: '', especialidad: '', autenticado: false };
+          window.AppStore.cacheDatos.value = { "Borrador": [], "OATC": [], "Agentes": [] };
+          window.AppStore.cacheEncabezados.value = { "Borrador": [], "OATC": [], "Agentes": [] };
+          cargarNicknamesSede();
+        };
+
+        const forzarRefrescoDatos = () => {
+          const tab = window.AppStore.pestanaActiva.value;
+          let hojaReal = tab === "Mis Atenciones" ? "Borrador" : tab === "Mi Historial" ? "OATC" : tab;
+          window.AppStore.cacheDatos.value[hojaReal] = [];
+          solicitarMatrizAlServidor(hojaReal);
+        };
+
+        const formatearFechaUHoraVisual = (val, h) => {
+          if (!val) return "---";
+          if (typeof val === 'string' && !val.includes('T') && !val.includes('-')) return val.trim();
+          try {
+            const d = new Date(val);
+            if (isNaN(d.getTime())) return String(val).trim();
+            if (h) {
+              let hrs = d.getHours();
+              const mins = String(d.getMinutes()).padStart(2, '0');
+              const ampm = hrs >= 12 ? 'PM' : 'AM';
+              hrs = hrs % 12 || 12;
+              return `${hrs}:${mins} ${ampm}`;
+            } else {
+              return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+            }
+          } catch(e) { return String(val).trim(); }
+        };
+
+        const obtenerClaseEstadoCSS = (txt) => {
+          if (!txt) return "bg-slate-900 text-slate-400 border-slate-800";
+          const n = String(txt).toLowerCase();
+          if (n.includes("pendiente")) return "bg-amber-500/10 text-amber-400 border-amber-500/20";
+          if (n.includes("finalizado") || n.includes("terminado")) return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+          if (n.includes("cancelado")) return "bg-rose-500/10 text-rose-400 border-rose-500/20";
+          return "bg-indigo-500/10 text-indigo-400 border-indigo-500/20";
+        };
+
+        Vue.onMounted(() => {
+          const sesion = localStorage.getItem('workerview_session');
+          if (sesion) {
+            window.AppStore.agente.value = JSON.parse(sesion);
+            window.AppStore.agente.value.autenticado = true;
+            cambiarPestana(window.AppStore.agente.value.especialidad === 'Estilismo' || window.AppStore.agente.value.especialidad === 'Cosmiatría' ? 'Botonera' : 'Borrador');
+          } else {
+            cargarNicknamesSede();
+          }
+        });
+
+        const obtenerEncabezadosTabla = Vue.computed(() => {
+          const t = window.AppStore.pestanaActiva.value;
+          let h = t === "Mis Atenciones" ? "Borrador" : t === "Mi Historial" ? "OATC" : t;
+          return window.AppStore.cacheEncabezados.value[h] || [];
+        });
+
+        // =========================================================================
+        // INYECCIÓN DE CONTROLADORES SANITIZADOS DENTRO DEL SETUP() DE VUE 3
+        // =========================================================================
+
+        // 1. Instanciación del estado reactivo del Bar en el Almacén Global
+        AppStore.pedidoBar = Vue.reactive({
+          cafe: 0,
+          infusion: 0,
+          tipoInfusion: 'Manzanilla',
+          bebidaDia: 0,
+          agua: 0
+        });
+
+        // 2. Método Mutador Seguro (Garantiza mínimos de cero en RAM)
+        const modificarCantidadBar = (bebida, operacion) => {
+          if (operacion === 'sumar') {
+            AppStore.pedidoBar[bebida]++;
+          } else if (operacion === 'restar' && AppStore.pedidoBar[bebida] > 0) {
+            AppStore.pedidoBar[bebida]--;
+          }
+        };
+
+        // 3. Propiedad Computada: Filtro de Fin de semana (Viernes = 5, Sábado = 6)
+        const esFinDeSemanaEfectivo = Vue.computed(() => {
+          const dia = new Date().getDay();
+          return (dia === 5 || dia === 6);
+        });
+
+        // 4. Propiedad Computada: Validador de Visibilidad del Botón de Envío
+        const tieneItemsParaEnviar = Vue.computed(() => {
+          const p = AppStore.pedidoBar;
+          return (p.cafe + p.infusion + p.bebidaDia + p.agua) > 0;
+        });
+
+        // 5. Orquestador de Serialización Batch e Invocación Unificada de Red
+        const enviarPedidoBarConsolidado = () => {
+          const partes = [];
+          const p = AppStore.pedidoBar;
+
+          if (p.cafe > 0) partes.push(`${p.cafe} Café(s)`);
+          if (p.infusion > 0) partes.push(`${p.infusion} Infusión(es) de ${p.tipoInfusion}`);
+          if (p.bebidaDia > 0) partes.push(`${p.bebidaDia} Bebida(s) del Día`);
+          if (p.agua > 0) partes.push(`${p.agua} Agua(s)`);
+
+          const stringFinal = 'Bar: ' + partes.join(', ');
+
+          // Invoca la función existente de red con bloqueo anti-doble clic
+          if (typeof dispararAlertaBotonera === 'function') {
+            dispararAlertaBotonera(stringFinal);
+          }
+
+          // Reseteo limpio de la estructura local
+          p.cafe = 0;
+          p.infusion = 0;
+          p.bebidaDia = 0;
+          p.agua = 0;
+          p.tipoInfusion = 'Manzanilla';
+        };
+        
+        /**
+         * Restablece los inputs de fecha y refresca la UI de inmediato.
+         */
+        const limpiarFiltroFechas = () => {
+          window.AppStore.filtroFechaInicio.value = '';
+          window.AppStore.filtroFechaFin.value = '';
+        };
+
+        /**
+         * PROPIEDAD COMPUTADA ACTUALIZADA:
+         * Filtra por nickname del agente e intercepta rangos de fecha en caliente.
+         */
+        const obtenerDatosVisualizables = Vue.computed(() => {
+          const t = window.AppStore.pestanaActiva.value;
+          const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
+          let h = "", idx = 0;
+
+          if (t === "Mis Atenciones") { h = "Borrador"; idx = 19; }
+          else if (t === "Mi Historial") { h = "OATC"; idx = 6; }
+          else if (t === "Mi Perfil") { h = "Agentes"; idx = 13; }
+          else { h = t; idx = -1; }
+
+          const m = window.AppStore.cacheDatos.value[h] || [];
+          if (m.length === 0) return [];
+
+          // Paso A: Filtrar por el dueño de la asignación (Nickname del colaborador)
+          let filtered = idx === -1 ? m : m.filter(f => f[idx] && String(f[idx]).toLowerCase().trim() === nick);
+
+          // Paso B: INTERCEPCIÓN CRONOLÓGICA SÓLO EN "MI HISTORIAL"
+          if (t === "Mi Historial") {
+            const fechaIniStr = window.AppStore.filtroFechaInicio.value;
+            const fechaFinStr = window.AppStore.filtroFechaFin.value;
+
+            if (fechaIniStr && fechaFinStr) {
+              // Normalización a medianoche de inicio y último segundo de fin
+              const msInicio = new Date(fechaIniStr + "T00:00:00").getTime();
+              const msFin = new Date(fechaFinStr + "T23:59:59").getTime();
+
+              filtered = filtered.filter(row => {
+                if (!row[0]) return false; // Fila sin fecha válida en la columna 0 de OATC
+                const msTarjeta = new Date(row[0]).getTime();
+                return (msTarjeta >= msInicio && msTarjeta <= msFin);
+              });
+            }
+          }
+
+          // Paso C: Ordenamiento final descendente por tipo de vista
+          if (t === "Mis Atenciones") return filtered.sort((a,b) => String(b[13]).localeCompare(String(a[13])));
+          if (t === "Mi Historial") return filtered.sort((a,b) => new Date(b[0]) - new Date(a[0]));
+          return filtered;
+        });
+        return {
+          // Estado Global existente
+          AppStore: window.AppStore,
+
+          // Funciones de navegación y autenticación existentes
+          cambiarPestana,
+          dispararAlertaBotonera,
+          cargarNicknamesSede,
+          ejecutarLogin,
+          cerrarSesion,
+          forzarRefrescoDatos,
+          limpiarFiltroFechas,
+          // Formateadores y utilitarios existentes
+          formatearFechaUHoraVisual,
+          obtenerClaseEstadoCSS,
+          obtenerEncabezadosTabla,
+          obtenerDatosVisualizables,
+
+          // =========================================================================
+          // NUEVOS CONTROLADORES DE LA BOTONERA Y SECCIÓN BAR (INJECTADOS)
+          // =========================================================================
+          modificarCantidadBar,        // Función para sumar/restar cantidades de bebida
+          esFinDeSemanaEfectivo,      // Propiedad computada que valida si es Viernes o Sábado
+          tieneItemsParaEnviar,       // Propiedad computada que muestra/oculta el botón de envío
+          enviarPedidoBarConsolidado  // Función que procesa el string final y limpia el estado
+        };
+      }
+    });
+
+    app.mount('#app');
+  })();
+</script>

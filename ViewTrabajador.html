@@ -1,0 +1,268 @@
+<!-- =========================================================================
+  VISTA: ViewTrabajador.html (Versión Final Sanitizada y Corregida)
+  ========================================================================= -->
+<div v-if="AppStore.agente.value.autenticado" class="flex-1 flex flex-col w-full animate-fadeIn">
+      
+  <!-- Mini Header Superior de Estado Fijo -->
+  <header class="bg-slate-950/90 border-b border-slate-800/80 sticky top-0 z-50 px-4 py-3 backdrop-blur-md shadow-lg shrink-0">
+    <div class="max-w-md mx-auto flex items-center justify-between gap-2">
+      <div class="flex items-center gap-2.5 min-w-0">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center font-black text-xs text-white shadow-md border border-indigo-400/20 shrink-0">
+          {{ AppStore.agente.value.nombre.charAt(0) }}
+        </div>
+        <div class="min-w-0">
+          <h2 class="text-xs font-black text-white truncate tracking-tight">{{ AppStore.agente.value.nombre }}</h2>
+          <p class="text-[10px] text-slate-400 truncate mt-0.5">@{{ AppStore.agente.value.nickname }} • Sede {{ AppStore.agente.value.sede }}</p>
+        </div>
+      </div>
+      <button @click="cerrarSesion" class="text-[11px] font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20 px-2.5 py-1.5 rounded-xl active:scale-95 transition-all shrink-0">
+        Salir
+      </button>
+    </div>
+  </header>
+
+  <!-- CONTENIDO DINÁMICO -->
+  <main class="flex-1 p-4 max-w-md mx-auto w-full flex flex-col overflow-y-auto pb-24">
+    
+    <!-- PESTAÑA: BOTONERA DE ALERTAS Y BAR -->
+    <section v-if="AppStore.pestanaActiva.value === 'Botonera' || AppStore.pestanaActiva.value === 'Borrador'" class="space-y-6 animate-fadeIn w-full">
+      
+      <!-- Bloque A: Alertas Inmediatas -->
+      <div class="space-y-3">
+        <div class="text-center mb-2">
+          <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400">🚨 Panel de Alertas Inmediatas</h3>
+          <p class="text-[11px] text-slate-400 mt-0.5">Presiona para notificar al panel de recepción al instante.</p>
+        </div>
+        
+        <!-- Grid Táctil de 6 Estados -->
+        <div class="grid grid-cols-2 gap-3 w-full">
+          <button @click="dispararAlertaBotonera('Ya llegué')" :disabled="AppStore.procesandoAlerta.value"
+            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            <span class="text-2xl">👋</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Ya llegué</span>
+          </button>
+
+          <button @click="dispararAlertaBotonera('Voy a comer')" :disabled="AppStore.procesandoAlerta.value"
+            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            <span class="text-2xl">🍕</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Voy a comer</span>
+          </button>
+
+          <button @click="dispararAlertaBotonera('Regresé de comer')" :disabled="AppStore.procesandoAlerta.value"
+            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            <span class="text-2xl">🔄</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Regresé</span>
+          </button>
+
+          <button @click="dispararAlertaBotonera('Acabó mi día')" :disabled="AppStore.procesandoAlerta.value"
+            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            <span class="text-2xl">🏁</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Acabó mi día</span>
+          </button>
+
+          <button @click="dispararAlertaBotonera('Estoy atendiendo')" :disabled="AppStore.procesandoAlerta.value"
+            class="bg-amber-600/10 hover:bg-amber-600/20 disabled:bg-slate-950 p-4 rounded-xl shadow border border-amber-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            <span class="text-2xl">💇</span>
+            <span class="text-[10px] font-black uppercase tracking-wide text-amber-400">Atendiendo</span>
+          </button>
+
+          <button @click="dispararAlertaBotonera('Estoy disponible')" :disabled="AppStore.procesandoAlerta.value"
+            class="bg-emerald-600/10 hover:bg-emerald-600/20 disabled:bg-slate-950 p-4 rounded-xl shadow border border-emerald-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            <span class="text-2xl">🟢</span>
+            <span class="text-[10px] font-black uppercase tracking-wide text-emerald-400">Disponible</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Bloque B: Sección Bar -->
+      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-4 shadow-xl">
+        <div class="text-center border-b border-slate-900 pb-2">
+          <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center justify-center gap-1">🍹 Sección Bar</h3>
+          <p class="text-[10px] text-slate-500">Agrega las cantidades deseadas y envía el pedido completo.</p>
+        </div>
+
+        <!-- Lista de Bebidas -->
+        <div class="space-y-3">
+          
+          <!-- Ítem: Café -->
+          <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
+            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">☕ Café</span>
+            <div class="flex items-center gap-3">
+              <button @click="modificarCantidadBar('cafe', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
+              <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.cafe }}</span>
+              <button @click="modificarCantidadBar('cafe', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+            </div>
+          </div>
+
+          <!-- Ítem: Infusión -->
+          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60 space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">🍵 Infusión</span>
+              <div class="flex items-center gap-3">
+                <button @click="modificarCantidadBar('infusion', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
+                <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.infusion }}</span>
+                <button @click="modificarCantidadBar('infusion', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+              </div>
+            </div>
+            <!-- Sub-opción Condicional de Tipo de Hierba -->
+            <div v-if="AppStore.pedidoBar.infusion > 0" class="animate-fadeIn pt-1 border-t border-slate-800/40">
+              <label class="block text-[9px] font-extrabold uppercase text-slate-500 tracking-wider mb-1">Selecciona la variedad:</label>
+              <select v-model="AppStore.pedidoBar.tipoInfusion" class="w-full bg-slate-950 text-slate-300 text-xs rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500 font-medium">
+                <option value="Manzanilla">🌼 Manzanilla</option>
+                <option value="Té">🍃 Té</option>
+                <option value="Anís">🌱 Anís</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Ítem: Bebida del día (Con Alcohol) - Corregido sin espacio sintáctico -->
+          <div v-if="esFinDeSemanaEfectivo" class="flex items-center justify-between bg-gradient-to-r from-purple-950/20 to-slate-900/60 p-2.5 rounded-xl border border-purple-900/30 animate-fadeIn">
+            <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">🍹 Bebida del Día <small class="text-[9px] text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded font-bold border border-purple-500/20">Fin de Semana</small></span>
+            <div class="flex items-center gap-3">
+              <button @click="modificarCantidadBar('bebidaDia', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
+              <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.bebidaDia }}</span>
+              <button @click="modificarCantidadBar('bebidaDia', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+            </div>
+          </div>
+
+          <!-- Ítem: Agua -->
+          <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
+            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">💧 Agua</span>
+            <div class="flex items-center gap-3">
+              <button @click="modificarCantidadBar('agua', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
+              <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.agua }}</span>
+              <button @click="modificarCantidadBar('agua', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Despachador de Transacción de Red Unificada -->
+        <div v-if="tieneItemsParaEnviar" class="pt-2 animate-fadeIn">
+          <button @click="enviarPedidoBarConsolidado" :disabled="AppStore.procesandoAlerta.value" 
+            class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl active:scale-[0.98] transition-all shadow-md">
+            🚀 Enviar Pedido al Bar
+          </button>
+        </div>
+      </div>
+      
+      <!-- Loader de Red Compartido -->
+      <div v-if="AppStore.procesandoAlerta.value" class="text-center text-xs font-bold text-indigo-400 animate-pulse bg-slate-950 py-2 rounded-xl border border-slate-800">
+        ⏳ Registrando evento en Google Sheets...
+      </div>
+    </section>
+
+    <!-- OTRAS PESTAÑAS (Mis Atenciones / Mi Historial / Mi Perfil) -->
+    <!-- PESTAÑAS 2 Y 3: VISTAS DE TRANSACCIONES (Mis Atenciones / Mi Historial con Buscador por Rango de Fechas) -->
+    <section v-else-if="AppStore.pestanaActiva.value === 'Mis Atenciones' || AppStore.pestanaActiva.value === 'Mi Historial'" class="space-y-3 animate-fadeIn w-full">
+      
+      <!-- SUB-PANEL DINÁMICO: BUSCADOR POR FECHAS (Sólo visible en Mi Historial) -->
+      <div v-if="AppStore.pestanaActiva.value === 'Mi Historial'" class="bg-slate-950 border border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
+        <div class="flex items-center justify-between">
+          <label class="text-[10px] font-extrabold uppercase text-indigo-400 tracking-wider">📅 Filtrar rango de producción</label>
+          <button v-if="AppStore.filtroFechaInicio.value || AppStore.filtroFechaFin.value" @click="limpiarFiltroFechas" class="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 active:scale-95">
+            Limpiar Filtro
+          </button>
+        </div>
+        
+        <!-- Grid de Inputs Nativos de Celular -->
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <span class="block text-[9px] text-slate-500 font-bold mb-1">Desde:</span>
+            <input type="date" v-model="AppStore.filtroFechaInicio.value" class="w-full bg-slate-900 text-slate-200 text-xs rounded-xl p-2 border border-slate-800 focus:outline-none focus:border-indigo-500 font-medium font-mono text-center" />
+          </div>
+          <div>
+            <span class="block text-[9px] text-slate-500 font-bold mb-1">Hasta:</span>
+            <input type="date" v-model="AppStore.filtroFechaFin.value" class="w-full bg-slate-900 text-slate-200 text-xs rounded-xl p-2 border border-slate-800 focus:outline-none focus:border-indigo-500 font-medium font-mono text-center" />
+          </div>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between mb-1 pt-1">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">
+          Registros Asignados: <span class="text-indigo-400 font-black">{{ obtenerDatosVisualizables.length }}</span>
+        </h3>
+        <button @click="forzarRefrescoDatos" :disabled="AppStore.cargando.value" class="text-xs font-bold text-indigo-400 flex items-center gap-1 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800/80 active:scale-95">
+          <span :class="{'animate-spin': AppStore.cargando.value}">🔄</span> Refrescar
+        </button>
+      </div>
+
+      <!-- Skeleton Loader Móvil -->
+      <div v-if="AppStore.cargando.value" class="space-y-3 animate-pulse">
+        <div class="h-28 bg-slate-800/50 rounded-2xl w-full" v-for="n in 3" :key="n"></div>
+      </div>
+
+      <!-- Estado Vacío Personalizado -->
+      <div v-else-if="obtenerDatosVisualizables.length === 0" class="text-center py-12 bg-slate-950/50 border border-slate-800/60 rounded-2xl">
+        <span class="text-3xl block mb-2">📂</span>
+        <h4 class="text-xs font-bold text-slate-300">Sin asignaciones</h4>
+        <p class="text-[11px] text-slate-500 mt-1 max-w-[200px] mx-auto">No se encontraron tareas registradas para el rango seleccionado.</p>
+      </div>
+
+      <!-- MÓDULO DE PRESENTACIÓN PREMIUM DE CARDS MÓVILES (CRONOLÓGICO DESCENDENTE) -->
+      <div v-else class="space-y-3 w-full">
+        <div 
+          v-for="(card, idx) in obtenerDatosVisualizables" 
+          :key="'card-'+idx"
+          class="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col gap-1.5 transition-all active:bg-slate-900/40"
+        >
+          <!-- Cabecera de la Tarjeta con Badges Semánticos -->
+          <div class="flex items-center justify-between border-b border-slate-800/60 pb-2 mb-1">
+            <span class="text-xs font-black text-indigo-400 font-mono">
+              ID: {{ card.length === 22 ? (card[14] || '---') : (card[1] || '---') }}
+            </span>
+            
+            <!-- Badge Dinámico de Estado formateado con clases de Tailwind CSS -->
+            <span 
+              class="text-[9px] font-black px-2 py-0.5 rounded-full uppercase font-mono tracking-wider border"
+              :class="obtenerClaseEstadoCSS(card.length === 22 ? card[20] : card[7])"
+            >
+              {{ (card.length === 22 ? card[20] : card[7]) || 'Desconocido' }}
+            </span>
+          </div>
+
+          <!-- Bloque de Contenido Detallado con Formateo Localizado -->
+          <div class="space-y-1.5 text-xs">
+            <!-- Estructura optimizada para "Mis Atenciones" (Borrador) -->
+            <template v-if="card.length === 22">
+              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-200">{{ card[17] || 'Anónimo' }}</span></p>
+              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">💼 Servicio:</span> <span class="font-medium text-slate-200 text-right max-w-[180px] truncate">{{ card[15] || 'General' }}</span></p>
+              <div class="pt-1.5 mt-1 border-t border-slate-900 flex items-center justify-between font-mono text-[11px] text-slate-400">
+                <span class="flex items-center gap-1">🕒 Hora: <strong class="text-indigo-300">{{ formatearFechaUHoraVisual(card[13], true) }}</strong></span>
+                <span v-if="card[21]" class="text-rose-400 truncate max-w-[140px]" :title="card[21]">⚠ {{ card[21] }}</span>
+              </div>
+            </template>
+
+            <!-- Estructura optimizada para "Mi Historial" (OATC) -->
+            <template v-else-if="card.length === 9">
+              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-200">{{ card[4] || 'Anónimo' }}</span></p>
+              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">💼 Servicio:</span> <span class="font-medium text-slate-200 text-right max-w-[180px] truncate">{{ card[2] || 'General' }}</span></p>
+              <div class="pt-1.5 mt-1 border-t border-slate-900 flex items-center justify-between font-mono text-[11px] text-slate-400">
+                <span class="flex items-center gap-1">📅 Finalizado: <strong class="text-indigo-300">{{ formatearFechaUHoraVisual(card[0], false) }}</strong></span>
+              </div>
+            </template>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <section v-else-if="AppStore.pestanaActiva.value === 'Mi Perfil'" class="space-y-4 animate-fadeIn w-full">
+      <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl space-y-3 text-xs text-slate-300">
+        <h3 class="text-sm font-black text-white text-center">{{ AppStore.agente.value.nombre }}</h3>
+        <p class="text-center text-slate-500">Sede {{ AppStore.agente.value.sede }}</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
+  <nav class="bg-slate-950 border-t border-slate-800/80 fixed bottom-0 left-0 right-0 z-50 px-2 py-1.5 shadow-2xl flex items-center justify-around max-w-md mx-auto rounded-t-2xl">
+    <button v-for="tab in ['Botonera', 'Mis Atenciones', 'Mi Historial', 'Mi Perfil']" :key="tab" @click="cambiarPestana(tab)"
+      class="flex flex-col items-center justify-center w-20 h-[48px] active:scale-90"
+      :class="AppStore.pestanaActiva.value === tab ? 'text-indigo-400 font-black bg-indigo-500/5' : 'text-slate-500 font-medium'">
+      <span class="text-lg">{{ tab === 'Botonera' ? '🚨' : tab === 'Mis Atenciones' ? '⚡' : tab === 'Mi Historial' ? '📜' : '👤' }}</span>
+      <span class="text-[9px] mt-0.5 tracking-tight">{{ tab }}</span>
+    </button>
+  </nav>
+
+</div>

@@ -1,0 +1,29 @@
+<!-- 
+  =========================================================================
+  ARCHIVO DE ESTILOS E INYECCIÓN JIT
+  =========================================================================
+  Desarrollado por: Programador GAS
+  
+  Inyecta el framework Tailwind CSS y gestiona la visualización síncrona
+  mediante el blindaje de la directiva v-cloak para evitar el parpadeo de carga.
+-->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<style>
+  /* Previene el parpadeo de plantillas de Vue antes del montaje definitivo del DOM */
+  [v-cloak] { 
+    display: none !important; 
+  }
+
+  /* Optimización de scrollbars táctiles para visualización de tablas extensas en móvil */
+  .custom-scrollbar::-webkit-scrollbar {
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+  }
+</style>

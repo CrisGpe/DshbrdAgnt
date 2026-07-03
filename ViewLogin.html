@@ -1,0 +1,82 @@
+<!-- 
+  =========================================================================
+  VISTA: ViewLogin.html
+  =========================================================================
+  Desarrollado por: Programador GAS
+  
+  Interfaz de acceso estilizada con Tailwind CSS y optimizada para entornos 
+  móviles. Conecta el formulario de login al almacén reactivo y maneja los 
+  estados de carga intermedios de forma síncrona.
+-->
+<div class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950">
+  <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl shadow-2xl w-full max-w-sm backdrop-blur-md">
+    
+    <!-- Encabezado de la tarjeta -->
+    <div class="text-center mb-6">
+      <span class="text-4xl block mb-2 animate-bounce">🔑</span>
+      <h2 class="text-xl font-black text-white tracking-tight">Control de Acceso</h2>
+      <p class="text-xs text-slate-400 mt-1">Identifícate para acceder a la Central de Datos</p>
+    </div>
+    
+    <div class="space-y-4">
+      <!-- Selector de Sede Operativa -->
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Sede de Trabajo</label>
+        <select 
+          v-model="AppStore.loginForm.value.sede" 
+          @change="cargarNicknamesSede" 
+          class="w-full border border-slate-800 rounded-xl px-3 py-2.5 bg-slate-900 text-sm font-semibold text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+        >
+          <option value="RD">Sede RD</option>
+          <option value="Luxury">Sede Luxury</option>
+        </select>
+      </div>
+
+      <!-- ComboBox Dinámico de Nicknames -->
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Nickname / Apodo</label>
+        <select 
+          v-model="AppStore.loginForm.value.nickname" 
+          class="w-full border border-slate-800 rounded-xl px-3 py-2.5 bg-slate-900 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+        >
+          <option value="" disabled selected>Selecciona tu apodo...</option>
+          <option v-if="AppStore.listaNicknamesDisponibles.value.length === 0" value="" disabled>
+            Cargando agentes de la sede...
+          </option>
+          <option 
+            v-for="nick in AppStore.listaNicknamesDisponibles.value" 
+            :key="nick" 
+            :value="nick"
+          >
+            {{ nick }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Input de Código PIN Privado -->
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-1">Código PIN (4 Dígitos)</label>
+        <input 
+          type="password" 
+          inputmode="numeric" 
+          pattern="[0-9]*" 
+          maxlength="4"
+          v-model="AppStore.loginForm.value.pin" 
+          placeholder="••••" 
+          class="w-full border border-slate-800 rounded-xl px-3 py-2.5 text-center bg-slate-900 text-white font-mono text-lg tracking-widest focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all" 
+        />
+      </div>
+
+      <!-- Botón de Envío con Estado de Carga -->
+      <button 
+        @click="ejecutarLogin" 
+        :disabled="AppStore.cargando.value" 
+        class="w-full bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 text-white font-bold text-sm py-3 rounded-xl shadow-lg shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-50 flex items-center justify-center gap-2 h-[46px]"
+      >
+        <span v-if="AppStore.cargando.value" class="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+        {{ AppStore.cargando.value ? 'Verificando Credenciales...' : 'Iniciar Sesión' }}
+      </button>
+    </div>
+
+  </div>
+</div>

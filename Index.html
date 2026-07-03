@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Workerview Master Engine</title>
+  <!-- Inyección de Estilos y Tailwind CSS -->
+  <?!= include('Styles.html'); ?>
+</head>
+<body class="bg-slate-900 font-sans text-slate-100 min-h-screen antialiased flex flex-col pb-20 select-none">
+
+  <!-- Contenedor Raíz Máster protegido por v-cloak -->
+  <div id="app" v-cloak class="flex-1 flex flex-col w-full">
+    
+    <!-- EVALUACIÓN DE AUTENTICACIÓN GLOBAL -->
+    <div v-if="AppStore.agente.value.autenticado" class="flex-1 flex flex-col w-full">
+      
+      <!-- ENRUTADOR POLIMÓRFICO DE SECCIONES DE ACUERDO A LA ESPECIALIDAD (COL L) -->
+      
+      <!-- CASO TRABAJADOR: Estilismo o Cosmiatría -->
+      <template v-if="AppStore.agente.value.especialidad === 'Estilismo' || AppStore.agente.value.especialidad === 'Cosmiatría'">
+        <?!= include('ViewTrabajador.html'); ?>
+      </template>
+
+      <!-- CASO ADMINISTRACIÓN -->
+      <template v-else-if="AppStore.agente.value.especialidad === 'Administracion'">
+        <?!= include('ViewAdministracion.html'); ?>
+      </template>
+
+      <!-- CASO JEFE OPERATIVO -->
+      <template v-else-if="AppStore.agente.value.especialidad === 'Jefe Operativo'">
+        <?!= include('ViewJefeOperativo.html'); ?>
+      </template>
+
+      <!-- CASO DE RESGUARDO: Rol no mapeado en el Frontend -->
+      <div v-else class="flex-1 flex flex-col justify-center items-center p-6 text-center animate-fadeIn">
+        <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl max-w-xs shadow-2xl">
+          <span class="text-4xl block mb-2">🚫</span>
+          <h3 class="text-sm font-black text-white">Módulo No Asignado</h3>
+          <p class="text-xs text-slate-400 mt-1.5">Tu especialidad <strong class="text-indigo-400">"{{ AppStore.agente.value.especialidad }}"</strong> no posee un entorno móvil configurado.</p>
+          <button @click="cerrarSesion" class="w-full mt-4 bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs py-2 rounded-xl">
+            Cerrar Sesión
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- PANTALLA DE ACCESO: Si no cuenta con Handshake de autenticación activo -->
+    <div v-else class="min-h-screen flex flex-col justify-center animate-fadeIn">
+      <?!= include('ViewLogin.html'); ?>
+    </div>
+
+  </div>
+
+  <!-- Inyección Síncrona Máster de Vue 3 -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  
+  <!-- Inyección de la Capa de Lógica, Estados y Caché Remota -->
+  <?!= include('ScriptsApp.html'); ?>
+</body>
+</html>
