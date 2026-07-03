@@ -84,38 +84,73 @@
 
     <!-- SUB-PESTAÑA 2: MI CUENTA / PERFIL DE JEFATURA -->
     <section v-else-if="AppStore.pestanaActiva.value === 'Mi Perfil'" class="space-y-4 animate-fadeIn w-full flex-1 flex flex-col justify-center">
-      <div class="bg-slate-950 border border-slate-800 p-5 rounded-2xl shadow-xl space-y-4">
+      <div class="bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-5 rounded-2xl shadow-xl space-y-3 text-xs text-slate-700 dark:text-slate-300 relative overflow-hidden">
         
-        <div class="text-center border-b border-slate-800/60 pb-4">
-          <div class="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 mx-auto flex items-center justify-center font-black text-2xl text-white shadow-xl mb-2 border border-emerald-400/20">
-            {{ AppStore.agente.value.nombre.charAt(0) }}
+        <div v-if="!AppStore.modoEdicionPerfil.value" class="space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="text-sm font-black text-slate-900 dark:text-white">{{ AppStore.agente.value.nombre }}</h3>
+              <p class="text-slate-500">Sede {{ AppStore.agente.value.sede }}</p>
+            </div>
+            <button @click="iniciarEdicionPerfil" class="text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-3 py-1 rounded-lg active:scale-95 transition-all">Editar</button>
           </div>
-          <h3 class="text-sm font-black text-white">{{ AppStore.agente.value.nombre }}</h3>
-          <p class="text-xs text-slate-500 font-mono">Fila de Registro: #{{ AppStore.agente.value.filaOriginal }}</p>
+          
+          <div class="space-y-2.5 pt-2 border-t border-slate-200 dark:border-slate-800/80">
+            <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Apodo (Nickname)</span>
+              <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.nickname || '---' }}</span>
+            </div>
+            <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">PIN Secreto</span>
+              <span class="font-black font-mono text-slate-800 dark:text-slate-200 tracking-[0.2em]">{{ AppStore.agente.value.pin ? '****' : '---' }}</span>
+            </div>
+            <div class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Día de Descanso</span>
+              <span class="font-black text-emerald-600 dark:text-emerald-400 capitalize">{{ AppStore.agente.value.diaDescanso || 'No asignado' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-else class="space-y-3 animate-fadeIn">
+          <h3 class="text-xs font-black text-slate-900 dark:text-white border-b border-slate-200 dark:border-slate-800 pb-2 mb-3">✏️ Editar Credenciales</h3>
+          
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Apodo (Nickname)</label>
+            <input type="text" v-model="AppStore.perfilForm.value.nickname" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">PIN (4 dígitos)</label>
+            <input type="number" v-model="AppStore.perfilForm.value.pin" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors font-mono tracking-widest">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Día de Descanso</label>
+            <select v-model="AppStore.perfilForm.value.diaDescanso" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+              <option value="">Selecciona un día</option>
+              <option value="Lunes">Lunes</option>
+              <option value="Martes">Martes</option>
+              <option value="Miércoles">Miércoles</option>
+              <option value="Jueves">Jueves</option>
+              <option value="Viernes">Viernes</option>
+              <option value="Sábado">Sábado</option>
+              <option value="Domingo">Domingo</option>
+            </select>
+          </div>
+          
+          <div class="flex gap-2 pt-3">
+            <button @click="AppStore.modoEdicionPerfil.value = false" class="flex-1 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-2 rounded-xl active:scale-95 transition-all">Cancelar</button>
+            <button @click="guardarPerfil" :disabled="AppStore.cargando.value" class="flex-1 bg-emerald-600 text-white font-bold py-2 rounded-xl active:scale-95 transition-all flex justify-center items-center gap-2">
+              <span v-if="AppStore.cargando.value" class="animate-spin">🔄</span>
+              <span v-else>Guardar</span>
+            </button>
+          </div>
         </div>
         
-        <div class="space-y-3 text-xs">
-          <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Identificación DNI</label>
-            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 font-mono text-slate-700 dark:text-slate-300 mt-1 font-bold">{{ AppStore.agente.value.dni || '---' }}</div>
-          </div>
-          <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Especialidad Asignada</label>
-            <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-xl border border-emerald-200 dark:border-slate-800 text-emerald-600 dark:text-emerald-400 mt-1 font-black uppercase tracking-wide">{{ AppStore.agente.value.especialidad }}</div>
-          </div>
-          <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">Número Celular</label>
-            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 font-mono text-slate-700 dark:text-slate-300 mt-1 font-bold">{{ AppStore.agente.value.celular || '---' }}</div>
-          </div>
-        </div>
-        
-        <div class="pt-4 mt-2 border-t border-slate-200 dark:border-slate-800 flex justify-center">
+        <div class="pt-4 mt-4 border-t border-slate-200 dark:border-slate-800 flex justify-center">
           <button @click="alternarTema" class="flex items-center gap-2 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold px-4 py-2 rounded-xl border border-emerald-500/20 active:scale-95 transition-all">
             <span v-if="AppStore.tema.value === 'oscuro'">☀️ Modo Claro</span>
             <span v-else>🌙 Modo Oscuro</span>
           </button>
         </div>
-
       </div>
     </section>
 

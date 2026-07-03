@@ -42,7 +42,15 @@
       tema: Vue.ref(localStorage.getItem('workerview_theme') || 'oscuro'),
       
       // UX Modal Detalles
-      modalDetalles: Vue.ref({ visible: false, card: null })
+      modalDetalles: Vue.ref({ visible: false, card: null }),
+
+      // UX Edición de Perfil
+      modoEdicionPerfil: Vue.ref(false),
+      perfilForm: Vue.ref({
+        nickname: '',
+        pin: '',
+        diaDescanso: ''
+      })
     };
 
     const app = Vue.createApp({
@@ -176,7 +184,49 @@
           window.AppStore.agente.value = { filaOriginal: null, sede: '', nombre: '', nickname: '', especialidad: '', autenticado: false };
           window.AppStore.cacheDatos.value = { "Borrador": [], "OATC": [], "Agentes": [] };
           window.AppStore.cacheEncabezados.value = { "Borrador": [], "OATC": [], "Agentes": [] };
+          window.AppStore.modoEdicionPerfil.value = false;
           cargarNicknamesSede();
+        };
+
+        const iniciarEdicionPerfil = () => {
+          window.AppStore.perfilForm.value = {
+            nickname: window.AppStore.agente.value.nickname,
+            pin: window.AppStore.agente.value.pin,
+            diaDescanso: window.AppStore.agente.value.diaDescanso,
+            celular: window.AppStore.agente.value.celular,
+            dni: window.AppStore.agente.value.dni
+          };
+          window.AppStore.modoEdicionPerfil.value = true;
+        };
+
+        const guardarPerfil = () => {
+          const form = window.AppStore.perfilForm.value;
+          if (!form.nickname || !form.pin) return mostrarToast("Nickname y PIN son obligatorios.", "error");
+          
+          window.AppStore.cargando.value = true;
+          
+          google.script.run
+            .withSuccessHandler((res) => {
+              window.AppStore.cargando.value = false;
+              if (res && res.exito) {
+                mostrarToast("Perfil actualizado correctamente", "success");
+                window.AppStore.agente.value.nickname = form.nickname;
+                window.AppStore.agente.value.pin = form.pin;
+                window.AppStore.agente.value.diaDescanso = form.diaDescanso;
+                window.AppStore.agente.value.celular = form.celular;
+                window.AppStore.agente.value.dni = form.dni;
+                
+                localStorage.setItem('workerview_session', JSON.stringify(window.AppStore.agente.value));
+                window.AppStore.modoEdicionPerfil.value = false;
+              } else {
+                mostrarToast(res.mensaje || "Error al actualizar perfil.", "error");
+              }
+            })
+            .withFailureHandler((err) => {
+              window.AppStore.cargando.value = false;
+              mostrarToast("Fallo de red: " + (err.message || err), "error");
+            })
+            .actualizarPerfil(window.AppStore.agente.value.sede, window.AppStore.agente.value.filaOriginal, form);
         };
 
         const forzarRefrescoDatos = () => {
@@ -350,7 +400,10 @@
           dispararAlertaBotonera,
           cargarNicknamesSede,
           ejecutarLogin,
+          // Manejo de Sesión
           cerrarSesion,
+          iniciarEdicionPerfil,
+          guardarPerfil,
           forzarRefrescoDatos,
           limpiarFiltroFechas,
           

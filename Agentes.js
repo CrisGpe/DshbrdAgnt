@@ -24,6 +24,7 @@ function actualizarPerfil(sede, filaOriginal, nuevosDatos) {
     
     // Realizamos las modificaciones directamente sobre el arreglo en memoria JS.
     // Mapeamos los índices de matriz exactamente con los índices correspondientes del login de Auth.gs:
+    matrizFila[0][7]  = nuevosDatos.diaDescanso.toString().trim(); // Col H (Índice 7 en Base 0)
     matrizFila[0][9]  = nuevosDatos.dni.toString().trim();       // Col J (Índice 9 en Base 0)
     matrizFila[0][13] = nuevosDatos.nickname.toString().trim();  // Col N (Índice 13 en Base 0)
     matrizFila[0][14] = nuevosDatos.celular.toString().trim();   // Col O (Índice 14 en Base 0)
