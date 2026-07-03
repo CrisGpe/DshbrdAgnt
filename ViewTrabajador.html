@@ -203,9 +203,8 @@
         <div 
           v-for="(card, idx) in obtenerDatosVisualizables" 
           :key="'card-'+idx"
-          @click="card.length === 9 ? abrirModalDetalles(card) : null"
-          class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col gap-1.5 transition-all"
-          :class="card.length === 9 ? 'cursor-pointer active:bg-indigo-50 dark:active:bg-indigo-900/20 active:scale-[0.98]' : 'active:bg-slate-50 dark:active:bg-slate-900/40'"
+          @click="abrirModalDetalles(card)"
+          class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col gap-1.5 transition-all cursor-pointer active:bg-indigo-50 dark:active:bg-indigo-900/20 active:scale-[0.98]"
         >
           <!-- Cabecera de la Tarjeta con Badges Semánticos -->
           <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/60 pb-2 mb-1">
@@ -224,13 +223,15 @@
 
           <!-- Bloque de Contenido Detallado con Formateo Localizado -->
           <div class="space-y-1.5 text-xs">
-            <!-- Estructura optimizada para "Mis Atenciones" (Borrador) -->
+            <!-- Estructura optimizada para "Mis Atenciones" (Borrador) - VISTA RESUMIDA UX -->
             <template v-if="card.length === 22">
               <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[17] || 'Anónimo' }}</span></p>
-              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">💼 Servicio:</span> <span class="font-medium text-slate-900 dark:text-slate-200 text-right max-w-[180px] truncate">{{ card[15] || 'General' }}</span></p>
-              <div class="pt-1.5 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
+              <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
                 <span class="flex items-center gap-1">🕒 Hora: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[13], true) }}</strong></span>
-                <span v-if="card[21]" class="text-rose-600 dark:text-rose-400 truncate max-w-[140px]" :title="card[21]">⚠ {{ card[21] }}</span>
+                <div class="flex items-center gap-2">
+                  <span v-if="card[21]" class="text-rose-600 dark:text-rose-400 truncate max-w-[80px]" :title="card[21]">⚠ {{ card[21] }}</span>
+                  <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Ver Más &rarr;</span>
+                </div>
               </div>
             </template>
 
@@ -284,7 +285,7 @@
         <div class="bg-slate-50 dark:bg-slate-900 p-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
           <div>
             <h3 class="text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">Detalles de Atención</h3>
-            <p class="text-[10px] text-slate-500 font-mono mt-0.5">ID: {{ AppStore.modalDetalles.value.card[1] }}</p>
+            <p class="text-[10px] text-slate-500 font-mono mt-0.5">ID: {{ AppStore.modalDetalles.value.card.length === 22 ? AppStore.modalDetalles.value.card[14] : AppStore.modalDetalles.value.card[1] }}</p>
           </div>
           <button @click="cerrarModalDetalles" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-rose-100 hover:text-rose-500 transition-colors">
             ✕
@@ -293,22 +294,46 @@
         
         <!-- Cuerpo del Modal (Los datos expandidos) -->
         <div class="p-5 space-y-3 text-xs">
-          <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente Registrado</label>
-            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[4] || 'Anónimo' }}</div>
-          </div>
-          <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📍 Punto de Partida</label>
-            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[2] || '---' }}</div>
-          </div>
-          <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⚡ Tipo de Demanda</label>
-            <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[5] || '---' }}</div>
-          </div>
-          <div>
-            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⏱️ Registro de Orden</label>
-            <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], false) }} • {{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], true) }}</div>
-          </div>
+          
+          <!-- SECCIÓN: BORRADOR (Mis Atenciones) -->
+          <template v-if="AppStore.modalDetalles.value.card.length === 22">
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[17] || 'Anónimo' }}</div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">💼 Servicio Programado</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[15] || 'General' }}</div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🕒 Hora de Cita</label>
+              <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[13], true) }}</div>
+            </div>
+            <div v-if="AppStore.modalDetalles.value.card[21]">
+              <label class="block text-[10px] font-extrabold uppercase text-rose-500 tracking-wider">⚠️ Observaciones / Alerta</label>
+              <div class="bg-rose-50 dark:bg-rose-900/20 p-2.5 rounded-xl border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-400 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[21] }}</div>
+            </div>
+          </template>
+
+          <!-- SECCIÓN: OATC (Mi Historial) -->
+          <template v-else-if="AppStore.modalDetalles.value.card.length === 9">
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente Registrado</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[4] || 'Anónimo' }}</div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📍 Punto de Partida</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[2] || '---' }}</div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⚡ Tipo de Demanda</label>
+              <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[5] || '---' }}</div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⏱️ Registro de Orden</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], false) }} • {{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], true) }}</div>
+            </div>
+          </template>
         </div>
       </div>
     </div>
