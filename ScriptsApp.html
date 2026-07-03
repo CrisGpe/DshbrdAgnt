@@ -11,6 +11,10 @@
   (function() {
     console.log("[SISTEMA MÁSTER] Inicializando orquestador reactivo de permisos...");
 
+    const fechaAyer = new Date();
+    fechaAyer.setDate(fechaAyer.getDate() - 1);
+    const fechaAyerStr = fechaAyer.toISOString().split('T')[0];
+
     // 1. Estructuración del Almacén Máster en window
     window.AppStore = {
       pestanaActiva: Vue.ref('Borrador'), // Será gobernada dinámicamente por la vista inyectada
@@ -30,8 +34,8 @@
       listaNicknamesDisponibles: Vue.ref([]),
       cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
       cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
-      filtroFechaInicio: Vue.ref(''),
-      filtroFechaFin: Vue.ref(''),
+      filtroFechaInicio: Vue.ref(fechaAyerStr),
+      filtroFechaFin: Vue.ref(fechaAyerStr),
       
       // NUEVO: Sistema Toast y Tema
       toasts: Vue.ref([]),
@@ -273,12 +277,12 @@
           p.tipoInfusion = 'Manzanilla';
         };
         
-        /**
-         * Restablece los inputs de fecha y refresca la UI de inmediato.
-         */
         const limpiarFiltroFechas = () => {
-          window.AppStore.filtroFechaInicio.value = '';
-          window.AppStore.filtroFechaFin.value = '';
+          const fechaAyer = new Date();
+          fechaAyer.setDate(fechaAyer.getDate() - 1);
+          const fechaAyerStr = fechaAyer.toISOString().split('T')[0];
+          window.AppStore.filtroFechaInicio.value = fechaAyerStr;
+          window.AppStore.filtroFechaFin.value = fechaAyerStr;
         };
 
         /**

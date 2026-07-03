@@ -203,10 +203,10 @@
         <div 
           v-for="(card, idx) in obtenerDatosVisualizables" 
           :key="'card-'+idx"
-          class="bg-slate-950 border border-slate-800/80 rounded-2xl p-4 shadow-xl relative overflow-hidden flex flex-col gap-1.5 transition-all active:bg-slate-900/40"
+          class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800/80 rounded-2xl p-4 shadow-md dark:shadow-xl relative overflow-hidden flex flex-col gap-1.5 transition-all active:bg-slate-50 dark:active:bg-slate-900/40"
         >
           <!-- Cabecera de la Tarjeta con Badges Semánticos -->
-          <div class="flex items-center justify-between border-b border-slate-800/60 pb-2 mb-1">
+          <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800/60 pb-2 mb-1">
             <span class="text-xs font-black text-indigo-400 font-mono">
               ID: {{ card.length === 22 ? (card[14] || '---') : (card[1] || '---') }}
             </span>
@@ -224,20 +224,21 @@
           <div class="space-y-1.5 text-xs">
             <!-- Estructura optimizada para "Mis Atenciones" (Borrador) -->
             <template v-if="card.length === 22">
-              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-200">{{ card[17] || 'Anónimo' }}</span></p>
-              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">💼 Servicio:</span> <span class="font-medium text-slate-200 text-right max-w-[180px] truncate">{{ card[15] || 'General' }}</span></p>
-              <div class="pt-1.5 mt-1 border-t border-slate-900 flex items-center justify-between font-mono text-[11px] text-slate-400">
-                <span class="flex items-center gap-1">🕒 Hora: <strong class="text-indigo-300">{{ formatearFechaUHoraVisual(card[13], true) }}</strong></span>
-                <span v-if="card[21]" class="text-rose-400 truncate max-w-[140px]" :title="card[21]">⚠ {{ card[21] }}</span>
+              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[17] || 'Anónimo' }}</span></p>
+              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">💼 Servicio:</span> <span class="font-medium text-slate-900 dark:text-slate-200 text-right max-w-[180px] truncate">{{ card[15] || 'General' }}</span></p>
+              <div class="pt-1.5 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                <span class="flex items-center gap-1">🕒 Hora: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[13], true) }}</strong></span>
+                <span v-if="card[21]" class="text-rose-600 dark:text-rose-400 truncate max-w-[140px]" :title="card[21]">⚠ {{ card[21] }}</span>
               </div>
             </template>
 
             <!-- Estructura optimizada para "Mi Historial" (OATC) -->
             <template v-else-if="card.length === 9">
-              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-200">{{ card[4] || 'Anónimo' }}</span></p>
-              <p class="text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">💼 Servicio:</span> <span class="font-medium text-slate-200 text-right max-w-[180px] truncate">{{ card[2] || 'General' }}</span></p>
-              <div class="pt-1.5 mt-1 border-t border-slate-900 flex items-center justify-between font-mono text-[11px] text-slate-400">
-                <span class="flex items-center gap-1">📅 Finalizado: <strong class="text-indigo-300">{{ formatearFechaUHoraVisual(card[0], false) }}</strong></span>
+              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[4] || 'Anónimo' }}</span></p>
+              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">📍 Partida:</span> <span class="font-medium text-slate-900 dark:text-slate-200 text-right max-w-[180px] truncate">{{ card[2] || '---' }}</span></p>
+              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">⚡ Demanda:</span> <span class="font-medium text-slate-900 dark:text-slate-200 text-right max-w-[180px] truncate">{{ card[5] || '---' }}</span></p>
+              <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-xs text-slate-600 dark:text-slate-400">
+                <span class="flex items-center gap-1.5">⏱️ Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[0], false) }} • {{ formatearFechaUHoraVisual(card[0], true) }}</strong></span>
               </div>
             </template>
           </div>
