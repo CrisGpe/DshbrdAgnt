@@ -327,13 +327,71 @@
 
   </main>
 
-  <!-- BARRA DE NAVEGACIÓN INFERIOR -->
-  <nav class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 fixed bottom-0 left-0 right-0 z-50 px-2 py-1.5 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-2xl flex items-center justify-around max-w-md mx-auto rounded-t-2xl transition-colors duration-300">
-    <button v-for="tab in ['Botonera', 'Mis Atenciones', 'Mi Historial', 'Mi Perfil']" :key="tab" @click="cambiarPestana(tab)"
-      class="flex flex-col items-center justify-center w-20 h-[48px] active:scale-90 transition-all rounded-xl"
-      :class="AppStore.pestanaActiva.value === tab ? 'text-indigo-600 dark:text-indigo-400 font-black bg-indigo-500/10' : 'text-slate-500 dark:text-slate-500 font-medium hover:text-indigo-500'">
-      <span class="text-lg">{{ tab === 'Botonera' ? '🚨' : tab === 'Mis Atenciones' ? '⚡' : tab === 'Mi Historial' ? '📜' : '👤' }}</span>
-      <span class="text-[9px] mt-0.5 tracking-tight">{{ tab }}</span>
+  <!-- MENÚ BURBUJA FLOTANTE (Oculto por defecto) -->
+  <transition name="toast">
+    <div v-if="AppStore.mostrarMenuBurbujas.value" 
+         class="fixed inset-0 z-[49] bg-slate-900/40 backdrop-blur-sm flex flex-col justify-end pb-28 px-6 items-center"
+         @click.self="alternarMenuBurbujas()">
+      
+      <div class="grid grid-cols-3 gap-6 animate-fadeIn pb-4">
+        <!-- Burbuja: Historial -->
+        <button @click="cambiarPestana('Mi Historial'); alternarMenuBurbujas()" class="flex flex-col items-center gap-2 group">
+          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-2xl group-active:scale-90 transition-all border border-slate-200 dark:border-slate-700">📜</div>
+          <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 drop-shadow-md">Historial</span>
+        </button>
+
+        <!-- Burbuja: Indicadores -->
+        <button @click="cambiarPestana('Mis Indicadores'); alternarMenuBurbujas()" class="flex flex-col items-center gap-2 group">
+          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-2xl group-active:scale-90 transition-all border border-slate-200 dark:border-slate-700">📊</div>
+          <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 drop-shadow-md">Métricas</span>
+        </button>
+
+        <!-- Burbuja: Perfil -->
+        <button @click="cambiarPestana('Mi Perfil'); alternarMenuBurbujas()" class="flex flex-col items-center gap-2 group">
+          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-2xl group-active:scale-90 transition-all border border-slate-200 dark:border-slate-700">👤</div>
+          <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 drop-shadow-md">Perfil</span>
+        </button>
+      </div>
+    </div>
+  </transition>
+
+  <!-- BARRA DE NAVEGACIÓN INFERIOR (PWA Tab Bar con FAB) -->
+  <nav class="bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800/80 fixed bottom-0 left-0 right-0 z-50 px-2 h-16 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] dark:shadow-2xl flex items-center justify-between max-w-md mx-auto rounded-t-2xl transition-colors duration-300">
+    
+    <!-- Pestaña 1: Botonera -->
+    <button @click="cambiarPestana('Botonera')" class="flex flex-col items-center justify-center w-[20%] h-full active:scale-90 transition-all"
+      :class="AppStore.pestanaActiva.value === 'Botonera' ? 'text-indigo-600 dark:text-indigo-400 font-black' : 'text-slate-500 hover:text-indigo-500'">
+      <span class="text-xl">🚨</span>
+      <span class="text-[9px] mt-0.5 tracking-tight">Inicio</span>
+    </button>
+
+    <!-- Pestaña 2: Atenciones -->
+    <button @click="cambiarPestana('Mis Atenciones')" class="flex flex-col items-center justify-center w-[20%] h-full active:scale-90 transition-all mr-2"
+      :class="AppStore.pestanaActiva.value === 'Mis Atenciones' ? 'text-indigo-600 dark:text-indigo-400 font-black' : 'text-slate-500 hover:text-indigo-500'">
+      <span class="text-xl">⚡</span>
+      <span class="text-[9px] mt-0.5 tracking-tight">Turno</span>
+    </button>
+
+    <!-- Pestaña Central: FAB Burbuja -->
+    <div class="absolute left-1/2 -top-6 -translate-x-1/2">
+      <button @click="alternarMenuBurbujas()" 
+        class="w-14 h-14 rounded-full bg-gradient-to-tr from-indigo-600 to-violet-500 text-white shadow-xl shadow-indigo-500/30 flex items-center justify-center text-3xl font-light active:scale-95 transition-all focus:outline-none">
+        <span class="transform transition-transform duration-300" :class="{'rotate-45': AppStore.mostrarMenuBurbujas.value}">+</span>
+      </button>
+    </div>
+
+    <!-- Pestaña 3: Clientes -->
+    <button @click="cambiarPestana('Mis Clientes')" class="flex flex-col items-center justify-center w-[20%] h-full active:scale-90 transition-all ml-2"
+      :class="AppStore.pestanaActiva.value === 'Mis Clientes' ? 'text-indigo-600 dark:text-indigo-400 font-black' : 'text-slate-500 hover:text-indigo-500'">
+      <span class="text-xl">👥</span>
+      <span class="text-[9px] mt-0.5 tracking-tight">Clientes</span>
+    </button>
+
+    <!-- Pestaña 4: Agenda -->
+    <button @click="cambiarPestana('Mi Agenda')" class="flex flex-col items-center justify-center w-[20%] h-full active:scale-90 transition-all"
+      :class="AppStore.pestanaActiva.value === 'Mi Agenda' ? 'text-indigo-600 dark:text-indigo-400 font-black' : 'text-slate-500 hover:text-indigo-500'">
+      <span class="text-xl">📅</span>
+      <span class="text-[9px] mt-0.5 tracking-tight">Agenda</span>
     </button>
   </nav>
 

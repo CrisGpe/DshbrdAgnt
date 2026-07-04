@@ -41,6 +41,15 @@
     background: #334155;
   }
 
+  /* Ocultar barra de desplazamiento para menús deslizables */
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .hide-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+  }
+
   /* Animaciones Toast */
   .toast-enter-active,
   .toast-leave-active {

@@ -44,6 +44,9 @@
       // UX Modal Detalles
       modalDetalles: Vue.ref({ visible: false, card: null }),
 
+      // UX Menú Burbujas
+      mostrarMenuBurbujas: Vue.ref(false),
+
       // UX Edición de Perfil
       modoEdicionPerfil: Vue.ref(false),
       perfilForm: Vue.ref({
@@ -425,6 +428,8 @@
           aplicarTemaAlHTML,
           abrirModalDetalles,
           cerrarModalDetalles,
+          
+          alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
           
           // Formateadores y utilitarios existentes
           formatearFechaUHoraVisual,
