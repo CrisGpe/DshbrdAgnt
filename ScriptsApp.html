@@ -407,14 +407,19 @@
           const m = window.AppStore.cacheDatos.value[h] || [];
           if (m.length === 0) return [];
 
-          // Paso A: Filtrar por el dueño de la asignación (Nickname)
-          let filtered = idx === -1 ? m : m.filter(f => f[idx] && String(f[idx]).toLowerCase().trim() === nick);
+          let filtered = m;
 
-          // Paso B: Filtro Adicional por Sede (si aplica)
+          // Paso A y B: Filtros de Pertenencia y Sede
           if (t === "Mis Atenciones") {
             const sedeActual = window.AppStore.agente.value.sede;
             const sedeFormateada = sedeActual.toUpperCase() === "RD" ? "Sede RD" : sedeActual;
             filtered = filtered.filter(row => row[3] === sedeFormateada);
+          } else if (t === "Mi Historial") {
+            filtered = filtered.filter(row => row[6] && String(row[6]).toLowerCase().trim() === nick);
+          } else if (t === "Mi Agenda") {
+            filtered = filtered.filter(row => row[5] && String(row[5]).toLowerCase().trim() === nick);
+          } else if (t === "Mi Perfil") {
+            filtered = filtered.filter(row => row[13] && String(row[13]).toLowerCase().trim() === nick);
           }
 
           // Paso C: INTERCEPCIÓN CRONOLÓGICA (Solo Historial y Agenda)
