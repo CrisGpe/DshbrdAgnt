@@ -223,7 +223,7 @@
               Estás en la posición <strong class="text-2xl font-black mx-1">#{{ estadoTurnoAgente.posicion }}</strong> de {{ estadoTurnoAgente.total }} en cola.
             </p>
           </div>
-          <div class="z-10 bg-white/20 p-2.5 rounded-xl backdrop-blur-sm border border-white/20">
+          <div @click="alternarModalCola()" class="z-10 bg-white/20 p-2.5 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer active:scale-95 transition-transform hover:bg-white/30" title="Ver la cola completa">
             <span class="text-2xl">👥</span>
           </div>
         </div>
@@ -672,6 +672,43 @@
               <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-medium truncate">{{ AppStore.modalDetalles.value.card[6] }}</div>
             </div>
           </template>
+        </div>
+      </div>
+    </div>
+  </transition>
+
+  <!-- MODAL DE COLA DE TURNOS -->
+  <transition name="toast">
+    <div v-if="AppStore.modalCola.value" 
+         class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+         @click.self="alternarModalCola()">
+      
+      <div class="bg-white dark:bg-slate-950 w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800 animate-fadeIn">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
+          <h3 class="font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">👥 Lista de Turnos</h3>
+          <button @click="alternarModalCola()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold active:scale-90">✕</button>
+        </div>
+        
+        <div class="p-4 max-h-[60vh] overflow-y-auto space-y-2">
+          <div v-if="estadoTurnoAgente.cola && estadoTurnoAgente.cola.length === 0" class="text-center text-slate-500 py-4 text-sm font-medium">
+            No hay nadie en cola.
+          </div>
+          <div v-else v-for="(nombre, idx) in estadoTurnoAgente.cola" :key="idx" 
+               class="flex items-center gap-3 p-3 rounded-xl border transition-colors"
+               :class="(idx + 1) === estadoTurnoAgente.posicion ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800' : 'bg-slate-50 border-slate-200 dark:bg-slate-900 dark:border-slate-800'">
+            
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-black text-xs shrink-0 shadow-sm"
+                 :class="(idx + 1) === estadoTurnoAgente.posicion ? 'bg-indigo-500 text-white' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400'">
+              {{ idx + 1 }}
+            </div>
+            
+            <span class="font-bold text-sm truncate"
+                  :class="(idx + 1) === estadoTurnoAgente.posicion ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'">
+              {{ (nombre || 'Anónimo').split(' ')[0] }}
+            </span>
+            
+            <span v-if="(idx + 1) === estadoTurnoAgente.posicion" class="ml-auto text-[10px] font-black uppercase text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-md">Tú</span>
+          </div>
         </div>
       </div>
     </div>

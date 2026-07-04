@@ -43,8 +43,10 @@
       tema: Vue.ref(localStorage.getItem('workerview_theme') || 'oscuro'),
       
       // UX Modal Detalles
-      modalDetalles: Vue.ref({ visible: false, card: null }),
-
+      modalDetalles: Vue.ref({ visible: false, card: null, origen: '' }),
+      modalCola: Vue.ref(false),
+      toast: Vue.ref({ visible: false, mensaje: '', tipo: 'success' }),
+      
       // UX Diálogo Universal Tailwind (Confirm/Prompt)
       dialogo: Vue.ref({ 
         visible: false, 
@@ -605,7 +607,8 @@
             }
           }
           
-          return { posicion, total: totalCola, estadoActual };
+          const cola = agentesCola.map(a => a[1]); // Retornar array de nombres
+          return { posicion, total: totalCola, estadoActual, cola };
         });
 
         // 7. Agenda Agrupada (Clasificación temporal para Mi Agenda)
@@ -705,6 +708,7 @@
           forzarRefrescoDatos,
           limpiarFiltroFechas,
           
+          alternarModalCola: () => { window.AppStore.modalCola.value = !window.AppStore.modalCola.value; },
           mostrarToast,
           alternarTema,
           aplicarTemaAlHTML,
