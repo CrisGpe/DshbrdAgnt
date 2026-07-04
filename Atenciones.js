@@ -55,3 +55,40 @@ function obtenerMisAtenciones(nickname, sede) {
     return { exito: false, mensaje: e.toString() };
   }
 }
+
+/**
+ * Actualiza el nombre del cliente directamente en la hoja Borrador
+ * @param {string} sede La sede del agente
+ * @param {string} idTurno El ID de la atención (Columna O)
+ * @param {string} nuevoNombre El nuevo nombre del cliente
+ */
+function actualizarNombreAtencionBorrador(sede, idTurno, nuevoNombre) {
+  try {
+    const sheetBorrador = getHoja(sede, "Borrador");
+    const lastRow = sheetBorrador.getLastRow();
+    
+    if (lastRow < 2) throw new Error("La hoja Borrador está vacía.");
+    
+    // Obtenemos todos los IDs (Columna O es la 15)
+    const ids = sheetBorrador.getRange(2, 15, lastRow - 1, 1).getValues();
+    let rowIndex = -1;
+    
+    for (let i = 0; i < ids.length; i++) {
+      if (ids[i][0].toString().trim() === idTurno.toString().trim()) {
+        rowIndex = i + 2; // +2 porque empieza en la fila 2
+        break;
+      }
+    }
+    
+    if (rowIndex === -1) {
+      throw new Error("No se encontró el turno con ID: " + idTurno);
+    }
+    
+    // Sobrescribimos el nombre en la Columna R (18)
+    sheetBorrador.getRange(rowIndex, 18).setValue(nuevoNombre.trim());
+    
+    return { exito: true, mensaje: "Nombre actualizado correctamente." };
+  } catch (e) {
+    return { exito: false, mensaje: e.toString() };
+  }
+}

@@ -65,7 +65,10 @@
         tipo: 'confirm', // 'confirm' o 'prompt'
         inputPlaceholder: '',
         inputVal: '', 
-        onConfirm: null 
+        onConfirm: null,
+        botonAuxiliar: null,
+        onBotonAuxiliar: null,
+        mostrarSelectorClientes: false
       }),
 
       // UX Menú Burbujas
@@ -117,15 +120,18 @@
           setTimeout(() => { window.AppStore.modalDetalles.value.card = null; }, 300); // Dar tiempo a la animación
         };
 
-        const mostrarDialogo = (opciones) => {
+        const mostrarDialogo = (config) => {
           window.AppStore.dialogo.value = {
             visible: true,
-            titulo: opciones.titulo || 'Atención',
-            mensaje: opciones.mensaje || '',
-            tipo: opciones.tipo || 'confirm',
-            inputPlaceholder: opciones.inputPlaceholder || 'Escribe aquí...',
+            titulo: config.titulo || 'Atención',
+            mensaje: config.mensaje || '',
+            tipo: config.tipo || 'confirm',
+            inputPlaceholder: config.inputPlaceholder || '',
             inputVal: '',
-            onConfirm: opciones.onConfirm || null
+            onConfirm: config.onConfirm || null,
+            botonAuxiliar: config.botonAuxiliar || null,
+            onBotonAuxiliar: config.onBotonAuxiliar || null,
+            mostrarSelectorClientes: config.mostrarSelectorClientes || false
           };
         };
 
@@ -136,13 +142,24 @@
         const confirmarDialogo = () => {
           const state = window.AppStore.dialogo.value;
           if (state.onConfirm) {
-            if (state.tipo === 'prompt') {
-              state.onConfirm(state.inputVal);
-            } else {
-              state.onConfirm();
-            }
+            state.onConfirm(state.tipo === 'prompt' ? state.inputVal : null);
           }
           cerrarDialogo();
+        };
+
+        const seleccionarClienteDialogo = (clienteRaw) => {
+          // Formato: Nombre Apellido | DNI | Celular
+          const nombre = clienteRaw[1] ? String(clienteRaw[1]).trim() : '';
+          const apellido = clienteRaw[2] ? String(clienteRaw[2]).trim() : '';
+          const dni = clienteRaw[3] ? String(clienteRaw[3]).trim() : '';
+          const cel = clienteRaw[5] ? String(clienteRaw[5]).trim() : '';
+          
+          let format = `${nombre} ${apellido}`.trim();
+          if (dni) format += ` | ${dni}`;
+          if (cel) format += ` | ${cel}`;
+          
+          window.AppStore.dialogo.value.inputVal = format;
+          window.AppStore.dialogo.value.mostrarSelectorClientes = false;
         };
 
         const cambiarPestana = (nuevaPestana) => {
@@ -726,12 +743,39 @@
             mostrarDialogo({
               tipo: 'prompt',
               titulo: 'Editar Nombre',
-              mensaje: `Ingresa el nuevo nombre para el cliente (actual: ${clienteActual}):`,
-              inputPlaceholder: 'Nuevo nombre...',
+              mensaje: `Ingresa el nuevo nombre para el Turno de la atención [${idTurno}]:`,
+              inputPlaceholder: 'Nombre Apellido | DNI | Celular',
+              botonAuxiliar: 'Seleccionar de Mis Clientes',
+              mostrarSelectorClientes: false,
+              onBotonAuxiliar: () => {
+                // Al hacer clic, cargamos la hoja de clientes si no está y mostramos el selector
+                window.AppStore.dialogo.value.mostrarSelectorClientes = !window.AppStore.dialogo.value.mostrarSelectorClientes;
+                if (window.AppStore.dialogo.value.mostrarSelectorClientes) {
+                   if (!window.AppStore.cacheDatos.value['Clientes'] || window.AppStore.cacheDatos.value['Clientes'].length === 0) {
+                      solicitarMatrizAlServidor('Clientes');
+                   }
+                }
+              },
               onConfirm: (nuevoNombre) => {
                 if (nuevoNombre && nuevoNombre.trim() !== '') {
-                  dispararAlertaBotonera(`Editar nombre de ID ${idTurno} a: ${nuevoNombre.trim()}`);
-                  mostrarToast('Alerta de cambio de nombre enviada', 'exito');
+                  // Escribir directamente a GAS
+                  window.AppStore.cargando.value = true;
+                  google.script.run
+                    .withSuccessHandler((res) => {
+                      window.AppStore.cargando.value = false;
+                      if(res.exito) {
+                         mostrarToast(`Nombre actualizado a: ${nuevoNombre.trim()}`, 'success');
+                         forzarRefrescoDatos(); // Refrescamos la vista para ver el cambio
+                      } else {
+                         mostrarToast('⚠️ Error: ' + res.mensaje, 'error');
+                      }
+                    })
+                    .withFailureHandler((err) => {
+                      window.AppStore.cargando.value = false;
+                      mostrarToast('⚠️ Fallo de red: ' + err.message, 'error');
+                    })
+                    .actualizarNombreAtencionBorrador(window.AppStore.agente.value.sede, idTurno, nuevoNombre.trim());
+                  
                   cerrarModalDetalles();
                 }
               }
@@ -774,6 +818,7 @@
           confirmarDialogo,
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
+          seleccionarClienteDialogo,
           accionModalAtencion,
           
           // Formateadores y utilitarios existentes
