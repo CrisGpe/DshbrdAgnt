@@ -407,6 +407,35 @@
           if (t === "Mi Historial") return filtered.sort((a,b) => new Date(b[0]) - new Date(a[0]));
           return filtered;
         });
+
+        // =========================================================================
+        // ACCIONES DE MODAL OATC (NUEVA FASE 2)
+        // =========================================================================
+        const accionModalAtencion = (tipo) => {
+          const card = window.AppStore.modalDetalles.value.card;
+          if (!card) return;
+
+          const idTurno = card[14]; // Columna O en Borrador
+          const clienteActual = card[17] || 'Anónimo'; // Columna R en Borrador
+
+          if (tipo === 'terminar') {
+            if (confirm(`¿Estás seguro de terminar la atención de ${clienteActual}?`)) {
+               dispararAlertaBotonera(`Terminó atención: ${clienteActual} (ID: ${idTurno})`);
+               cerrarModalDetalles();
+            }
+          } else if (tipo === 'editar') {
+            const nuevoNombre = prompt(`Ingresa el nuevo nombre para el cliente (actual: ${clienteActual}):`);
+            if (nuevoNombre && nuevoNombre.trim() !== '') {
+               dispararAlertaBotonera(`Editar nombre de ID ${idTurno} a: ${nuevoNombre.trim()}`);
+               cerrarModalDetalles();
+            }
+          } else if (tipo === 'insumos') {
+            mostrarToast('Módulo de Despacho de Insumos en desarrollo 🚧', 'aviso');
+          } else if (tipo === 'ficha') {
+            mostrarToast('Módulo de Ventas Retail (Fichas) en desarrollo 🚧', 'aviso');
+          }
+        };
+
         return {
           // Estado Global existente
           AppStore: window.AppStore,
@@ -430,6 +459,7 @@
           cerrarModalDetalles,
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
+          accionModalAtencion,
           
           // Formateadores y utilitarios existentes
           formatearFechaUHoraVisual,
