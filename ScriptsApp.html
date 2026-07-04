@@ -570,10 +570,11 @@
           
           // Filtrar agentes en la Sede (Col B tiene el nombre, Col I tiene el estado)
           let agentesCola = m.filter(row => {
-            const dependiente = String(row[1] || '').trim();
+            const dependiente = String(row[1] || '').trim(); // Col B
             const estadoFisico = String(row[8] || '').toLowerCase().trim(); // Col I
-            return dependiente.length > 0 && 
-                   (estadoFisico === 'disponible' || estadoFisico === 'libre' || estadoFisico.includes('espera'));
+            const esFilaAgente = !row[13]; // Col N (Hora OATC) debe estar vacía para considerarse registro de asistencia pura
+            
+            return dependiente.length > 0 && esFilaAgente && estadoFisico === 'disponible';
           });
           
           // Ordenar por Col M (Ult Act) ascendente (el más antiguo primero)
