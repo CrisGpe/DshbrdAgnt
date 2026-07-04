@@ -531,6 +531,7 @@
                   const partes = String(row[4]).split('|').map(p => p.trim());
                   identificadoresAgente.add(partes[0].toLowerCase()); // Nombre
                   if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase()); // DNI
+                  if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase()); // Celular
                 }
               }
             });
@@ -539,8 +540,9 @@
             filtered = filtered.filter(row => {
               const nombreCliente = String(row[1] || '').toLowerCase().trim();
               const dniCliente = String(row[3] || '').toLowerCase().trim();
+              const celularCliente = String(row[5] || '').toLowerCase().trim();
               
-              const perteneceAgente = identificadoresAgente.has(nombreCliente) || identificadoresAgente.has(dniCliente);
+              const perteneceAgente = identificadoresAgente.has(nombreCliente) || identificadoresAgente.has(dniCliente) || identificadoresAgente.has(celularCliente);
               if (!perteneceAgente) return false;
 
               // 3. Aplicar barra de búsqueda opcional
