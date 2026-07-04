@@ -249,7 +249,7 @@
             <template v-else-if="AppStore.pestanaActiva.value === 'Mi Historial'">
               <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[4] || 'Anónimo' }}</span></p>
               <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-xs text-slate-600 dark:text-slate-400">
-                <span class="flex items-center gap-1.5">⏱️ Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[0], false) }}</strong></span>
+                <span class="flex items-center gap-1.5">⏱️ Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[3], false) }} a las {{ formatearFechaUHoraVisual(card[0], true) }}</strong></span>
                 <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Ver Más &rarr;</span>
               </div>
             </template>
@@ -547,7 +547,7 @@
             </div>
             <div>
               <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⏱️ Fecha/Hora de Registro</label>
-              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], false) }}</div>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[3], false) }} • {{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], true) }}</div>
             </div>
             <div>
               <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🧾 Referencia / Factura</label>

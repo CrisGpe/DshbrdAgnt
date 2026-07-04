@@ -281,22 +281,76 @@
           solicitarMatrizAlServidor(hojaReal);
         };
 
+        const parseDateRobust = (val) => {
+          if (!val) return NaN;
+          if (val instanceof Date) return val.getTime();
+          if (typeof val === 'number') return val; // Podría ser un número serial, pero lo tratamos como ms o lo ignoramos
+          
+          const str = String(val).trim();
+          
+          // Si es ISO (generado por Consultas.js)
+          if (str.includes('T') && (str.endsWith('Z') || str.includes('+') || str.includes('-'))) {
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) return d.getTime();
+          }
+
+          // Formato DD/MM/YYYY, DD-MM-YYYY, DD.MM.YYYY
+          const matchES = str.match(/^(\d{1,2})[/\-.](\d{1,2})[/\-.](\d{4})/);
+          if (matchES) {
+            const day = parseInt(matchES[1], 10);
+            const month = parseInt(matchES[2], 10) - 1;
+            const year = parseInt(matchES[3], 10);
+            
+            const timeMatch = str.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+            let hours = 0, mins = 0, secs = 0;
+            if (timeMatch) {
+              hours = parseInt(timeMatch[1], 10);
+              mins = parseInt(timeMatch[2], 10);
+              secs = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
+              if (str.toLowerCase().includes('pm') && hours < 12) hours += 12;
+              if (str.toLowerCase().includes('am') && hours === 12) hours = 0;
+            }
+            return new Date(year, month, day, hours, mins, secs).getTime();
+          }
+
+          // Formato YYYY/MM/DD, YYYY-MM-DD
+          const matchEN = str.match(/^(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})/);
+          if (matchEN) {
+            const year = parseInt(matchEN[1], 10);
+            const month = parseInt(matchEN[2], 10) - 1;
+            const day = parseInt(matchEN[3], 10);
+            
+            const timeMatch = str.match(/(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?/);
+            let hours = 0, mins = 0, secs = 0;
+            if (timeMatch) {
+              hours = parseInt(timeMatch[1], 10);
+              mins = parseInt(timeMatch[2], 10);
+              secs = timeMatch[3] ? parseInt(timeMatch[3], 10) : 0;
+              if (str.toLowerCase().includes('pm') && hours < 12) hours += 12;
+              if (str.toLowerCase().includes('am') && hours === 12) hours = 0;
+            }
+            return new Date(year, month, day, hours, mins, secs).getTime();
+          }
+
+          // Fallback final
+          return new Date(str).getTime();
+        };
+
         const formatearFechaUHoraVisual = (val, h) => {
           if (!val) return "---";
-          if (typeof val === 'string' && !val.includes('T') && !val.includes('-')) return val.trim();
-          try {
-            const d = new Date(val);
-            if (isNaN(d.getTime())) return String(val).trim();
-            if (h) {
-              let hrs = d.getHours();
-              const mins = String(d.getMinutes()).padStart(2, '0');
-              const ampm = hrs >= 12 ? 'PM' : 'AM';
-              hrs = hrs % 12 || 12;
-              return `${hrs}:${mins} ${ampm}`;
-            } else {
-              return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-            }
-          } catch(e) { return String(val).trim(); }
+          const ms = parseDateRobust(val);
+          if (isNaN(ms)) return String(val).trim();
+          
+          const d = new Date(ms);
+          if (h) {
+            let hrs = d.getHours();
+            const mins = String(d.getMinutes()).padStart(2, '0');
+            const ampm = hrs >= 12 ? 'PM' : 'AM';
+            hrs = hrs % 12 || 12;
+            return `${hrs}:${mins} ${ampm}`;
+          } else {
+            return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
+          }
         };
 
         const obtenerClaseEstadoCSS = (txt) => {
@@ -432,16 +486,38 @@
           } else if (t === "Mi Perfil") {
             filtered = filtered.filter(row => row[13] && String(row[13]).toLowerCase().trim() === nick);
           } else if (t === "Mis Clientes") {
-            // Filtrar globalmente por la barra de búsqueda (DNI, Nombre, Apellido, Celular)
-            const busqueda = window.AppStore.filtroBusquedaCliente.value.toLowerCase().trim();
-            if (busqueda.length < 3) {
-              filtered = []; // Si hay menos de 3 caracteres, no mostrar toda la BD
-            } else {
-              filtered = filtered.filter(row => {
+            // Filtrar por DNI/Nombre encontrados en OATC
+            const historialOatc = window.AppStore.cacheDatos.value["OATC"] || [];
+            
+            // 1. Extraer DNIs/Nombres únicos del historial del agente actual
+            const identificadoresAgente = new Set();
+            historialOatc.forEach(row => {
+              if (row[6] && (String(row[6]).toLowerCase().includes(nick) || String(row[6]).toLowerCase().includes(nombreCompleto))) {
+                if (row[4]) {
+                  // OATC Col E (4) tiene formato: Nombre | DNI | Celular
+                  const partes = String(row[4]).split('|').map(p => p.trim());
+                  identificadoresAgente.add(partes[0].toLowerCase()); // Nombre
+                  if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase()); // DNI
+                }
+              }
+            });
+
+            // 2. Filtrar base global de clientes
+            filtered = filtered.filter(row => {
+              const nombreCliente = String(row[1] || '').toLowerCase().trim();
+              const dniCliente = String(row[3] || '').toLowerCase().trim();
+              
+              const perteneceAgente = identificadoresAgente.has(nombreCliente) || identificadoresAgente.has(dniCliente);
+              if (!perteneceAgente) return false;
+
+              // 3. Aplicar barra de búsqueda opcional
+              const busqueda = window.AppStore.filtroBusquedaCliente.value.toLowerCase().trim();
+              if (busqueda.length > 0) {
                 const searchStr = `${row[1] || ''} ${row[2] || ''} ${row[3] || ''} ${row[5] || ''}`.toLowerCase();
                 return searchStr.includes(busqueda);
-              });
-            }
+              }
+              return true; // Si no hay búsqueda, mostrar toda la cartera del agente
+            });
           }
 
           // Paso C: INTERCEPCIÓN CRONOLÓGICA (Solo Historial y Agenda)
@@ -454,23 +530,10 @@
               const msFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
 
               filtered = filtered.filter(row => {
-                const colFecha = (t === "Mi Historial") ? 0 : 1; // Col A para OATC, Col B para Agenda
+                const colFecha = (t === "Mi Historial") ? 3 : 1; // Col D para OATC, Col B para Agenda
                 if (!row[colFecha]) return false;
                 
-                let msTarjeta = NaN;
-                if (typeof row[colFecha] === 'string' && row[colFecha].includes('/')) {
-                  const partes = row[colFecha].split(/[/\s:-]/);
-                  // Determinar si el primer elemento es el año o el día
-                  if (partes[0].length === 4) {
-                    // Formato YYYY/MM/DD
-                    msTarjeta = new Date(partes[0], partes[1] - 1, partes[2]).getTime();
-                  } else {
-                    // Asumir DD/MM/YYYY
-                    msTarjeta = new Date(partes[2], partes[1] - 1, partes[0]).getTime();
-                  }
-                } else {
-                  msTarjeta = new Date(row[colFecha]).getTime();
-                }
+                const msTarjeta = parseDateRobust(row[colFecha]);
                 
                 if (isNaN(msTarjeta)) return false;
                 return (msTarjeta >= msInicio && msTarjeta <= msFin);
