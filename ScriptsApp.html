@@ -162,23 +162,7 @@
           window.AppStore.dialogo.value.mostrarSelectorClientes = false;
         };
 
-        const cambiarPestana = (nuevaPestana) => {
-          window.AppStore.pestanaActiva.value = nuevaPestana;
-          if (nuevaPestana === 'Botonera') return;
 
-          let hojaReal = "";
-          if (nuevaPestana === "Mis Atenciones") hojaReal = "Borrador";
-          else if (nuevaPestana === "Mi Historial") hojaReal = "OATC";
-          else if (nuevaPestana === "Mi Perfil") hojaReal = "Agentes";
-          else if (nuevaPestana === "Mis Clientes") hojaReal = "Clientes";
-          else if (nuevaPestana === "Mi Agenda") hojaReal = "Registro Citas";
-          else hojaReal = nuevaPestana; // Habilita compatibilidad para las nuevas vistas de Admin/Jefe
-
-          const dataExistente = window.AppStore.cacheDatos.value[hojaReal];
-          if (!dataExistente || dataExistente.length === 0) {
-            solicitarMatrizAlServidor(hojaReal);
-          }
-        };
 
         const solicitarMatrizAlServidor = (nombreHojaReal) => {
           const sede = window.AppStore.agente.value.sede;
