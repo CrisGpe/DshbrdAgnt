@@ -51,6 +51,25 @@
       <?!= include('ViewLogin.html'); ?>
     </div>
 
+    <!-- SISTEMA GLOBAL DE DIÁLOGOS (TAILWIND CONFIRM/PROMPT) -->
+    <transition name="toast">
+      <div v-if="AppStore.dialogo.value.visible" class="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click.self="cerrarDialogo">
+        <div class="bg-white dark:bg-slate-950 w-full max-w-xs rounded-3xl shadow-2xl p-5 border border-slate-200 dark:border-slate-800/80 animate-fadeIn">
+          <h3 class="text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider mb-2">{{ AppStore.dialogo.value.titulo }}</h3>
+          <p class="text-xs text-slate-700 dark:text-slate-300 mb-4">{{ AppStore.dialogo.value.mensaje }}</p>
+          
+          <div v-if="AppStore.dialogo.value.tipo === 'prompt'" class="mb-4">
+            <input type="text" v-model="AppStore.dialogo.value.inputVal" :placeholder="AppStore.dialogo.value.inputPlaceholder" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors" @keyup.enter="confirmarDialogo" autofocus />
+          </div>
+
+          <div class="flex items-center justify-end gap-2 mt-4">
+            <button @click="cerrarDialogo" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">Cancelar</button>
+            <button @click="confirmarDialogo" class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md active:scale-95 transition-all">Aceptar</button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
     <!-- SISTEMA GLOBAL DE TOASTS -->
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[10000] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm">
       <transition-group name="toast">

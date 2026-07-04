@@ -242,6 +242,19 @@
                 <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Ver Más &rarr;</span>
               </div>
             </template>
+
+            <!-- Estructura optimizada para "Mi Agenda" - VISTA RESUMIDA UX -->
+            <template v-else-if="AppStore.pestanaActiva.value === 'Mi Agenda'">
+              <div class="flex items-center justify-between">
+                <p class="text-slate-700 dark:text-slate-300 flex items-center gap-1.5"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[3] || '---' }}</span></p>
+                <span v-if="card[4]" class="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400 border border-purple-200 dark:border-purple-800 shrink-0 ml-2 max-w-[100px] truncate" :title="card[4]">{{ card[4] }}</span>
+              </div>
+              <p v-if="card[6]" class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate mt-0.5">💼 {{ card[6] }}</p>
+              <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                <span class="flex items-center gap-1">📅 Cita: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[1], false) }} <span v-if="card[2]">a las {{ formatearFechaUHoraVisual(card[2], true) }}</span></strong></span>
+                <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Detalles &rarr;</span>
+              </div>
+            </template>
           </div>
 
         </div>
@@ -464,6 +477,38 @@
                 <span class="text-lg">📋</span>
                 <span class="text-[9px] uppercase tracking-wide">Abrir Ficha</span>
               </button>
+            </div>
+          </template>
+
+          <!-- SECCIÓN: AGENDA (Mi Agenda) -->
+          <template v-else-if="AppStore.modalDetalles.value.origen === 'Mi Agenda'">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex-1 min-w-0">
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente</label>
+                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold truncate">{{ AppStore.modalDetalles.value.card[3] || '---' }}</div>
+              </div>
+              <div v-if="AppStore.modalDetalles.value.card[4]" class="shrink-0 max-w-[120px]">
+                <label class="block text-[10px] font-extrabold uppercase text-transparent tracking-wider select-none">-</label>
+                <div class="bg-purple-50 dark:bg-purple-900/20 p-2.5 rounded-xl border border-purple-200 dark:border-purple-900/50 text-purple-700 dark:text-purple-400 mt-1 font-bold truncate text-center" :title="AppStore.modalDetalles.value.card[4]">{{ AppStore.modalDetalles.value.card[4] }}</div>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">💼 Servicio o Especialidad</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[6] || '---' }}</div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📅 Fecha de Cita</label>
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[1], false) }}</div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🕒 Hora de Cita</label>
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[2], true) || '--:--' }}</div>
+              </div>
+            </div>
+            <div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📝 Estado</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[7] || 'Programado' }}</div>
             </div>
           </template>
 

@@ -44,6 +44,17 @@
       // UX Modal Detalles
       modalDetalles: Vue.ref({ visible: false, card: null }),
 
+      // UX Diálogo Universal Tailwind (Confirm/Prompt)
+      dialogo: Vue.ref({ 
+        visible: false, 
+        titulo: '', 
+        mensaje: '', 
+        tipo: 'confirm', // 'confirm' o 'prompt'
+        inputPlaceholder: '',
+        inputVal: '', 
+        onConfirm: null 
+      }),
+
       // UX Menú Burbujas
       mostrarMenuBurbujas: Vue.ref(false),
 
@@ -91,6 +102,34 @@
         const cerrarModalDetalles = () => {
           window.AppStore.modalDetalles.value.visible = false;
           setTimeout(() => { window.AppStore.modalDetalles.value.card = null; }, 300); // Dar tiempo a la animación
+        };
+
+        const mostrarDialogo = (opciones) => {
+          window.AppStore.dialogo.value = {
+            visible: true,
+            titulo: opciones.titulo || 'Atención',
+            mensaje: opciones.mensaje || '',
+            tipo: opciones.tipo || 'confirm',
+            inputPlaceholder: opciones.inputPlaceholder || 'Escribe aquí...',
+            inputVal: '',
+            onConfirm: opciones.onConfirm || null
+          };
+        };
+
+        const cerrarDialogo = () => {
+          window.AppStore.dialogo.value.visible = false;
+        };
+
+        const confirmarDialogo = () => {
+          const state = window.AppStore.dialogo.value;
+          if (state.onConfirm) {
+            if (state.tipo === 'prompt') {
+              state.onConfirm(state.inputVal);
+            } else {
+              state.onConfirm();
+            }
+          }
+          cerrarDialogo();
         };
 
         const cambiarPestana = (nuevaPestana) => {
@@ -353,60 +392,63 @@
           window.AppStore.filtroFechaFin.value = fechaAyerStr;
         };
 
-        /**
-         * PROPIEDAD COMPUTADA ACTUALIZADA:
-         * Filtra por nickname del agente e intercepta rangos de fecha en caliente.
-         */
         const obtenerDatosVisualizables = Vue.computed(() => {
           const t = window.AppStore.pestanaActiva.value;
           const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
           let h = "", idx = 0;
 
-          if (t === "Mis Atenciones") { h = "Borrador"; idx = 19; }
-          else if (t === "Mi Historial") { h = "OATC"; idx = 6; }
+          // Asignación de pestaña y columna base de Agente
+          if (t === "Mis Atenciones") { h = "Borrador"; idx = 19; } // Col T
+          else if (t === "Mi Historial") { h = "OATC"; idx = 6; }   // Col G
+          else if (t === "Mi Agenda") { h = "Registro Citas"; idx = 5; } // Col F
           else if (t === "Mi Perfil") { h = "Agentes"; idx = 13; }
           else { h = t; idx = -1; }
 
           const m = window.AppStore.cacheDatos.value[h] || [];
           if (m.length === 0) return [];
 
-          // Paso A: Filtrar por el dueño de la asignación (Nickname del colaborador)
+          // Paso A: Filtrar por el dueño de la asignación (Nickname)
           let filtered = idx === -1 ? m : m.filter(f => f[idx] && String(f[idx]).toLowerCase().trim() === nick);
 
-          // Paso B: INTERCEPCIÓN CRONOLÓGICA SÓLO EN "MI HISTORIAL"
-          if (t === "Mi Historial") {
+          // Paso B: Filtro Adicional por Sede (si aplica)
+          if (t === "Mis Atenciones") {
+            const sedeActual = window.AppStore.agente.value.sede;
+            const sedeFormateada = sedeActual.toUpperCase() === "RD" ? "Sede RD" : sedeActual;
+            filtered = filtered.filter(row => row[3] === sedeFormateada);
+          }
+
+          // Paso C: INTERCEPCIÓN CRONOLÓGICA (Solo Historial y Agenda)
+          if (t === "Mi Historial" || t === "Mi Agenda") {
             const fechaIniStr = window.AppStore.filtroFechaInicio.value;
             const fechaFinStr = window.AppStore.filtroFechaFin.value;
 
             if (fechaIniStr || fechaFinStr) {
-              // Permitir búsquedas de "desde tal fecha" o "hasta tal fecha"
               const msInicio = fechaIniStr ? new Date(fechaIniStr + "T00:00:00").getTime() : 0;
               const msFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
 
               filtered = filtered.filter(row => {
-                if (!row[0]) return false; // Fila sin fecha válida en la columna 0 de OATC
+                const colFecha = (t === "Mi Historial") ? 0 : 1; // Col A para OATC, Col B para Agenda
+                if (!row[colFecha]) return false;
                 
-                let msTarjeta = new Date(row[0]).getTime();
+                let msTarjeta = new Date(row[colFecha]).getTime();
                 
-                // Fallback por si Google Sheets devuelve texto "DD/MM/YYYY" en lugar de objeto Date
-                if (isNaN(msTarjeta) && typeof row[0] === 'string' && row[0].includes('/')) {
-                  const partes = row[0].split(/[/\s:-]/);
+                if (isNaN(msTarjeta) && typeof row[colFecha] === 'string' && row[colFecha].includes('/')) {
+                  const partes = row[colFecha].split(/[/\s:-]/);
                   if (partes.length >= 3) {
-                    // Interpretar como DD/MM/YYYY
                     msTarjeta = new Date(partes[2], partes[1] - 1, partes[0]).getTime();
                   }
                 }
-
-                if (isNaN(msTarjeta)) return false; // Ignorar filas corruptas
-
+                
+                if (isNaN(msTarjeta)) return false;
                 return (msTarjeta >= msInicio && msTarjeta <= msFin);
               });
             }
           }
 
-          // Paso C: Ordenamiento final descendente por tipo de vista
+          // Paso D: Ordenamiento final
           if (t === "Mis Atenciones") return filtered.sort((a,b) => String(b[13]).localeCompare(String(a[13])));
           if (t === "Mi Historial") return filtered.sort((a,b) => new Date(b[0]) - new Date(a[0]));
+          if (t === "Mi Agenda") return filtered.sort((a,b) => new Date(a[1]) - new Date(b[1])); // Próximas primero
           return filtered;
         });
 
@@ -421,18 +463,30 @@
           const clienteActual = card[17] || 'Anónimo'; // Columna R en Borrador
 
           if (tipo === 'terminar') {
-            if (confirm(`¿Estás seguro de terminar la atención de ${clienteActual}?`)) {
-               dispararAlertaBotonera(`Terminó atención: ${clienteActual} (ID: ${idTurno})`);
-               mostrarToast('Alerta de término enviada a recepción', 'exito');
-               cerrarModalDetalles();
-            }
+            mostrarDialogo({
+              tipo: 'confirm',
+              titulo: 'Terminar Atención',
+              mensaje: `¿Estás seguro de terminar la atención de ${clienteActual}?`,
+              onConfirm: () => {
+                dispararAlertaBotonera(`Terminó atención: ${clienteActual} (ID: ${idTurno})`);
+                mostrarToast('Alerta de término enviada a recepción', 'exito');
+                cerrarModalDetalles();
+              }
+            });
           } else if (tipo === 'editar') {
-            const nuevoNombre = prompt(`Ingresa el nuevo nombre para el cliente (actual: ${clienteActual}):`);
-            if (nuevoNombre && nuevoNombre.trim() !== '') {
-               dispararAlertaBotonera(`Editar nombre de ID ${idTurno} a: ${nuevoNombre.trim()}`);
-               mostrarToast('Alerta de cambio de nombre enviada', 'exito');
-               cerrarModalDetalles();
-            }
+            mostrarDialogo({
+              tipo: 'prompt',
+              titulo: 'Editar Nombre',
+              mensaje: `Ingresa el nuevo nombre para el cliente (actual: ${clienteActual}):`,
+              inputPlaceholder: 'Nuevo nombre...',
+              onConfirm: (nuevoNombre) => {
+                if (nuevoNombre && nuevoNombre.trim() !== '') {
+                  dispararAlertaBotonera(`Editar nombre de ID ${idTurno} a: ${nuevoNombre.trim()}`);
+                  mostrarToast('Alerta de cambio de nombre enviada', 'exito');
+                  cerrarModalDetalles();
+                }
+              }
+            });
           } else if (tipo === 'insumos') {
             mostrarToast('Módulo de Despacho de Insumos en desarrollo 🚧', 'aviso');
           } else if (tipo === 'ficha') {
@@ -461,6 +515,10 @@
           aplicarTemaAlHTML,
           abrirModalDetalles,
           cerrarModalDetalles,
+          
+          mostrarDialogo,
+          cerrarDialogo,
+          confirmarDialogo,
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
           accionModalAtencion,
