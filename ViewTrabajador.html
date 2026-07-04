@@ -37,46 +37,46 @@
         <!-- Grid Táctil de 6 Estados -->
         <div class="grid grid-cols-2 gap-3 w-full">
           <button @click="dispararAlertaBotonera('Ya llegué')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
             <span class="text-2xl">👋</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Ya llegué</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Ya llegué</span>
           </button>
 
           <button @click="dispararAlertaBotonera('Voy a comer')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
             <span class="text-2xl">🍕</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Voy a comer</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Voy a comer</span>
           </button>
 
           <button @click="dispararAlertaBotonera('Regresé de comer')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
             <span class="text-2xl">🔄</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Regresé</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Regresé</span>
           </button>
 
           <button @click="dispararAlertaBotonera('Acabó mi día')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-slate-900 hover:bg-slate-850 disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
             <span class="text-2xl">🏁</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-200">Acabó mi día</span>
+            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Acabó mi día</span>
           </button>
 
           <button @click="dispararAlertaBotonera('Estoy atendiendo')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-amber-600/10 hover:bg-amber-600/20 disabled:bg-slate-950 p-4 rounded-xl shadow border border-amber-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            class="bg-amber-50 dark:bg-amber-600/10 hover:bg-amber-100 dark:hover:bg-amber-600/20 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-amber-200 dark:border-amber-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
             <span class="text-2xl">💇</span>
-            <span class="text-[10px] font-black uppercase tracking-wide text-amber-400">Atendiendo</span>
+            <span class="text-[10px] font-black uppercase tracking-wide text-amber-600 dark:text-amber-400">Atendiendo</span>
           </button>
 
           <button @click="dispararAlertaBotonera('Estoy disponible')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-emerald-600/10 hover:bg-emerald-600/20 disabled:bg-slate-950 p-4 rounded-xl shadow border border-emerald-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+            class="bg-emerald-50 dark:bg-emerald-600/10 hover:bg-emerald-100 dark:hover:bg-emerald-600/20 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-emerald-200 dark:border-emerald-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
             <span class="text-2xl">🟢</span>
-            <span class="text-[10px] font-black uppercase tracking-wide text-emerald-400">Disponible</span>
+            <span class="text-[10px] font-black uppercase tracking-wide text-emerald-600 dark:text-emerald-400">Disponible</span>
           </button>
         </div>
       </div>
 
       <!-- Bloque B: Sección Bar -->
-      <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-4 shadow-xl">
-        <div class="text-center border-b border-slate-900 pb-2">
+      <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-4 shadow-lg dark:shadow-xl">
+        <div class="text-center border-b border-slate-200 dark:border-slate-900 pb-2">
           <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center justify-center gap-1">🍹 Sección Bar</h3>
           <p class="text-[10px] text-slate-500">Agrega las cantidades deseadas y envía el pedido completo.</p>
         </div>
@@ -85,29 +85,29 @@
         <div class="space-y-3">
           
           <!-- Ítem: Café -->
-          <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
-            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">☕ Café</span>
+          <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">☕ Café</span>
             <div class="flex items-center gap-3">
-              <button @click="modificarCantidadBar('cafe', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
-              <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.cafe }}</span>
-              <button @click="modificarCantidadBar('cafe', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+              <button @click="modificarCantidadBar('cafe', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+              <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.cafe }}</span>
+              <button @click="modificarCantidadBar('cafe', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
             </div>
           </div>
 
           <!-- Ítem: Infusión -->
-          <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60 space-y-2.5">
+          <div class="bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60 space-y-2.5">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">🍵 Infusión</span>
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">🍵 Infusión</span>
               <div class="flex items-center gap-3">
-                <button @click="modificarCantidadBar('infusion', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
-                <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.infusion }}</span>
-                <button @click="modificarCantidadBar('infusion', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+                <button @click="modificarCantidadBar('infusion', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+                <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.infusion }}</span>
+                <button @click="modificarCantidadBar('infusion', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
               </div>
             </div>
             <!-- Sub-opción Condicional de Tipo de Hierba -->
-            <div v-if="AppStore.pedidoBar.infusion > 0" class="animate-fadeIn pt-1 border-t border-slate-800/40">
+            <div v-if="AppStore.pedidoBar.infusion > 0" class="animate-fadeIn pt-1 border-t border-slate-200 dark:border-slate-800/40">
               <label class="block text-[9px] font-extrabold uppercase text-slate-500 tracking-wider mb-1">Selecciona la variedad:</label>
-              <select v-model="AppStore.pedidoBar.tipoInfusion" class="w-full bg-slate-950 text-slate-300 text-xs rounded-lg p-2 border border-slate-800 focus:outline-none focus:border-indigo-500 font-medium">
+              <select v-model="AppStore.pedidoBar.tipoInfusion" class="w-full bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-xs rounded-lg p-2 border border-slate-300 dark:border-slate-800 focus:outline-none focus:border-indigo-500 font-medium">
                 <option value="Manzanilla">🌼 Manzanilla</option>
                 <option value="Té">🍃 Té</option>
                 <option value="Anís">🌱 Anís</option>
@@ -116,22 +116,22 @@
           </div>
 
           <!-- Ítem: Bebida del día (Con Alcohol) - Corregido sin espacio sintáctico -->
-          <div v-if="esFinDeSemanaEfectivo" class="flex items-center justify-between bg-gradient-to-r from-purple-950/20 to-slate-900/60 p-2.5 rounded-xl border border-purple-900/30 animate-fadeIn">
-            <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">🍹 Bebida del Día <small class="text-[9px] text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded font-bold border border-purple-500/20">Fin de Semana</small></span>
+          <div v-if="esFinDeSemanaEfectivo" class="flex items-center justify-between bg-gradient-to-r from-purple-100 to-slate-100 dark:from-purple-950/20 dark:to-slate-900/60 p-2.5 rounded-xl border border-purple-200 dark:border-purple-900/30 animate-fadeIn">
+            <span class="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">🍹 Bebida del Día <small class="text-[9px] text-purple-600 dark:text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded font-bold border border-purple-500/20">Fin de Semana</small></span>
             <div class="flex items-center gap-3">
-              <button @click="modificarCantidadBar('bebidaDia', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
-              <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.bebidaDia }}</span>
-              <button @click="modificarCantidadBar('bebidaDia', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+              <button @click="modificarCantidadBar('bebidaDia', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+              <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.bebidaDia }}</span>
+              <button @click="modificarCantidadBar('bebidaDia', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
             </div>
           </div>
 
           <!-- Ítem: Agua -->
-          <div class="flex items-center justify-between bg-slate-900/60 p-2.5 rounded-xl border border-slate-800/60">
-            <span class="text-xs font-bold text-slate-200 flex items-center gap-1.5">💧 Agua</span>
+          <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">💧 Agua</span>
             <div class="flex items-center gap-3">
-              <button @click="modificarCantidadBar('agua', 'restar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">-</button>
-              <span class="text-xs font-mono font-black text-white w-4 text-center">{{ AppStore.pedidoBar.agua }}</span>
-              <button @click="modificarCantidadBar('agua', 'sumar')" class="w-7 h-7 bg-slate-800 rounded-lg text-slate-300 font-bold active:bg-slate-700">+</button>
+              <button @click="modificarCantidadBar('agua', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+              <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.agua }}</span>
+              <button @click="modificarCantidadBar('agua', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
             </div>
           </div>
         </div>
@@ -156,7 +156,7 @@
     <section v-else-if="AppStore.pestanaActiva.value === 'Mis Atenciones' || AppStore.pestanaActiva.value === 'Mi Historial'" class="space-y-3 animate-fadeIn w-full">
       
       <!-- SUB-PANEL DINÁMICO: BUSCADOR POR FECHAS (Sólo visible en Mi Historial) -->
-      <div v-if="AppStore.pestanaActiva.value === 'Mi Historial'" class="bg-slate-950 border border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
+      <div v-if="AppStore.pestanaActiva.value === 'Mi Historial'" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
         <div class="flex items-center justify-between">
           <label class="text-[10px] font-extrabold uppercase text-indigo-400 tracking-wider">📅 Filtrar rango de producción</label>
           <button v-if="AppStore.filtroFechaInicio.value || AppStore.filtroFechaFin.value" @click="limpiarFiltroFechas" class="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 active:scale-95">
@@ -168,20 +168,20 @@
         <div class="grid grid-cols-2 gap-2">
           <div>
             <span class="block text-[9px] text-slate-500 font-bold mb-1">Desde:</span>
-            <input type="date" v-model="AppStore.filtroFechaInicio.value" class="w-full bg-slate-900 text-slate-200 text-xs rounded-xl p-2 border border-slate-800 focus:outline-none focus:border-indigo-500 font-medium font-mono text-center" />
+            <input type="date" v-model="AppStore.filtroFechaInicio.value" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-2 border border-slate-300 dark:border-slate-800 focus:outline-none focus:border-indigo-500 font-medium font-mono text-center" />
           </div>
           <div>
             <span class="block text-[9px] text-slate-500 font-bold mb-1">Hasta:</span>
-            <input type="date" v-model="AppStore.filtroFechaFin.value" class="w-full bg-slate-900 text-slate-200 text-xs rounded-xl p-2 border border-slate-800 focus:outline-none focus:border-indigo-500 font-medium font-mono text-center" />
+            <input type="date" v-model="AppStore.filtroFechaFin.value" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-2 border border-slate-300 dark:border-slate-800 focus:outline-none focus:border-indigo-500 font-medium font-mono text-center" />
           </div>
         </div>
       </div>
 
       <div class="flex items-center justify-between mb-1 pt-1">
-        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">
-          Registros Asignados: <span class="text-indigo-400 font-black">{{ obtenerDatosVisualizables.length }}</span>
+        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          Registros Asignados: <span class="text-indigo-600 dark:text-indigo-400 font-black">{{ obtenerDatosVisualizables.length }}</span>
         </h3>
-        <button @click="forzarRefrescoDatos" :disabled="AppStore.cargando.value" class="text-xs font-bold text-indigo-400 flex items-center gap-1 bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-800/80 active:scale-95">
+        <button @click="forzarRefrescoDatos" :disabled="AppStore.cargando.value" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800/80 active:scale-95 shadow-sm">
           <span :class="{'animate-spin': AppStore.cargando.value}">🔄</span> Refrescar
         </button>
       </div>
