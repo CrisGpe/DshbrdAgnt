@@ -432,30 +432,45 @@
 
   </main>
 
-  <!-- MENÚ BURBUJA FLOTANTE (Oculto por defecto) -->
+  <!-- MENÚ BURBUJA FLOTANTE (Smartwatch Radial UI) -->
   <transition name="toast">
     <div v-if="AppStore.mostrarMenuBurbujas.value" 
-         class="fixed inset-0 z-[49] bg-slate-900/40 backdrop-blur-sm flex flex-col justify-end pb-28 px-6 items-center"
+         class="fixed inset-0 z-[49] bg-slate-900/60 backdrop-blur-sm"
          @click.self="alternarMenuBurbujas()">
       
-      <div class="grid grid-cols-3 gap-6 animate-fadeIn pb-4">
-        <!-- Burbuja: Historial -->
-        <button @click="cambiarPestana('Mi Historial'); alternarMenuBurbujas()" class="flex flex-col items-center gap-2 group">
-          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-2xl group-active:scale-90 transition-all border border-slate-200 dark:border-slate-700">📜</div>
-          <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 drop-shadow-md">Historial</span>
+      <!-- Contenedor Base Radial anclado sobre el bottom-nav -->
+      <div class="absolute bottom-[20px] left-1/2 -translate-x-1/2 w-0 h-0 flex items-center justify-center animate-fadeIn">
+        
+        <!-- Burbuja 1: Historial (Arco Izquierdo -45 grados) -->
+        <button @click="cambiarPestana('Mi Historial'); alternarMenuBurbujas()" 
+                class="absolute flex flex-col items-center gap-2 group transition-all duration-300 transform -translate-x-[95px] -translate-y-[100px] hover:scale-110 active:scale-95">
+          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-2xl shadow-indigo-500/20 flex items-center justify-center text-2xl border-2 border-slate-100 dark:border-slate-700 relative overflow-hidden">
+            <div class="absolute inset-0 bg-indigo-500/5 group-hover:bg-indigo-500/20 transition-colors"></div>
+            📜
+          </div>
+          <span class="text-[10px] font-black text-white bg-slate-900/70 px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg border border-slate-700/50">Historial</span>
         </button>
 
-        <!-- Burbuja: Indicadores -->
-        <button @click="cambiarPestana('Mis Indicadores'); alternarMenuBurbujas()" class="flex flex-col items-center gap-2 group">
-          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-2xl group-active:scale-90 transition-all border border-slate-200 dark:border-slate-700">📊</div>
-          <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 drop-shadow-md">Métricas</span>
+        <!-- Burbuja 2: Métricas (Arco Central Superior 90 grados) -->
+        <button @click="cambiarPestana('Mis Indicadores'); alternarMenuBurbujas()" 
+                class="absolute flex flex-col items-center gap-2 group transition-all duration-300 transform -translate-y-[150px] hover:scale-110 active:scale-95">
+          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-2xl shadow-sky-500/20 flex items-center justify-center text-2xl border-2 border-slate-100 dark:border-slate-700 relative overflow-hidden">
+            <div class="absolute inset-0 bg-sky-500/5 group-hover:bg-sky-500/20 transition-colors"></div>
+            📊
+          </div>
+          <span class="text-[10px] font-black text-white bg-slate-900/70 px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg border border-slate-700/50">Métricas</span>
         </button>
 
-        <!-- Burbuja: Perfil -->
-        <button @click="cambiarPestana('Mi Perfil'); alternarMenuBurbujas()" class="flex flex-col items-center gap-2 group">
-          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-xl flex items-center justify-center text-2xl group-active:scale-90 transition-all border border-slate-200 dark:border-slate-700">👤</div>
-          <span class="text-[10px] font-bold text-slate-800 dark:text-slate-200 drop-shadow-md">Perfil</span>
+        <!-- Burbuja 3: Perfil (Arco Derecho 45 grados) -->
+        <button @click="cambiarPestana('Mi Perfil'); alternarMenuBurbujas()" 
+                class="absolute flex flex-col items-center gap-2 group transition-all duration-300 transform translate-x-[95px] -translate-y-[100px] hover:scale-110 active:scale-95">
+          <div class="w-14 h-14 rounded-full bg-white dark:bg-slate-800 shadow-2xl shadow-emerald-500/20 flex items-center justify-center text-2xl border-2 border-slate-100 dark:border-slate-700 relative overflow-hidden">
+            <div class="absolute inset-0 bg-emerald-500/5 group-hover:bg-emerald-500/20 transition-colors"></div>
+            👤
+          </div>
+          <span class="text-[10px] font-black text-white bg-slate-900/70 px-2.5 py-1 rounded-full backdrop-blur-md shadow-lg border border-slate-700/50">Perfil</span>
         </button>
+        
       </div>
     </div>
   </transition>
