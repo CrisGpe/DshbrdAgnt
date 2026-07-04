@@ -326,7 +326,10 @@
               </div>
               <p v-if="card[6]" class="text-xs text-slate-600 dark:text-slate-400 font-medium truncate mt-0.5">💼 {{ card[6] }}</p>
               <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
-                <span class="flex items-center gap-1">📅 Cita: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[1], false) }} <span v-if="card[2]">a las {{ formatearFechaUHoraVisual(card[2], true) }}</span></strong></span>
+                <span class="flex items-center gap-1">📅 Cita: <strong class="text-indigo-600 dark:text-indigo-400">
+                  <template v-if="card[2]">{{ formatearFechaUHoraVisual(card[1], false) }} a las {{ formatearFechaUHoraVisual(card[2], true) }}</template>
+                  <template v-else>{{ formatearFechaUHoraVisual(card[1], false) }} a las {{ formatearFechaUHoraVisual(card[1], true) }}</template>
+                </strong></span>
                 <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Detalles &rarr;</span>
               </div>
             </template>
@@ -607,7 +610,7 @@
               </div>
               <div>
                 <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🕒 Hora de Cita</label>
-                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[2], true) || '--:--' }}</div>
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-mono font-bold">{{ AppStore.modalDetalles.value.card[2] ? formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[2], true) : formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[1], true) }}</div>
               </div>
             </div>
             <div>
