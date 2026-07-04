@@ -262,10 +262,16 @@
 
             <!-- Estructura optimizada para "Mi Historial" (OATC) - VISTA RESUMIDA UX -->
             <template v-else-if="AppStore.pestanaActiva.value === 'Mi Historial'">
-              <p class="text-slate-700 dark:text-slate-300 flex justify-between"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[4] || 'Anónimo' }}</span></p>
-              <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-xs text-slate-600 dark:text-slate-400">
-                <span class="flex items-center gap-1.5">⏱️ Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[3], false) }} a las {{ formatearFechaUHoraVisual(card[0], true) }}</strong></span>
-                <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Ver Más &rarr;</span>
+              <div class="flex items-center justify-between">
+                <p class="text-slate-700 dark:text-slate-300 flex items-center gap-1.5"><span class="text-slate-500 font-bold">👤 Nombre:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ (card[4] || 'Anónimo').split('|')[0].trim() }}</span></p>
+                <span v-if="card[5]" class="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400 border border-sky-200 dark:border-sky-800 shrink-0 ml-2 max-w-[100px] truncate" :title="card[5]">{{ card[5] }}</span>
+              </div>
+              <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                <span class="flex items-center gap-1">🕒 Orden: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[3], false) }} • {{ formatearFechaUHoraVisual(card[0], true) }}</strong></span>
+                <div class="flex items-center gap-2">
+                  <span v-if="card[8]" class="text-rose-600 dark:text-rose-400 truncate max-w-[80px]" :title="card[8]">⚠ {{ card[8] }}</span>
+                  <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Ver Más &rarr;</span>
+                </div>
               </div>
             </template>
 
