@@ -59,18 +59,6 @@
             <span class="text-2xl">🏁</span>
             <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Acabó mi día</span>
           </button>
-
-          <button @click="dispararAlertaBotonera('Estoy atendiendo')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-amber-50 dark:bg-amber-600/10 hover:bg-amber-100 dark:hover:bg-amber-600/20 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-amber-200 dark:border-amber-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
-            <span class="text-2xl">💇</span>
-            <span class="text-[10px] font-black uppercase tracking-wide text-amber-600 dark:text-amber-400">Atendiendo</span>
-          </button>
-
-          <button @click="dispararAlertaBotonera('Estoy disponible')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-emerald-50 dark:bg-emerald-600/10 hover:bg-emerald-100 dark:hover:bg-emerald-600/20 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-emerald-200 dark:border-emerald-500/20 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
-            <span class="text-2xl">🟢</span>
-            <span class="text-[10px] font-black uppercase tracking-wide text-emerald-600 dark:text-emerald-400">Disponible</span>
-          </button>
         </div>
       </div>
 
