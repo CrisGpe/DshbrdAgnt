@@ -152,11 +152,11 @@
     </section>
 
     <!-- OTRAS PESTAÑAS (Mis Atenciones / Mi Historial / Mi Perfil) -->
-    <!-- PESTAÑAS 2 Y 3: VISTAS DE TRANSACCIONES (Mis Atenciones / Mi Historial con Buscador por Rango de Fechas) -->
-    <section v-else-if="AppStore.pestanaActiva.value === 'Mis Atenciones' || AppStore.pestanaActiva.value === 'Mi Historial'" class="space-y-3 animate-fadeIn w-full">
+    <!-- PESTAÑAS DE VISTAS DE LISTAS (Mis Atenciones / Mi Historial / Mi Agenda / Mis Clientes) -->
+    <section v-else-if="['Mis Atenciones', 'Mi Historial', 'Mi Agenda', 'Mis Clientes'].includes(AppStore.pestanaActiva.value)" class="space-y-3 animate-fadeIn w-full">
       
-      <!-- SUB-PANEL DINÁMICO: BUSCADOR POR FECHAS (Sólo visible en Mi Historial) -->
-      <div v-if="AppStore.pestanaActiva.value === 'Mi Historial'" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
+      <!-- SUB-PANEL DINÁMICO: BUSCADOR POR FECHAS (Visible en Mi Historial y Mi Agenda) -->
+      <div v-if="['Mi Historial', 'Mi Agenda'].includes(AppStore.pestanaActiva.value)" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
         <div class="flex items-center justify-between">
           <label class="text-[10px] font-extrabold uppercase text-indigo-400 tracking-wider">📅 Filtrar rango de producción</label>
           <button v-if="AppStore.filtroFechaInicio.value || AppStore.filtroFechaFin.value" @click="limpiarFiltroFechas" class="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 active:scale-95">
@@ -177,9 +177,20 @@
         </div>
       </div>
 
+      <!-- SUB-PANEL DINÁMICO: BUSCADOR GLOBAL DE CLIENTES (Visible en Mis Clientes) -->
+      <div v-if="AppStore.pestanaActiva.value === 'Mis Clientes'" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
+        <label class="text-[10px] font-extrabold uppercase text-indigo-400 tracking-wider">🔎 Búsqueda Global de Clientes</label>
+        <div class="relative">
+          <input type="text" v-model="AppStore.filtroBusquedaCliente.value" placeholder="DNI, Nombre, Apellido, Celular..." class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-800 focus:outline-none focus:border-indigo-500 font-medium transition-colors" />
+        </div>
+        <p v-if="AppStore.filtroBusquedaCliente.value.length > 0 && AppStore.filtroBusquedaCliente.value.length < 3" class="text-[9px] text-amber-500 font-bold mt-1">Escribe al menos 3 letras para buscar...</p>
+      </div>
+
       <div class="flex items-center justify-between mb-1 pt-1">
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          Registros Asignados: <span class="text-indigo-600 dark:text-indigo-400 font-black">{{ obtenerDatosVisualizables.length }}</span>
+          <span v-if="AppStore.pestanaActiva.value === 'Mis Clientes'">Clientes encontrados: </span>
+          <span v-else>Registros Asignados: </span>
+          <span class="text-indigo-600 dark:text-indigo-400 font-black">{{ obtenerDatosVisualizables.length }}</span>
         </h3>
         <button @click="forzarRefrescoDatos" :disabled="AppStore.cargando.value" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800/80 active:scale-95 shadow-sm">
           <span :class="{'animate-spin': AppStore.cargando.value}">🔄</span> Refrescar
@@ -253,6 +264,18 @@
               <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
                 <span class="flex items-center gap-1">📅 Cita: <strong class="text-indigo-600 dark:text-indigo-400">{{ formatearFechaUHoraVisual(card[1], false) }} <span v-if="card[2]">a las {{ formatearFechaUHoraVisual(card[2], true) }}</span></strong></span>
                 <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Detalles &rarr;</span>
+              </div>
+            </template>
+
+            <!-- Estructura optimizada para "Mis Clientes" - VISTA RESUMIDA UX -->
+            <template v-else-if="AppStore.pestanaActiva.value === 'Mis Clientes'">
+              <div class="flex items-center justify-between">
+                <p class="text-slate-700 dark:text-slate-300 flex items-center gap-1.5"><span class="text-slate-500 font-bold">👤 Cliente:</span> <span class="font-medium text-slate-900 dark:text-slate-200">{{ card[1] }} {{ card[2] }}</span></p>
+                <span v-if="card[3]" class="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border border-amber-200 dark:border-amber-800 shrink-0 ml-2">{{ card[3] }}</span>
+              </div>
+              <div class="pt-2 mt-1 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between font-mono text-[11px] text-slate-600 dark:text-slate-400">
+                <span class="flex items-center gap-1">📱 Celular: <strong class="text-indigo-600 dark:text-indigo-400">{{ card[5] || '---' }}</strong></span>
+                <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Perfil &rarr;</span>
               </div>
             </template>
           </div>
@@ -515,20 +538,54 @@
           <!-- SECCIÓN: OATC (Mi Historial) -->
           <template v-else-if="AppStore.modalDetalles.value.origen === 'Mi Historial'">
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente Registrado</label>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Cliente</label>
               <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[4] || 'Anónimo' }}</div>
             </div>
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📍 Punto de Partida</label>
-              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[2] || '---' }}</div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">💰 Monto Operación</label>
+              <div class="bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400 mt-1 font-mono font-bold text-lg">S/ {{ AppStore.modalDetalles.value.card[2] || '0.00' }}</div>
             </div>
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⚡ Tipo de Demanda</label>
-              <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[5] || '---' }}</div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⏱️ Fecha/Hora de Registro</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], false) }}</div>
             </div>
             <div>
-              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⏱️ Registro de Orden</label>
-              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold">{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], false) }} • {{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], true) }}</div>
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🧾 Referencia / Factura</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[3] || 'N/A' }}</div>
+            </div>
+          </template>
+
+          <!-- SECCIÓN: CLIENTES (Mis Clientes) -->
+          <template v-else-if="AppStore.modalDetalles.value.origen === 'Mis Clientes'">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex-1 min-w-0">
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">👤 Nombre Completo</label>
+                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold truncate">{{ AppStore.modalDetalles.value.card[1] }} {{ AppStore.modalDetalles.value.card[2] }}</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🆔 DNI</label>
+                <div class="bg-amber-50 dark:bg-amber-900/20 p-2.5 rounded-xl border border-amber-200 dark:border-amber-900/50 text-amber-700 dark:text-amber-400 mt-1 font-mono font-bold">{{ AppStore.modalDetalles.value.card[3] || '---' }}</div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📱 Celular</label>
+                <div class="bg-indigo-50 dark:bg-indigo-900/20 p-2.5 rounded-xl border border-indigo-200 dark:border-slate-800/80 text-indigo-700 dark:text-indigo-400 mt-1 font-mono font-bold">{{ AppStore.modalDetalles.value.card[5] || '---' }}</div>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🎂 Cumpleaños</label>
+                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[4] ? formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[4], false) : '---' }}</div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📅 Registro</label>
+                <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono">{{ AppStore.modalDetalles.value.card[0] ? formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], false) : '---' }}</div>
+              </div>
+            </div>
+            <div v-if="AppStore.modalDetalles.value.card[6]">
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">📧 Correo</label>
+              <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-medium truncate">{{ AppStore.modalDetalles.value.card[6] }}</div>
             </div>
           </template>
         </div>

@@ -36,6 +36,7 @@
       cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] }),
       filtroFechaInicio: Vue.ref(fechaAyerStr),
       filtroFechaFin: Vue.ref(fechaAyerStr),
+      filtroBusquedaCliente: Vue.ref(''), // Búsqueda de Mis Clientes
       
       // NUEVO: Sistema Toast y Tema
       toasts: Vue.ref([]),
@@ -402,6 +403,7 @@
           else if (t === "Mi Historial") { h = "OATC"; idx = 6; }   // Col G
           else if (t === "Mi Agenda") { h = "Registro Citas"; idx = 5; } // Col F
           else if (t === "Mi Perfil") { h = "Agentes"; idx = 13; }
+          else if (t === "Mis Clientes") { h = "Clientes"; idx = -2; } // No filtra por agente, busca globalmente
           else { h = t; idx = -1; }
 
           const m = window.AppStore.cacheDatos.value[h] || [];
@@ -420,6 +422,17 @@
             filtered = filtered.filter(row => row[5] && String(row[5]).toLowerCase().trim() === nick);
           } else if (t === "Mi Perfil") {
             filtered = filtered.filter(row => row[13] && String(row[13]).toLowerCase().trim() === nick);
+          } else if (t === "Mis Clientes") {
+            // Filtrar globalmente por la barra de búsqueda (DNI, Nombre, Apellido, Celular)
+            const busqueda = window.AppStore.filtroBusquedaCliente.value.toLowerCase().trim();
+            if (busqueda.length < 3) {
+              filtered = []; // Si hay menos de 3 caracteres, no mostrar toda la BD
+            } else {
+              filtered = filtered.filter(row => {
+                const searchStr = `${row[1] || ''} ${row[2] || ''} ${row[3] || ''} ${row[5] || ''}`.toLowerCase();
+                return searchStr.includes(busqueda);
+              });
+            }
           }
 
           // Paso C: INTERCEPCIÓN CRONOLÓGICA (Solo Historial y Agenda)
