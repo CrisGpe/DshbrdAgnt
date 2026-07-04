@@ -533,8 +533,8 @@
             });
           }
 
-          // Paso C: INTERCEPCIÓN CRONOLÓGICA (Solo Historial y Agenda)
-          if (t === "Mi Historial" || t === "Mi Agenda") {
+          // Paso C: INTERCEPCIÓN CRONOLÓGICA (Solo Historial)
+          if (t === "Mi Historial") {
             const fechaIniStr = window.AppStore.filtroFechaInicio.value;
             const fechaFinStr = window.AppStore.filtroFechaFin.value;
 
@@ -543,7 +543,7 @@
               const msFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
 
               filtered = filtered.filter(row => {
-                const colFecha = (t === "Mi Historial") ? 3 : 1; // Col D para OATC, Col B para Agenda
+                const colFecha = 3; // Col D para OATC
                 if (!row[colFecha]) return false;
                 
                 const msTarjeta = parseDateRobust(row[colFecha]);
@@ -555,8 +555,8 @@
           }
 
           // Paso D: Ordenamiento final
-          if (t === "Mi Historial") return filtered.sort((a,b) => new Date(b[3]) - new Date(a[3]));
-          if (t === "Mi Agenda") return filtered.sort((a,b) => new Date(a[1]) - new Date(b[1])); // Próximas primero
+          if (t === "Mi Historial") return filtered.sort((a,b) => parseDateRobust(b[3]) - parseDateRobust(a[3]));
+          if (t === "Mi Agenda") return filtered.sort((a,b) => parseDateRobust(a[1]) - parseDateRobust(b[1])); // Próximas primero
           return filtered;
         });
 
