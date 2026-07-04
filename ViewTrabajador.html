@@ -155,8 +155,8 @@
     <!-- PESTAÑAS DE VISTAS DE LISTAS (Mis Atenciones / Mi Historial / Mi Agenda / Mis Clientes) -->
     <section v-else-if="['Mis Atenciones', 'Mi Historial', 'Mi Agenda', 'Mis Clientes'].includes(AppStore.pestanaActiva.value)" class="space-y-3 animate-fadeIn w-full">
       
-      <!-- SUB-PANEL DINÁMICO: BUSCADOR POR FECHAS (Visible en Mi Historial y Mi Agenda) -->
-      <div v-if="['Mi Historial', 'Mi Agenda'].includes(AppStore.pestanaActiva.value)" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
+      <!-- SUB-PANEL DINÁMICO: BUSCADOR POR FECHAS (Visible en Mi Historial) -->
+      <div v-if="AppStore.pestanaActiva.value === 'Mi Historial'" class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl space-y-2.5 shadow-md">
         <div class="flex items-center justify-between">
           <label class="text-[10px] font-extrabold uppercase text-indigo-400 tracking-wider">📅 Filtrar rango de producción</label>
           <button v-if="AppStore.filtroFechaInicio.value || AppStore.filtroFechaFin.value" @click="limpiarFiltroFechas" class="text-[10px] font-bold text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md border border-rose-500/20 active:scale-95">
