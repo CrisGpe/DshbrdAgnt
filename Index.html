@@ -88,7 +88,27 @@
       </div>
     </transition>
 
-    <!-- SISTEMA GLOBAL DE TOASTS -->
+    <!-- SISTEMA GLOBAL DE MODAL FORMULARIO -->
+    <transition name="toast">
+      <div v-if="AppStore.modalFormulario.value.visible" class="fixed inset-0 z-[10006] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click.self="cerrarModalFormulario">
+        <div class="bg-white dark:bg-slate-950 w-full max-w-sm rounded-3xl shadow-2xl p-5 border border-slate-200 dark:border-slate-800/80 animate-fadeIn flex flex-col max-h-[80vh]">
+          <h3 class="text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider mb-4 border-b border-slate-200 dark:border-slate-800 pb-2">{{ AppStore.modalFormulario.value.titulo }}</h3>
+          
+          <div class="overflow-y-auto flex-1 mb-4 pr-1 space-y-3">
+            <div v-for="(campo, idx) in AppStore.modalFormulario.value.campos" :key="idx" class="flex flex-col gap-1">
+              <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">{{ campo.label }}</label>
+              <input v-if="campo.tipo !== 'textarea'" :type="campo.tipo || 'text'" v-model="campo.valor" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors" />
+              <textarea v-else v-model="campo.valor" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors resize-none"></textarea>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 mt-auto shrink-0 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <button @click="cerrarModalFormulario" class="px-4 py-2 text-xs font-bold text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors">Cancelar</button>
+            <button @click="enviarModalFormulario" class="px-5 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-md active:scale-95 transition-all">{{ AppStore.modalFormulario.value.textoBoton }}</button>
+          </div>
+        </div>
+      </div>
+    </transition>
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[10000] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm">
       <transition-group name="toast">
         <div v-for="t in AppStore.toasts.value" :key="t.id"

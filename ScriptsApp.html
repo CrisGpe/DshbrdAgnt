@@ -71,6 +71,15 @@
         mostrarSelectorClientes: false
       }),
 
+      // UX Modal Formulario Genérico
+      modalFormulario: Vue.ref({
+        visible: false,
+        titulo: '',
+        campos: [], // ej: [{ id: 'nombre', label: 'Nombre', tipo: 'text', valor: '' }]
+        textoBoton: 'Guardar',
+        onSubmit: null
+      }),
+
       // UX Menú Burbujas
       mostrarMenuBurbujas: Vue.ref(false),
 
@@ -145,6 +154,32 @@
             state.onConfirm(state.tipo === 'prompt' ? state.inputVal : null);
           }
           cerrarDialogo();
+        };
+
+        const mostrarModalFormulario = (config) => {
+          const camposMapeados = (config.campos || []).map(c => ({ ...c, valor: '' }));
+          window.AppStore.modalFormulario.value = {
+            visible: true,
+            titulo: config.titulo || 'Formulario',
+            campos: camposMapeados,
+            textoBoton: config.textoBoton || 'Guardar',
+            onSubmit: config.onSubmit || null
+          };
+        };
+
+        const cerrarModalFormulario = () => {
+          window.AppStore.modalFormulario.value.visible = false;
+        };
+
+        const enviarModalFormulario = () => {
+          const state = window.AppStore.modalFormulario.value;
+          if (state.onSubmit) {
+            // Extraer valores en un objeto { idCampo: valor }
+            const payload = {};
+            state.campos.forEach(c => payload[c.id] = c.valor);
+            state.onSubmit(payload);
+          }
+          cerrarModalFormulario();
         };
 
         const seleccionarClienteDialogo = (clienteRaw) => {
@@ -766,9 +801,30 @@
               }
             });
           } else if (tipo === 'insumos') {
-            mostrarToast('Módulo de Despacho de Insumos en desarrollo 🚧', 'aviso');
+            mostrarModalFormulario({
+              titulo: 'Solicitar Insumos',
+              textoBoton: 'Enviar Solicitud',
+              campos: [
+                { id: 'insumo', label: 'Insumo Requerido', tipo: 'text' },
+                { id: 'cantidad', label: 'Cantidad', tipo: 'number' }
+              ],
+              onSubmit: (data) => {
+                dispararAlertaBotonera(`Insumo: ${data.cantidad}x ${data.insumo} (Ref: ${idTurno})`);
+                mostrarToast('Solicitud de insumos enviada', 'success');
+              }
+            });
           } else if (tipo === 'ficha') {
-            mostrarToast('Módulo de Ventas Retail (Fichas) en desarrollo 🚧', 'aviso');
+            mostrarModalFormulario({
+              titulo: 'Abrir Ficha Clínica',
+              textoBoton: 'Abrir',
+              campos: [
+                { id: 'motivo', label: 'Motivo de Consulta', tipo: 'text' },
+                { id: 'observaciones', label: 'Observaciones Iniciales', tipo: 'text' }
+              ],
+              onSubmit: (data) => {
+                mostrarToast('Ficha guardada (Simulación)', 'success');
+              }
+            });
           }
         };
 
@@ -801,6 +857,10 @@
           mostrarDialogo,
           cerrarDialogo,
           confirmarDialogo,
+          
+          mostrarModalFormulario,
+          cerrarModalFormulario,
+          enviarModalFormulario,
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
           seleccionarClienteDialogo,

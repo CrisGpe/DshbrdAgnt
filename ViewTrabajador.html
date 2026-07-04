@@ -188,13 +188,13 @@
 
       <!-- BOTONES DE ACCIÓN RÁPIDA -->
       <div v-if="AppStore.pestanaActiva.value === 'Mi Agenda'" class="w-full mb-3 animate-fadeIn">
-        <button @click="mostrarToast('Módulo Registrar Cita en desarrollo 🚧', 'aviso')" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+        <button @click="mostrarModalFormulario({ titulo: 'Registrar Nueva Cita', textoBoton: 'Registrar', campos: [{ id: 'cliente', label: 'Cliente', tipo: 'text' }, { id: 'fecha', label: 'Fecha/Hora', tipo: 'text' }, { id: 'servicio', label: 'Servicio', tipo: 'text' }], onSubmit: () => { mostrarToast('Cita registrada (Simulación)', 'success') } })" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
           <span>➕</span> Registrar Nueva Cita
         </button>
       </div>
       
       <div v-if="AppStore.pestanaActiva.value === 'Mis Clientes'" class="w-full mb-3 animate-fadeIn">
-        <button @click="mostrarToast('Módulo Registrar Cliente en desarrollo 🚧', 'aviso')" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+        <button @click="mostrarModalFormulario({ titulo: 'Registrar Nuevo Cliente', textoBoton: 'Guardar Cliente', campos: [{ id: 'nombre', label: 'Nombre Completo', tipo: 'text' }, { id: 'dni', label: 'DNI', tipo: 'text' }, { id: 'cel', label: 'Celular', tipo: 'text' }], onSubmit: () => { mostrarToast('Cliente guardado (Simulación)', 'success') } })" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
           <span>➕</span> Registrar Nuevo Cliente
         </button>
       </div>
