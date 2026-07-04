@@ -410,6 +410,7 @@
           if (m.length === 0) return [];
 
           let filtered = m;
+          const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
 
           // Paso A y B: Filtros de Pertenencia y Sede
           if (t === "Mis Atenciones") {
@@ -417,9 +418,17 @@
             const sedeFormateada = sedeActual.toUpperCase() === "RD" ? "Sede RD" : sedeActual;
             filtered = filtered.filter(row => row[3] === sedeFormateada);
           } else if (t === "Mi Historial") {
-            filtered = filtered.filter(row => row[6] && String(row[6]).toLowerCase().trim() === nick);
+            filtered = filtered.filter(row => {
+              if (!row[6]) return false;
+              const celda = String(row[6]).toLowerCase();
+              return celda.includes(nick) || celda.includes(nombreCompleto);
+            });
           } else if (t === "Mi Agenda") {
-            filtered = filtered.filter(row => row[5] && String(row[5]).toLowerCase().trim() === nick);
+            filtered = filtered.filter(row => {
+              if (!row[5]) return false;
+              const celda = String(row[5]).toLowerCase();
+              return celda.includes(nick) || celda.includes(nombreCompleto);
+            });
           } else if (t === "Mi Perfil") {
             filtered = filtered.filter(row => row[13] && String(row[13]).toLowerCase().trim() === nick);
           } else if (t === "Mis Clientes") {
@@ -448,13 +457,19 @@
                 const colFecha = (t === "Mi Historial") ? 0 : 1; // Col A para OATC, Col B para Agenda
                 if (!row[colFecha]) return false;
                 
-                let msTarjeta = new Date(row[colFecha]).getTime();
-                
-                if (isNaN(msTarjeta) && typeof row[colFecha] === 'string' && row[colFecha].includes('/')) {
+                let msTarjeta = NaN;
+                if (typeof row[colFecha] === 'string' && row[colFecha].includes('/')) {
                   const partes = row[colFecha].split(/[/\s:-]/);
-                  if (partes.length >= 3) {
+                  // Determinar si el primer elemento es el año o el día
+                  if (partes[0].length === 4) {
+                    // Formato YYYY/MM/DD
+                    msTarjeta = new Date(partes[0], partes[1] - 1, partes[2]).getTime();
+                  } else {
+                    // Asumir DD/MM/YYYY
                     msTarjeta = new Date(partes[2], partes[1] - 1, partes[0]).getTime();
                   }
+                } else {
+                  msTarjeta = new Date(row[colFecha]).getTime();
                 }
                 
                 if (isNaN(msTarjeta)) return false;
