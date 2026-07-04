@@ -591,7 +591,7 @@
             const estadoFisico = String(row[8] || '').toLowerCase().trim(); // Col I
             const especialidad = String(row[10] || '').toLowerCase().trim(); // Col K
             
-            return dependiente.length > 0 && estadoFisico === 'disponible' && especialidad !== 'administracion';
+            return dependiente.length > 0 && estadoFisico === 'disponible' && especialidad !== 'administracion' && especialidad !== 'jefe operativo';
           });
           
           // Ordenar por Col M (Ult Act) ascendente (el más antiguo primero)
