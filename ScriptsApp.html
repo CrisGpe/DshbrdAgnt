@@ -334,6 +334,21 @@
             return new Date(year, month, day, hours, mins, secs).getTime();
           }
 
+          // Formato Solo Hora (ej. 11:33 AM, 12:48 PM)
+          const matchSoloHora = str.match(/^(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?\s*(am|pm)?/i);
+          if (matchSoloHora && !matchES && !matchEN) {
+            let hours = parseInt(matchSoloHora[1], 10);
+            let mins = parseInt(matchSoloHora[2], 10);
+            let secs = matchSoloHora[3] ? parseInt(matchSoloHora[3], 10) : 0;
+            const ampm = matchSoloHora[4] ? matchSoloHora[4].toLowerCase() : '';
+            if (ampm === 'pm' && hours < 12) hours += 12;
+            if (ampm === 'am' && hours === 12) hours = 0;
+            
+            // Asumimos el día de hoy
+            const hoy = new Date();
+            return new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), hours, mins, secs).getTime();
+          }
+
           // Fallback final
           return new Date(str).getTime();
         };
