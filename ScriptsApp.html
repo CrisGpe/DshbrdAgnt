@@ -32,8 +32,8 @@
       
       loginForm: Vue.ref({ nickname: '', pin: '', sede: 'RD' }),
       listaNicknamesDisponibles: Vue.ref([]),
-      cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
-      cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [] }),
+      cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] }),
+      cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] }),
       filtroFechaInicio: Vue.ref(fechaAyerStr),
       filtroFechaFin: Vue.ref(fechaAyerStr),
       
@@ -101,6 +101,8 @@
           if (nuevaPestana === "Mis Atenciones") hojaReal = "Borrador";
           else if (nuevaPestana === "Mi Historial") hojaReal = "OATC";
           else if (nuevaPestana === "Mi Perfil") hojaReal = "Agentes";
+          else if (nuevaPestana === "Mis Clientes") hojaReal = "Clientes";
+          else if (nuevaPestana === "Mi Agenda") hojaReal = "Registro Citas";
           else hojaReal = nuevaPestana; // Habilita compatibilidad para las nuevas vistas de Admin/Jefe
 
           const dataExistente = window.AppStore.cacheDatos.value[hojaReal];
@@ -421,12 +423,14 @@
           if (tipo === 'terminar') {
             if (confirm(`¿Estás seguro de terminar la atención de ${clienteActual}?`)) {
                dispararAlertaBotonera(`Terminó atención: ${clienteActual} (ID: ${idTurno})`);
+               mostrarToast('Alerta de término enviada a recepción', 'exito');
                cerrarModalDetalles();
             }
           } else if (tipo === 'editar') {
             const nuevoNombre = prompt(`Ingresa el nuevo nombre para el cliente (actual: ${clienteActual}):`);
             if (nuevoNombre && nuevoNombre.trim() !== '') {
                dispararAlertaBotonera(`Editar nombre de ID ${idTurno} a: ${nuevoNombre.trim()}`);
+               mostrarToast('Alerta de cambio de nombre enviada', 'exito');
                cerrarModalDetalles();
             }
           } else if (tipo === 'insumos') {

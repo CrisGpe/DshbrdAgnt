@@ -52,7 +52,7 @@
     </div>
 
     <!-- SISTEMA GLOBAL DE TOASTS -->
-    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm">
+    <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[10000] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm">
       <transition-group name="toast">
         <div v-for="t in AppStore.toasts.value" :key="t.id"
              class="px-4 py-3 rounded-xl shadow-2xl flex items-center gap-2 pointer-events-auto transform transition-all font-bold text-xs"
