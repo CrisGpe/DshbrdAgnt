@@ -219,8 +219,11 @@
           <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl"></div>
           <div class="z-10">
             <h4 class="text-[10px] font-extrabold uppercase tracking-widest text-white/80">Posición de Turno</h4>
-            <p class="text-sm font-medium mt-0.5">
-              Estás en la posición <strong class="text-2xl font-black mx-1">#{{ estadoTurnoAgente.posicion }}</strong> de {{ estadoTurnoAgente.total }} en cola.
+            <p v-if="estadoTurnoAgente.posicion > 0" class="text-sm font-medium mt-0.5">
+              Estás en la posición <strong class="text-2xl font-black mx-1">#{{ estadoTurnoAgente.posicion }}</strong> de {{ estadoTurnoAgente.total }} en <span class="capitalize">{{ AppStore.filtroCola.value }}</span>.
+            </p>
+            <p v-else class="text-sm font-medium mt-0.5 opacity-90">
+              No estás en la cola actual (<span class="capitalize">{{ AppStore.filtroCola.value }}</span>).
             </p>
           </div>
           <div @click="alternarModalCola()" class="z-10 bg-white/20 p-2.5 rounded-xl backdrop-blur-sm border border-white/20 cursor-pointer active:scale-95 transition-transform hover:bg-white/30" title="Ver la cola completa">
@@ -687,6 +690,12 @@
         <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50 dark:bg-slate-900/50">
           <h3 class="font-black text-slate-800 dark:text-slate-200 flex items-center gap-2">👥 Lista de Turnos</h3>
           <button @click="alternarModalCola()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 font-bold active:scale-90">✕</button>
+        </div>
+        
+        <div class="px-4 pt-3 flex gap-2">
+          <button @click="setFiltroCola('Todos')" class="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors" :class="AppStore.filtroCola.value === 'Todos' ? 'bg-indigo-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'">Todos</button>
+          <button @click="setFiltroCola('Estilismo')" class="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors" :class="AppStore.filtroCola.value === 'Estilismo' ? 'bg-indigo-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'">Estilismo</button>
+          <button @click="setFiltroCola('Cosmiatría')" class="flex-1 py-1.5 rounded-lg text-xs font-bold transition-colors" :class="AppStore.filtroCola.value === 'Cosmiatría' ? 'bg-indigo-500 text-white shadow-md' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400'">Cosmiatría</button>
         </div>
         
         <div class="p-4 max-h-[60vh] overflow-y-auto space-y-2">

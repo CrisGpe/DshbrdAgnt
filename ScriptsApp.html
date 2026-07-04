@@ -45,6 +45,7 @@
       // UX Modal Detalles
       modalDetalles: Vue.ref({ visible: false, card: null, origen: '' }),
       modalCola: Vue.ref(false),
+      filtroCola: Vue.ref('Todos'), // 'Todos', 'Estilismo', 'Cosmiatría'
       toast: Vue.ref({ visible: false, mensaje: '', tipo: 'success' }),
       
       // UX Diálogo Universal Tailwind (Confirm/Prompt)
@@ -209,10 +210,12 @@
                 window.AppStore.agente.value = res;
                 localStorage.setItem('workerview_session', JSON.stringify(res));
                 
-                // Inicializador dinámico de pestaña de arranque según especialidad
+                // Inicializador dinámico de pestaña de arranque y filtro de cola según especialidad
                 if (res.especialidad === 'Estilismo' || res.especialidad === 'Cosmiatría') {
+                  window.AppStore.filtroCola.value = res.especialidad;
                   cambiarPestana('Botonera');
                 } else {
+                  window.AppStore.filtroCola.value = 'Todos';
                   cambiarPestana('Borrador'); // Arranque estándar por tabla para Admin/Jefe
                 }
               } else {
@@ -585,13 +588,19 @@
           const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
           const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
           
+          const filtro = window.AppStore.filtroCola.value;
+          
           // Filtrar agentes en la Sede (Col B tiene el nombre, Col I tiene el estado)
           let agentesCola = m.filter(row => {
             const dependiente = String(row[1] || '').trim(); // Col B
             const estadoFisico = String(row[8] || '').toLowerCase().trim(); // Col I
             const especialidad = String(row[10] || '').toLowerCase().trim(); // Col K
             
-            return dependiente.length > 0 && estadoFisico === 'disponible' && especialidad !== 'administracion' && especialidad !== 'jefe operativo';
+            if (dependiente.length === 0 || estadoFisico !== 'disponible' || especialidad === 'administracion' || especialidad === 'jefe operativo') return false;
+            
+            if (filtro !== 'Todos' && especialidad !== filtro.toLowerCase()) return false;
+            
+            return true;
           });
           
           // Ordenar por Col M (Ult Act) ascendente (el más antiguo primero)
@@ -725,6 +734,7 @@
           limpiarFiltroFechas,
           
           alternarModalCola: () => { window.AppStore.modalCola.value = !window.AppStore.modalCola.value; },
+          setFiltroCola: (f) => { window.AppStore.filtroCola.value = f; },
           mostrarToast,
           alternarTema,
           aplicarTemaAlHTML,
