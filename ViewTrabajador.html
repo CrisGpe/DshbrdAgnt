@@ -693,7 +693,7 @@
           <div v-if="estadoTurnoAgente.cola && estadoTurnoAgente.cola.length === 0" class="text-center text-slate-500 py-4 text-sm font-medium">
             No hay nadie en cola.
           </div>
-          <div v-else v-for="(nombre, idx) in estadoTurnoAgente.cola" :key="idx" 
+          <div v-else v-for="(agente, idx) in estadoTurnoAgente.cola" :key="idx" 
                class="flex items-center gap-3 p-3 rounded-xl border transition-colors"
                :class="(idx + 1) === estadoTurnoAgente.posicion ? 'bg-indigo-50 border-indigo-200 dark:bg-indigo-900/20 dark:border-indigo-800' : 'bg-slate-50 border-slate-200 dark:bg-slate-900 dark:border-slate-800'">
             
@@ -704,10 +704,14 @@
             
             <span class="font-bold text-sm truncate"
                   :class="(idx + 1) === estadoTurnoAgente.posicion ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-700 dark:text-slate-300'">
-              {{ (nombre || 'Anónimo').split(' ')[0] }}
+              {{ (agente.nombre || 'Anónimo').split(' ')[0] }}
             </span>
             
-            <span v-if="(idx + 1) === estadoTurnoAgente.posicion" class="ml-auto text-[10px] font-black uppercase text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-md">Tú</span>
+            <span class="text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700 shrink-0 mx-1 max-w-[80px] truncate" :title="agente.especialidad">
+              {{ agente.especialidad }}
+            </span>
+            
+            <span v-if="(idx + 1) === estadoTurnoAgente.posicion" class="ml-auto text-[10px] font-black uppercase text-indigo-500 bg-indigo-500/10 px-2 py-0.5 rounded-md shrink-0">Tú</span>
           </div>
         </div>
       </div>

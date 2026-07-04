@@ -574,8 +574,9 @@
           let agentesCola = m.filter(row => {
             const dependiente = String(row[1] || '').trim(); // Col B
             const estadoFisico = String(row[8] || '').toLowerCase().trim(); // Col I
+            const especialidad = String(row[10] || '').toLowerCase().trim(); // Col K
             
-            return dependiente.length > 0 && estadoFisico === 'disponible';
+            return dependiente.length > 0 && estadoFisico === 'disponible' && especialidad !== 'administracion';
           });
           
           // Ordenar por Col M (Ult Act) ascendente (el más antiguo primero)
@@ -607,7 +608,7 @@
             }
           }
           
-          const cola = agentesCola.map(a => a[1]); // Retornar array de nombres
+          const cola = agentesCola.map(a => ({ nombre: a[1], especialidad: String(a[10] || 'Técnico') })); // Retornar array de objetos
           return { posicion, total: totalCola, estadoActual, cola };
         });
 
