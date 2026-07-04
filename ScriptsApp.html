@@ -15,6 +15,15 @@
     fechaAyer.setDate(fechaAyer.getDate() - 1);
     const fechaAyerStr = fechaAyer.toISOString().split('T')[0];
 
+    const MAPA_PESTANAS = {
+      "Mis Atenciones": "Borrador",
+      "Mi Historial": "OATC",
+      "Mi Agenda": "Registro Citas",
+      "Mis Clientes": "Clientes",
+      "Mi Perfil": "Agentes",
+      "Botonera": "Borrador"
+    };
+
     // 1. Estructuración del Almacén Máster en window
     window.AppStore = {
       pestanaActiva: Vue.ref('Borrador'), // Será gobernada dinámicamente por la vista inyectada
@@ -171,19 +180,23 @@
         };
 
         const dispararAlertaBotonera = (tipoAlerta) => {
-          if (window.AppStore.procesandoAlerta.value) return;
+          if (window.AppStore.procesandoAlerta.value) return Promise.reject("Ya procesando");
           window.AppStore.procesandoAlerta.value = true;
 
-          google.script.run
-            .withSuccessHandler(() => {
-              window.AppStore.procesandoAlerta.value = false;
-              mostrarToast("🚨 Alerta '" + tipoAlerta + "' registrada con éxito.", "success");
-            })
-            .withFailureHandler((err) => { 
-              window.AppStore.procesandoAlerta.value = false;
-              mostrarToast("⚠️ Error al registrar alerta: " + (err.message || err), "error");
-            })
-            .registrarAlertaBotonera(window.AppStore.agente.value.nickname, tipoAlerta, window.AppStore.agente.value.sede);
+          return new Promise((resolve, reject) => {
+            google.script.run
+              .withSuccessHandler(() => {
+                window.AppStore.procesandoAlerta.value = false;
+                mostrarToast("🚨 Alerta '" + tipoAlerta + "' registrada con éxito.", "success");
+                resolve();
+              })
+              .withFailureHandler((err) => { 
+                window.AppStore.procesandoAlerta.value = false;
+                mostrarToast("⚠️ Error al registrar alerta: " + (err.message || err), "error");
+                reject(err);
+              })
+              .registrarAlertaBotonera(window.AppStore.agente.value.nickname, tipoAlerta, window.AppStore.agente.value.sede);
+          });
         };
 
         const cargarNicknamesSede = () => {
@@ -232,8 +245,8 @@
         const cerrarSesion = () => {
           localStorage.removeItem('workerview_session');
           window.AppStore.agente.value = { filaOriginal: null, sede: '', nombre: '', nickname: '', especialidad: '', autenticado: false };
-          window.AppStore.cacheDatos.value = { "Borrador": [], "OATC": [], "Agentes": [] };
-          window.AppStore.cacheEncabezados.value = { "Borrador": [], "OATC": [], "Agentes": [] };
+          window.AppStore.cacheDatos.value = { "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] };
+          window.AppStore.cacheEncabezados.value = { "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] };
           window.AppStore.modoEdicionPerfil.value = false;
           cargarNicknamesSede();
         };
@@ -279,9 +292,33 @@
             .actualizarPerfil(window.AppStore.agente.value.sede, window.AppStore.agente.value.filaOriginal, form);
         };
 
+        const esMiRegistro = (celdaTexto, miNick, miNombre) => {
+          const txt = String(celdaTexto || '').toLowerCase().trim();
+          const n = String(miNick || '').toLowerCase().trim();
+          const nc = String(miNombre || '').toLowerCase().trim();
+          
+          if (txt === n || txt === nc) return true;
+          
+          const regexNick = new RegExp(`\\b${n}\\b`);
+          const regexNombre = new RegExp(`\\b${nc}\\b`);
+          return regexNick.test(txt) || regexNombre.test(txt);
+        };
+
+        const cambiarPestana = (nuevaPestana) => {
+          window.AppStore.pestanaActiva.value = nuevaPestana;
+          if (nuevaPestana === 'Botonera') return;
+
+          let hojaReal = MAPA_PESTANAS[nuevaPestana] || nuevaPestana;
+
+          const dataExistente = window.AppStore.cacheDatos.value[hojaReal];
+          if (!dataExistente || dataExistente.length === 0) {
+            solicitarMatrizAlServidor(hojaReal);
+          }
+        };
+
         const forzarRefrescoDatos = () => {
           const tab = window.AppStore.pestanaActiva.value;
-          let hojaReal = tab === "Mis Atenciones" ? "Borrador" : tab === "Mi Historial" ? "OATC" : tab;
+          let hojaReal = MAPA_PESTANAS[tab] || tab;
           window.AppStore.cacheDatos.value[hojaReal] = [];
           solicitarMatrizAlServidor(hojaReal);
         };
@@ -396,7 +433,7 @@
 
         const obtenerEncabezadosTabla = Vue.computed(() => {
           const t = window.AppStore.pestanaActiva.value;
-          let h = t === "Mis Atenciones" ? "Borrador" : t === "Mi Historial" ? "OATC" : t;
+          let h = MAPA_PESTANAS[t] || t;
           return window.AppStore.cacheEncabezados.value[h] || [];
         });
 
@@ -448,16 +485,15 @@
 
           // Invoca la función existente de red con bloqueo anti-doble clic
           if (typeof dispararAlertaBotonera === 'function') {
-            dispararAlertaBotonera(stringFinal);
+            dispararAlertaBotonera(stringFinal).then(() => {
+              // Reseteo limpio de la estructura local SOLO al tener éxito
+              p.cafe = 0;
+              p.infusion = 0;
+              p.bebidaDia = 0;
+              p.agua = 0;
+              p.tipoInfusion = 'Manzanilla';
+            }).catch(e => console.error(e));
           }
-
-          // Reseteo limpio de la estructura local
-          p.cafe = 0;
-          p.infusion = 0;
-          p.bebidaDia = 0;
-          p.agua = 0;
-          p.tipoInfusion = 'Manzanilla';
-        };
         
         const limpiarFiltroFechas = () => {
           const fechaAyer = new Date();
@@ -505,17 +541,9 @@
             // Ordenar por hora de creación (Col N), asumiendo más antiguo primero
             return filtered.sort((a, b) => parseDateRobust(a[13]) - parseDateRobust(b[13]));
           } else if (t === "Mi Historial") {
-            filtered = filtered.filter(row => {
-              if (!row[6]) return false;
-              const celda = String(row[6]).toLowerCase();
-              return celda.includes(nick) || celda.includes(nombreCompleto);
-            });
+            filtered = filtered.filter(row => esMiRegistro(row[6], nick, nombreCompleto));
           } else if (t === "Mi Agenda") {
-            filtered = filtered.filter(row => {
-              if (!row[5]) return false;
-              const celda = String(row[5]).toLowerCase();
-              return celda.includes(nick) || celda.includes(nombreCompleto);
-            });
+            filtered = filtered.filter(row => esMiRegistro(row[5], nick, nombreCompleto));
           } else if (t === "Mi Perfil") {
             filtered = filtered.filter(row => row[13] && String(row[13]).toLowerCase().trim() === nick);
           } else if (t === "Mis Clientes") {
@@ -525,7 +553,7 @@
             // 1. Extraer DNIs/Nombres únicos del historial del agente actual
             const identificadoresAgente = new Set();
             historialOatc.forEach(row => {
-              if (row[6] && (String(row[6]).toLowerCase().includes(nick) || String(row[6]).toLowerCase().includes(nombreCompleto))) {
+              if (esMiRegistro(row[6], nick, nombreCompleto)) {
                 if (row[4]) {
                   // OATC Col E (4) tiene formato: Nombre | DNI | Celular
                   const partes = String(row[4]).split('|').map(p => p.trim());
@@ -615,8 +643,7 @@
           const totalCola = agentesCola.length;
           let posicion = 0;
           for(let i = 0; i < totalCola; i++) {
-             const dep = String(agentesCola[i][1]).toLowerCase();
-             if(dep.includes(nick) || dep.includes(nombreCompleto)) {
+             if (esMiRegistro(agentesCola[i][1], nick, nombreCompleto)) {
                 posicion = i + 1;
                 break;
              }
@@ -625,8 +652,7 @@
           // Buscar el estado real del agente en el borrador (primera coincidencia)
           let estadoActual = 'Desconocido';
           for (let row of m) {
-            const dep = String(row[1] || '').toLowerCase().trim();
-            if (dep.includes(nick) || dep.includes(nombreCompleto)) {
+            if (esMiRegistro(row[1], nick, nombreCompleto)) {
               if (row[8]) { // Col I (Estado)
                  estadoActual = String(row[8]).trim();
               }
