@@ -468,9 +468,22 @@
 
           // Paso A y B: Filtros de Pertenencia y Sede
           if (t === "Mis Atenciones") {
-            const sedeActual = window.AppStore.agente.value.sede;
-            const sedeFormateada = sedeActual.toUpperCase() === "RD" ? "Sede RD" : sedeActual;
-            filtered = filtered.filter(row => row[3] === sedeFormateada);
+            // Mapeo Complejo: Extraer el Stack (Apilamiento) de Atenciones en Curso para este Agente
+            filtered = m.filter(row => {
+              if (!row[13]) return false; // Debe ser OATC (tener hora de orden en Col N)
+              
+              const asignado = String(row[19] || '').toLowerCase(); // Col T (Agente OATC)
+              if (!asignado.includes(nick) && !asignado.includes(nombreCompleto)) return false;
+              
+              const resolucion = String(row[20] || '').toLowerCase().trim(); // Col U (Hora Resol.)
+              // Considerar activo si no dice cancelado, terminado, ni tiene una hora guardada (resolución)
+              if (resolucion.includes('cancelado') || resolucion.includes('terminado') || resolucion.match(/\d{1,2}:\d{2}/)) {
+                 return false;
+              }
+              return true;
+            });
+            // Ordenar por hora de creación (Col N), asumiendo más antiguo primero
+            return filtered.sort((a, b) => parseDateRobust(a[13]) - parseDateRobust(b[13]));
           } else if (t === "Mi Historial") {
             filtered = filtered.filter(row => {
               if (!row[6]) return false;
@@ -542,10 +555,45 @@
           }
 
           // Paso D: Ordenamiento final
-          if (t === "Mis Atenciones") return filtered.sort((a,b) => String(b[13]).localeCompare(String(a[13])));
-          if (t === "Mi Historial") return filtered.sort((a,b) => new Date(b[0]) - new Date(a[0]));
+          if (t === "Mi Historial") return filtered.sort((a,b) => new Date(b[3]) - new Date(a[3]));
           if (t === "Mi Agenda") return filtered.sort((a,b) => new Date(a[1]) - new Date(b[1])); // Próximas primero
           return filtered;
+        });
+
+        // 6. Estado del Turno (Cálculo de Posición en la Cola desde Borrador)
+        const estadoTurnoAgente = Vue.computed(() => {
+          const m = window.AppStore.cacheDatos.value["Borrador"] || [];
+          if (m.length === 0) return { posicion: 0, total: 0 };
+          
+          const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
+          const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
+          
+          // Filtrar agentes en la Sede (Col B tiene el nombre, Col I tiene el estado)
+          let agentesCola = m.filter(row => {
+            const dependiente = String(row[1] || '').trim();
+            const estadoFisico = String(row[8] || '').toLowerCase().trim(); // Col I
+            return dependiente.length > 0 && 
+                   (estadoFisico === 'disponible' || estadoFisico === 'libre' || estadoFisico.includes('espera'));
+          });
+          
+          // Ordenar por Col M (Ult Act) ascendente (el más antiguo primero)
+          agentesCola.sort((a, b) => {
+             const timeA = parseDateRobust(a[12]) || 0;
+             const timeB = parseDateRobust(b[12]) || 0;
+             return timeA - timeB;
+          });
+          
+          const totalCola = agentesCola.length;
+          let posicion = 0;
+          for(let i = 0; i < totalCola; i++) {
+             const dep = String(agentesCola[i][1]).toLowerCase();
+             if(dep.includes(nick) || dep.includes(nombreCompleto)) {
+                posicion = i + 1;
+                break;
+             }
+          }
+          
+          return { posicion, total: totalCola };
         });
 
         // =========================================================================
