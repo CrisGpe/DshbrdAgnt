@@ -596,6 +596,43 @@
           return { posicion, total: totalCola };
         });
 
+        // 7. Agenda Agrupada (Clasificación temporal para Mi Agenda)
+        const agendaAgrupada = Vue.computed(() => {
+          const citas = obtenerDatosVisualizables.value;
+          if (AppStore.pestanaActiva.value !== 'Mi Agenda' || !citas || citas.length === 0) {
+            return { pasadas: [], hoy: [], futuras: [] };
+          }
+
+          const hoy = new Date();
+          hoy.setHours(0, 0, 0, 0); // Normalizar a medianoche local
+          const msHoy = hoy.getTime();
+          const msManana = msHoy + 86400000;
+
+          const pasadas = [];
+          const citasHoy = [];
+          const futuras = [];
+
+          citas.forEach(cita => {
+            const msCita = parseDateRobust(cita[1]); // Col B = Fecha Cita
+            if (isNaN(msCita)) {
+              pasadas.push(cita); // Fallback
+            } else if (msCita < msHoy) {
+              pasadas.push(cita);
+            } else if (msCita >= msHoy && msCita < msManana) {
+              citasHoy.push(cita);
+            } else {
+              futuras.push(cita);
+            }
+          });
+
+          // Ordenamiento interno: Futuras y Hoy ascienden (próximas primero), pasadas descienden (más recientes primero)
+          pasadas.sort((a,b) => parseDateRobust(b[1]) - parseDateRobust(a[1]));
+          citasHoy.sort((a,b) => parseDateRobust(a[1]) - parseDateRobust(b[1]));
+          futuras.sort((a,b) => parseDateRobust(a[1]) - parseDateRobust(b[1]));
+
+          return { pasadas, hoy: citasHoy, futuras };
+        });
+
         // =========================================================================
         // ACCIONES DE MODAL OATC (NUEVA FASE 2)
         // =========================================================================
@@ -641,7 +678,8 @@
         return {
           // Estado Global existente
           AppStore: window.AppStore,
-          estadoTurnoAgente, // <-- AÑADIDO AHORA
+          estadoTurnoAgente,
+          agendaAgrupada,
 
           // Funciones de navegación y autenticación existentes
           cambiarPestana,
