@@ -50,16 +50,38 @@ function loginAgente(nickname, pin, sede) {
         }
         
         Logger.log("[SISTEMA ACCESO] Credenciales válidas y Activas. Especialidad: " + dbEspecialidad);
+        const formatearHora = (valor) => {
+          if (valor instanceof Date) {
+            let h = valor.getHours();
+            let m = valor.getMinutes().toString().padStart(2, '0');
+            const ampm = h >= 12 ? 'pm' : 'am';
+            h = h % 12;
+            h = h ? h : 12;
+            return h + ':' + m + ' ' + ampm;
+          }
+          return valor ? String(valor).trim() : "";
+        };
+
+        const formatearFecha = (valor) => {
+          if (valor instanceof Date) {
+            const d = valor.getDate().toString().padStart(2, '0');
+            const m = (valor.getMonth() + 1).toString().padStart(2, '0');
+            const y = valor.getFullYear();
+            return `${d}/${m}/${y}`;
+          }
+          return valor ? String(valor).trim() : "";
+        };
+
         return { 
           exito: true, 
           filaOriginal: i + 1, // Base 1 para operaciones atómicas de persistencia
           sede: sedeActiva,
           nombre: datos[i][2] ? String(datos[i][2]).trim() : "",
           sedeBase: datos[i][4] ? String(datos[i][4]).trim() : "", // Col E
-          horarioEntrada: datos[i][5] ? String(datos[i][5]).trim() : "", // Col F
-          horarioSalida: datos[i][6] ? String(datos[i][6]).trim() : "", // Col G
+          horarioEntrada: formatearHora(datos[i][5]), // Col F
+          horarioSalida: formatearHora(datos[i][6]), // Col G
           diaDescanso: datos[i][7] ? String(datos[i][7]).trim() : "", // Col H
-          cumpleanos: datos[i][8] ? String(datos[i][8]).trim() : "", // Col I
+          cumpleanos: formatearFecha(datos[i][8]), // Col I
           dni: datos[i][9] ? String(datos[i][9]).trim() : "", // Col J
           especialidad: dbEspecialidad,
           nickname: dbNickname,
