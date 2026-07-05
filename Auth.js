@@ -55,11 +55,16 @@ function loginAgente(nickname, pin, sede) {
           filaOriginal: i + 1, // Base 1 para operaciones atómicas de persistencia
           sede: sedeActiva,
           nombre: datos[i][2] ? String(datos[i][2]).trim() : "",
+          sedeBase: datos[i][4] ? String(datos[i][4]).trim() : "", // Col E
+          horarioEntrada: datos[i][5] ? String(datos[i][5]).trim() : "", // Col F
+          horarioSalida: datos[i][6] ? String(datos[i][6]).trim() : "", // Col G
           diaDescanso: datos[i][7] ? String(datos[i][7]).trim() : "", // Col H
-          dni: datos[i][9] ? String(datos[i][9]).trim() : "",
+          cumpleanos: datos[i][8] ? String(datos[i][8]).trim() : "", // Col I
+          dni: datos[i][9] ? String(datos[i][9]).trim() : "", // Col J
           especialidad: dbEspecialidad,
           nickname: dbNickname,
-          celular: datos[i][14] ? String(datos[i][14]).trim() : "",
+          celular: datos[i][14] ? String(datos[i][14]).trim() : "", // Col O
+          genero: datos[i][15] ? String(datos[i][15]).trim() : "", // Col P
           pin: dbPin
         };
       }

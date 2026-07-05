@@ -388,7 +388,7 @@
           <div class="flex justify-between items-start">
             <div>
               <h3 class="text-sm font-black text-slate-900 dark:text-white">{{ AppStore.agente.value.nombre }}</h3>
-              <p class="text-slate-500">Sede {{ AppStore.agente.value.sede }}</p>
+              <p class="text-slate-500">Sede {{ AppStore.agente.value.sedeBase || AppStore.agente.value.sede }} | ⏰ {{ AppStore.agente.value.horarioEntrada || '--:--' }} - {{ AppStore.agente.value.horarioSalida || '--:--' }}</p>
             </div>
             <button @click="iniciarEdicionPerfil" class="text-indigo-600 dark:text-indigo-400 font-bold bg-indigo-500/10 px-3 py-1 rounded-lg active:scale-95 transition-all">Editar</button>
           </div>
@@ -412,6 +412,34 @@
               <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Día de Descanso</span>
               <div class="flex items-center gap-2">
                 <span class="font-black text-emerald-600 dark:text-emerald-400 capitalize">{{ AppStore.agente.value.diaDescanso || 'No asignado' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">DNI</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.dni || '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Celular</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.celular || '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Cumpleaños</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.cumpleanos || '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Género</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.genero || '---' }}</span>
                 <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
               </div>
             </div>
@@ -440,6 +468,27 @@
               <option value="Viernes">Viernes</option>
               <option value="Sábado">Sábado</option>
               <option value="Domingo">Domingo</option>
+            </select>
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">DNI</label>
+            <input type="text" v-model="AppStore.perfilForm.value.dni" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Celular</label>
+            <input type="text" v-model="AppStore.perfilForm.value.celular" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cumpleaños (DD/MM/YYYY)</label>
+            <input type="text" v-model="AppStore.perfilForm.value.cumpleanos" placeholder="Ej: 15/08/1990" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Género</label>
+            <select v-model="AppStore.perfilForm.value.genero" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+              <option value="">No especificado</option>
+              <option value="Masculino">Masculino</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Otro">Otro</option>
             </select>
           </div>
           

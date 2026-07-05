@@ -295,7 +295,9 @@
             pin: window.AppStore.agente.value.pin,
             diaDescanso: window.AppStore.agente.value.diaDescanso,
             celular: window.AppStore.agente.value.celular,
-            dni: window.AppStore.agente.value.dni
+            dni: window.AppStore.agente.value.dni,
+            cumpleanos: window.AppStore.agente.value.cumpleanos,
+            genero: window.AppStore.agente.value.genero
           };
           window.AppStore.modoEdicionPerfil.value = true;
         };
@@ -316,6 +318,8 @@
                 window.AppStore.agente.value.diaDescanso = form.diaDescanso;
                 window.AppStore.agente.value.celular = form.celular;
                 window.AppStore.agente.value.dni = form.dni;
+                window.AppStore.agente.value.cumpleanos = form.cumpleanos;
+                window.AppStore.agente.value.genero = form.genero;
                 
                 localStorage.setItem('workerview_session', JSON.stringify(window.AppStore.agente.value));
                 window.AppStore.modoEdicionPerfil.value = false;
