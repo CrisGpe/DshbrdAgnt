@@ -270,7 +270,7 @@
               <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">{{ tipo }}</span>
               <span class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ count }}</span>
            </div>
-           <div v-if="Object.keys(metricasAgente.porTipo).length === 0" class="col-span-2 text-center text-slate-400 py-4 text-xs italic">
+           <div v-if="metricasAgente.totalAtenciones === 0" class="col-span-2 text-center text-slate-400 py-4 text-xs italic">
               No hay desglose disponible
            </div>
         </div>
