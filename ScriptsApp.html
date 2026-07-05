@@ -847,6 +847,8 @@
                 mostrarToast('Solicitud de insumos enviada', 'success');
               }
             });
+          } else if (tipo === 'historialAtenciones') {
+            mostrarToast('Funcionalidad de historial en desarrollo...', 'info');
           } else if (tipo === 'editarClienteHist') {
             cerrarModalDetalles();
             const nombreAntiguo = `${String(card[1] || '')} ${String(card[2] || '')}`.trim();
