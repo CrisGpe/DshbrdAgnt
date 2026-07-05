@@ -27,10 +27,17 @@
     <!-- PESTAÑA: BOTONERA DE ALERTAS Y BAR -->
     <section v-if="AppStore.pestanaActiva.value === 'Botonera' || AppStore.pestanaActiva.value === 'Borrador'" class="space-y-6 animate-fadeIn w-full">
       
-      <!-- VISTA TRABAJADOR REGULAR (Estilismo / Cosmiatría) -->
-      <template v-if="['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad)">
+      <!-- Toggle Jefe Operativo (Sólo visible para Jefes) -->
+      <div v-if="AppStore.agente.value.especialidad === 'Jefe Operativo'" class="bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl flex items-center gap-1 shadow-inner mb-4">
+        <button @click="AppStore.toggleInicioJefe.value = 'Mando'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleInicioJefe.value === 'Mando' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">🚨 Mando</button>
+        <button @click="AppStore.toggleInicioJefe.value = 'Botonera'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleInicioJefe.value === 'Botonera' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">🔔 Botonera</button>
+        <button @click="AppStore.toggleInicioJefe.value = 'Bar'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleInicioJefe.value === 'Bar' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">🍹 Bar</button>
+      </div>
+
+      <!-- VISTA TRABAJADOR REGULAR (O Jefe cuando selecciona Botonera) -->
+      <template v-if="['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad) || (AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleInicioJefe.value === 'Botonera')">
         <!-- Bloque A: Alertas Inmediatas -->
-        <div class="space-y-3">
+        <div class="space-y-3 animate-fadeIn">
           <div class="text-center mb-2">
             <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400">🚨 Panel de Alertas Inmediatas</h3>
             <p class="text-[11px] text-slate-400 mt-0.5">Presiona para notificar al panel de recepción al instante.</p>
@@ -65,9 +72,9 @@
         </div>
       </template>
 
-      <!-- VISTA JEFE OPERATIVO -->
-      <template v-else-if="AppStore.agente.value.especialidad === 'Jefe Operativo'">
-        <div class="flex-1 flex flex-col justify-center py-4 space-y-4">
+      <!-- VISTA MANDO OPERATIVO (Solo Jefe cuando selecciona Mando) -->
+      <template v-if="AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleInicioJefe.value === 'Mando'">
+        <div class="flex-1 flex flex-col justify-center py-2 space-y-4 animate-fadeIn">
           <div class="text-center mb-2">
             <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">Mando Operativo</span>
             <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight mt-3">🚨 Alertas Tácticas</h3>
@@ -102,76 +109,78 @@
         </div>
       </template>
 
-      <!-- Bloque B: Sección Bar -->
-      <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-4 shadow-lg dark:shadow-xl">
-        <div class="text-center border-b border-slate-200 dark:border-slate-900 pb-2">
-          <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center justify-center gap-1">🍹 Sección Bar</h3>
-          <p class="text-[10px] text-slate-500">Agrega las cantidades deseadas y envía el pedido completo.</p>
-        </div>
-
-        <!-- Lista de Bebidas -->
-        <div class="space-y-3">
-          
-          <!-- Ítem: Café -->
-          <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">☕ Café</span>
-            <div class="flex items-center gap-3">
-              <button @click="modificarCantidadBar('cafe', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
-              <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.cafe }}</span>
-              <button @click="modificarCantidadBar('cafe', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
-            </div>
+      <!-- Bloque B: Sección Bar (Trabajador regular o Jefe cuando selecciona Bar) -->
+      <template v-if="['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad) || (AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleInicioJefe.value === 'Bar')">
+        <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-4 shadow-lg dark:shadow-xl animate-fadeIn">
+          <div class="text-center border-b border-slate-200 dark:border-slate-900 pb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center justify-center gap-1">🍹 Sección Bar</h3>
+            <p class="text-[10px] text-slate-500">Agrega las cantidades deseadas y envía el pedido completo.</p>
           </div>
 
-          <!-- Ítem: Infusión -->
-          <div class="bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">🍵 Infusión</span>
+          <!-- Lista de Bebidas -->
+          <div class="space-y-3">
+            
+            <!-- Ítem: Café -->
+            <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">☕ Café</span>
               <div class="flex items-center gap-3">
-                <button @click="modificarCantidadBar('infusion', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
-                <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.infusion }}</span>
-                <button @click="modificarCantidadBar('infusion', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
+                <button @click="modificarCantidadBar('cafe', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+                <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.cafe }}</span>
+                <button @click="modificarCantidadBar('cafe', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
               </div>
             </div>
-            <!-- Sub-opción Condicional de Tipo de Hierba -->
-            <div v-if="AppStore.pedidoBar.infusion > 0" class="animate-fadeIn pt-1 border-t border-slate-200 dark:border-slate-800/40">
-              <label class="block text-[9px] font-extrabold uppercase text-slate-500 tracking-wider mb-1">Selecciona la variedad:</label>
-              <select v-model="AppStore.pedidoBar.tipoInfusion" class="w-full bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-xs rounded-lg p-2 border border-slate-300 dark:border-slate-800 focus:outline-none focus:border-indigo-500 font-medium">
-                <option value="Manzanilla">🌼 Manzanilla</option>
-                <option value="Té">🍃 Té</option>
-                <option value="Anís">🌱 Anís</option>
-              </select>
+
+            <!-- Ítem: Infusión -->
+            <div class="bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">🍵 Infusión</span>
+                <div class="flex items-center gap-3">
+                  <button @click="modificarCantidadBar('infusion', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+                  <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.infusion }}</span>
+                  <button @click="modificarCantidadBar('infusion', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
+                </div>
+              </div>
+              <!-- Sub-opción Condicional de Tipo de Hierba -->
+              <div v-if="AppStore.pedidoBar.infusion > 0" class="animate-fadeIn pt-1 border-t border-slate-200 dark:border-slate-800/40">
+                <label class="block text-[9px] font-extrabold uppercase text-slate-500 tracking-wider mb-1">Selecciona la variedad:</label>
+                <select v-model="AppStore.pedidoBar.tipoInfusion" class="w-full bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300 text-xs rounded-lg p-2 border border-slate-300 dark:border-slate-800 focus:outline-none focus:border-indigo-500 font-medium">
+                  <option value="Manzanilla">🌼 Manzanilla</option>
+                  <option value="Té">🍃 Té</option>
+                  <option value="Anís">🌱 Anís</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Ítem: Bebida del día (Con Alcohol) - Corregido sin espacio sintáctico -->
+            <div v-if="esFinDeSemanaEfectivo" class="flex items-center justify-between bg-gradient-to-r from-purple-100 to-slate-100 dark:from-purple-950/20 dark:to-slate-900/60 p-2.5 rounded-xl border border-purple-200 dark:border-purple-900/30 animate-fadeIn">
+              <span class="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">🍹 Bebida del Día <small class="text-[9px] text-purple-600 dark:text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded font-bold border border-purple-500/20">Fin de Semana</small></span>
+              <div class="flex items-center gap-3">
+                <button @click="modificarCantidadBar('bebidaDia', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+                <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.bebidaDia }}</span>
+                <button @click="modificarCantidadBar('bebidaDia', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
+              </div>
+            </div>
+
+            <!-- Ítem: Agua -->
+            <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
+              <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">💧 Agua</span>
+              <div class="flex items-center gap-3">
+                <button @click="modificarCantidadBar('agua', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
+                <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.agua }}</span>
+                <button @click="modificarCantidadBar('agua', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
+              </div>
             </div>
           </div>
 
-          <!-- Ítem: Bebida del día (Con Alcohol) - Corregido sin espacio sintáctico -->
-          <div v-if="esFinDeSemanaEfectivo" class="flex items-center justify-between bg-gradient-to-r from-purple-100 to-slate-100 dark:from-purple-950/20 dark:to-slate-900/60 p-2.5 rounded-xl border border-purple-200 dark:border-purple-900/30 animate-fadeIn">
-            <span class="text-xs font-bold text-purple-700 dark:text-purple-300 flex items-center gap-1.5">🍹 Bebida del Día <small class="text-[9px] text-purple-600 dark:text-purple-400 bg-purple-500/10 px-1 py-0.5 rounded font-bold border border-purple-500/20">Fin de Semana</small></span>
-            <div class="flex items-center gap-3">
-              <button @click="modificarCantidadBar('bebidaDia', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
-              <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.bebidaDia }}</span>
-              <button @click="modificarCantidadBar('bebidaDia', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
-            </div>
-          </div>
-
-          <!-- Ítem: Agua -->
-          <div class="flex items-center justify-between bg-slate-100 dark:bg-slate-900/60 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800/60">
-            <span class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">💧 Agua</span>
-            <div class="flex items-center gap-3">
-              <button @click="modificarCantidadBar('agua', 'restar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">-</button>
-              <span class="text-xs font-mono font-black text-slate-900 dark:text-white w-4 text-center">{{ AppStore.pedidoBar.agua }}</span>
-              <button @click="modificarCantidadBar('agua', 'sumar')" class="w-7 h-7 bg-slate-300 dark:bg-slate-800 rounded-lg text-slate-700 dark:text-slate-300 font-bold active:bg-slate-400 dark:active:bg-slate-700">+</button>
-            </div>
+          <!-- Despachador de Transacción de Red Unificada -->
+          <div v-if="tieneItemsParaEnviar" class="pt-2 animate-fadeIn">
+            <button @click="enviarPedidoBarConsolidado" :disabled="AppStore.procesandoAlerta.value" 
+              class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl active:scale-[0.98] transition-all shadow-md">
+              🚀 Enviar Pedido al Bar
+            </button>
           </div>
         </div>
-
-        <!-- Despachador de Transacción de Red Unificada -->
-        <div v-if="tieneItemsParaEnviar" class="pt-2 animate-fadeIn">
-          <button @click="enviarPedidoBarConsolidado" :disabled="AppStore.procesandoAlerta.value" 
-            class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 text-white font-black text-xs uppercase tracking-wider py-3 rounded-xl active:scale-[0.98] transition-all shadow-md">
-            🚀 Enviar Pedido al Bar
-          </button>
-        </div>
-      </div>
+      </template>
       
       <!-- Loader de Red Compartido -->
       <div v-if="AppStore.procesandoAlerta.value" class="text-center text-xs font-bold text-indigo-400 animate-pulse bg-slate-950 py-2 rounded-xl border border-slate-800">
