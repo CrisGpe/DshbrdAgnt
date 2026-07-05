@@ -552,12 +552,15 @@
           const identificadoresAgente = new Set();
           historialOatc.forEach(row => {
             if (esMiRegistro(row[6], nick, nombreCompleto)) {
-              if (row[4]) {
-                const partes = String(row[4]).split('|').map(p => p.trim());
-                identificadoresAgente.add(partes[0].toLowerCase().replace(/\s+/g, '')); // Nombre
-                if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase().replace(/\s+/g, '')); // DNI
-                if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase().replace(/\s+/g, '')); // Celular
-              }
+              // Buscar la cadena del cliente en Col D (3) o Col E (4)
+              [row[3], row[4]].forEach(celda => {
+                if (celda && String(celda).includes('|')) {
+                  const partes = String(celda).split('|').map(p => p.trim());
+                  if (partes[0]) identificadoresAgente.add(partes[0].toLowerCase().replace(/\s+/g, '')); // Nombre
+                  if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase().replace(/\s+/g, '')); // DNI
+                  if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase().replace(/\s+/g, '')); // Celular
+                }
+              });
             }
           });
 
