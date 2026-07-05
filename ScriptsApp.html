@@ -548,28 +548,26 @@
           
           if (!nick || baseClientes.length === 0) return [];
           
-          // 1. Extraer DNIs/Nombres únicos del historial del agente actual (Normalizados)
+          // 1. Extraer identificadores de bloque estricto del historial del agente actual
           const identificadoresAgente = new Set();
           historialOatc.forEach(row => {
             if (esMiRegistro(row[6], nick, nombreCompleto)) {
               // Buscar la cadena del cliente en Col D (3) o Col E (4)
               [row[3], row[4]].forEach(celda => {
                 if (celda && String(celda).includes('|')) {
-                  const partes = String(celda).split('|').map(p => p.trim());
-                  if (partes[0]) identificadoresAgente.add(partes[0].toLowerCase().replace(/\s+/g, '')); // Nombre
-                  if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase().replace(/\s+/g, '')); // DNI
-                  if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase().replace(/\s+/g, '')); // Celular
+                  const cadenaEstricta = String(celda).toLowerCase().replace(/[\s|]+/g, '');
+                  if (cadenaEstricta.length > 0) {
+                     identificadoresAgente.add(cadenaEstricta);
+                  }
                 }
               });
             }
           });
 
-          // 2. Filtrar base global de clientes (Normalizando espacios)
+          // 2. Filtrar base global de clientes (Comparación estricta de bloque completo)
           return baseClientes.filter(row => {
-            const nombreCompletoCliente = `${String(row[1] || '')}${String(row[2] || '')}`.toLowerCase().replace(/\s+/g, '');
-            const dniCliente = String(row[3] || '').toLowerCase().replace(/\s+/g, '');
-            const celularCliente = String(row[5] || '').toLowerCase().replace(/\s+/g, '');
-            return identificadoresAgente.has(nombreCompletoCliente) || identificadoresAgente.has(dniCliente) || identificadoresAgente.has(celularCliente);
+            const cadenaCliente = `${String(row[1] || '')}${String(row[2] || '')}${String(row[3] || '')}${String(row[5] || '')}`.toLowerCase().replace(/\s+/g, '');
+            return identificadoresAgente.has(cadenaCliente);
           });
         });
 
@@ -847,6 +845,37 @@
               onSubmit: (data) => {
                 dispararAlertaBotonera(`Insumo: ${data.cantidad}x ${data.insumo} (Ref: ${idTurno})`);
                 mostrarToast('Solicitud de insumos enviada', 'success');
+              }
+            });
+          } else if (tipo === 'editarClienteHist') {
+            cerrarModalDetalles();
+            const nombreAntiguo = `${String(card[1] || '')} ${String(card[2] || '')}`.trim();
+            mostrarModalFormulario({
+              titulo: 'Editar Perfil del Cliente',
+              textoBoton: 'Guardar y Sincronizar Historial',
+              campos: [
+                { id: 'nombre', label: 'Nombres', tipo: 'text', valor: card[1] },
+                { id: 'apellido', label: 'Apellidos', tipo: 'text', valor: card[2] },
+                { id: 'dni', label: 'DNI', tipo: 'text', valor: card[3] },
+                { id: 'cumpleanos', label: 'Cumpleaños', tipo: 'text', valor: card[4] ? formatearFechaUHoraVisual(card[4], false) : '' },
+                { id: 'celular', label: 'Celular', tipo: 'text', valor: card[5] },
+                { id: 'correo', label: 'Correo', tipo: 'text', valor: card[6] }
+              ],
+              onSubmit: (data) => {
+                mostrarToast('🔄 Sincronizando historial en segundo plano...', 'info');
+                google.script.run
+                  .withSuccessHandler(res => {
+                    if(res.exito){
+                      mostrarToast('✅ ' + res.mensaje, 'success');
+                      forzarRefrescoDatos();
+                    } else {
+                      mostrarToast('⚠️ Error: ' + res.mensaje, 'error');
+                    }
+                  })
+                  .withFailureHandler(err => {
+                    mostrarToast('⚠️ Error: ' + err.message, 'error');
+                  })
+                  .editarClienteYSincronizar(window.AppStore.agente.value.sede, nombreAntiguo, data);
               }
             });
           } else if (tipo === 'ficha') {
