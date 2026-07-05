@@ -765,6 +765,28 @@
                 cerrarModalDetalles();
               }
             });
+          } else if (tipo === 'comenzar') {
+            mostrarDialogo({
+              tipo: 'confirm',
+              titulo: 'Comenzar Atención',
+              mensaje: `¿Estás seguro de comenzar la asesoría de ${clienteActual}?`,
+              onConfirm: () => {
+                dispararAlertaBotonera(`Comenzó atención: ${clienteActual} (ID: ${idTurno})`);
+                mostrarToast('Alerta de inicio enviada a recepción', 'exito');
+                cerrarModalDetalles();
+              }
+            });
+          } else if (tipo === 'cancelar') {
+            mostrarDialogo({
+              tipo: 'confirm',
+              titulo: 'Cancelar Atención',
+              mensaje: `¿Estás seguro de cancelar la asesoría de ${clienteActual}?`,
+              onConfirm: () => {
+                dispararAlertaBotonera(`Canceló atención: ${clienteActual} (ID: ${idTurno})`);
+                mostrarToast('Alerta de cancelación enviada a recepción', 'exito');
+                cerrarModalDetalles();
+              }
+            });
           } else if (tipo === 'editar') {
             mostrarDialogo({
               tipo: 'prompt',
