@@ -68,10 +68,10 @@
 
             <!-- Selector Condicional de Clientes -->
             <div v-if="AppStore.dialogo.value.mostrarSelectorClientes" class="mt-3 max-h-40 overflow-y-auto bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-200 dark:divide-slate-800 shadow-inner">
-               <div v-if="!AppStore.cacheDatos.value['Clientes'] || AppStore.cacheDatos.value['Clientes'].length === 0" class="p-3 text-center text-[10px] font-bold text-slate-500">
+               <div v-if="!clientesAgente || clientesAgente.length === 0" class="p-3 text-center text-[10px] font-bold text-slate-500">
                   Cargando clientes o lista vacía...
                </div>
-               <button v-else v-for="(cliente, idx) in AppStore.cacheDatos.value['Clientes']" :key="idx" 
+               <button v-else v-for="(cliente, idx) in clientesAgente" :key="idx" 
                        @click="seleccionarClienteDialogo(cliente)"
                        class="w-full text-left p-2.5 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors focus:bg-indigo-50 dark:focus:bg-indigo-900/20 outline-none">
                   <div class="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate">{{ cliente[1] }} {{ cliente[2] }}</div>

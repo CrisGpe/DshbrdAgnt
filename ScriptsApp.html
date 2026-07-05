@@ -540,6 +540,36 @@
           window.AppStore.filtroFechaFin.value = fechaAyerStr;
         };
 
+        const clientesAgente = Vue.computed(() => {
+          const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
+          const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
+          const historialOatc = window.AppStore.cacheDatos.value["OATC"] || [];
+          const baseClientes = window.AppStore.cacheDatos.value["Clientes"] || [];
+          
+          if (!nick || baseClientes.length === 0) return [];
+          
+          // 1. Extraer DNIs/Nombres únicos del historial del agente actual
+          const identificadoresAgente = new Set();
+          historialOatc.forEach(row => {
+            if (esMiRegistro(row[6], nick, nombreCompleto)) {
+              if (row[4]) {
+                const partes = String(row[4]).split('|').map(p => p.trim());
+                identificadoresAgente.add(partes[0].toLowerCase()); // Nombre
+                if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase()); // DNI
+                if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase()); // Celular
+              }
+            }
+          });
+
+          // 2. Filtrar base global de clientes
+          return baseClientes.filter(row => {
+            const nombreCliente = String(row[1] || '').toLowerCase().trim();
+            const dniCliente = String(row[3] || '').toLowerCase().trim();
+            const celularCliente = String(row[5] || '').toLowerCase().trim();
+            return identificadoresAgente.has(nombreCliente) || identificadoresAgente.has(dniCliente) || identificadoresAgente.has(celularCliente);
+          });
+        });
+
         const obtenerDatosVisualizables = Vue.computed(() => {
           const t = window.AppStore.pestanaActiva.value;
           const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
@@ -584,32 +614,8 @@
           } else if (t === "Mi Perfil") {
             filtered = filtered.filter(row => row[13] && String(row[13]).toLowerCase().trim() === nick);
           } else if (t === "Mis Clientes") {
-            // Filtrar por DNI/Nombre encontrados en OATC
-            const historialOatc = window.AppStore.cacheDatos.value["OATC"] || [];
-            
-            // 1. Extraer DNIs/Nombres únicos del historial del agente actual
-            const identificadoresAgente = new Set();
-            historialOatc.forEach(row => {
-              if (esMiRegistro(row[6], nick, nombreCompleto)) {
-                if (row[4]) {
-                  // OATC Col E (4) tiene formato: Nombre | DNI | Celular
-                  const partes = String(row[4]).split('|').map(p => p.trim());
-                  identificadoresAgente.add(partes[0].toLowerCase()); // Nombre
-                  if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase()); // DNI
-                  if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase()); // Celular
-                }
-              }
-            });
-
-            // 2. Filtrar base global de clientes
-            filtered = filtered.filter(row => {
-              const nombreCliente = String(row[1] || '').toLowerCase().trim();
-              const dniCliente = String(row[3] || '').toLowerCase().trim();
-              const celularCliente = String(row[5] || '').toLowerCase().trim();
-              
-              const perteneceAgente = identificadoresAgente.has(nombreCliente) || identificadoresAgente.has(dniCliente) || identificadoresAgente.has(celularCliente);
-              if (!perteneceAgente) return false;
-
+            // Usamos la lista de clientes pre-filtrada del agente
+            filtered = clientesAgente.value.filter(row => {
               // 3. Aplicar barra de búsqueda opcional
               const busqueda = window.AppStore.filtroBusquedaCliente.value.toLowerCase().trim();
               if (busqueda.length > 0) {
@@ -870,6 +876,7 @@
           formatearFechaUHoraVisual,
           obtenerClaseEstadoCSS,
           obtenerEncabezadosTabla,
+          clientesAgente,
           obtenerDatosVisualizables,
 
           // =========================================================================
