@@ -25,10 +25,11 @@ function registrarAlertaBotonera(nickname, mensaje, sede) {
     const hojaAlertas = getHoja(sede, "Alertas");
     
     // 2. Genera el payload de la fila
-    const idUnico = Utilities.getUuid();
+    const timestamp = new Date().getTime();
+    const idUnico = "ALT-" + timestamp;
     
-    // Formatear la fecha para que sea más legible en Google Sheets (YYYY-MM-DD HH:MM:SS) o Timestamp ISO
-    const fechaHoraStr = new Date().toISOString();
+    // Formatear la fecha para Recepción (DD/MM/YYYY HH:MM:SS)
+    const fechaHoraStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
     
     const estado = "Pendiente";
     const horaResuelta = ""; // Vacío al inicio

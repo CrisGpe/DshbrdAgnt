@@ -231,7 +231,7 @@
                 mostrarToast("⚠️ Error al registrar alerta: " + (err.message || err), "error");
                 reject(err);
               })
-              .registrarAlertaBotonera(window.AppStore.agente.value.nickname, tipoAlerta, window.AppStore.agente.value.sede);
+              .registrarAlertaBotonera(window.AppStore.agente.value.nombre, tipoAlerta, window.AppStore.agente.value.sede);
           });
         };
 
