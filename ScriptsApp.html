@@ -20,6 +20,7 @@
       "Mi Historial": "OATC",
       "Mi Agenda": "Registro Citas",
       "Mis Clientes": "Clientes",
+      "Mis Indicadores": "OATC",
       "Mi Perfil": "Agentes",
       "Botonera": "Borrador"
     };
@@ -363,6 +364,12 @@
              window.AppStore.cacheDatos.value['OATC'] = [];
              solicitarMatrizAlServidor('OATC');
           }
+          if (tab === 'Mis Indicadores') {
+             window.AppStore.cacheDatos.value['Borrador'] = [];
+             window.AppStore.cacheDatos.value['Clientes'] = [];
+             solicitarMatrizAlServidor('Borrador');
+             solicitarMatrizAlServidor('Clientes');
+          }
         };
 
         const parseDateRobust = (val) => {
@@ -431,8 +438,13 @@
             return new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate(), hours, mins, secs).getTime();
           }
 
-          // Fallback final
-          return new Date(str).getTime();
+          // Fallback final - Safari compatibility
+          let safeStr = str;
+          if (/^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}/.test(safeStr)) {
+            safeStr = safeStr.replace(' ', 'T');
+          }
+          const finalTime = new Date(safeStr).getTime();
+          return isNaN(finalTime) ? NaN : finalTime;
         };
 
         const formatearFechaUHoraVisual = (val, h) => {
@@ -602,8 +614,8 @@
             filtered = m.filter(row => {
               if (!row[13]) return false; // Debe ser OATC (tener hora de orden en Col N)
               
-              const asignado = String(row[19] || '').toLowerCase(); // Col T (Agente OATC)
-              if (!asignado.includes(nick) && !asignado.includes(nombreCompleto)) return false;
+              const asignado = row[19]; // Col T (Agente OATC)
+              if (!esMiRegistro(asignado, nick, nombreCompleto)) return false;
               
               const resolucion = String(row[20] || '').toLowerCase().trim(); // Col U (Hora Resol.)
               // Considerar activo si no dice cancelado, terminado, ni tiene una hora guardada (resolución)
@@ -658,6 +670,48 @@
           if (t === "Mi Historial") return filtered.sort((a,b) => parseDateRobust(b[3]) - parseDateRobust(a[3]));
           if (t === "Mi Agenda") return filtered.sort((a,b) => parseDateRobust(a[1]) - parseDateRobust(b[1])); // Próximas primero
           return filtered;
+        });
+
+        // 5.1 Cálculo de Métricas e Indicadores
+        const metricasAgente = Vue.computed(() => {
+          const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
+          const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
+          
+          const msInicio = parseDateRobust(window.AppStore.filtroFechaInicio.value);
+          const msFin = parseDateRobust(window.AppStore.filtroFechaFin.value) + 86399999; // Hasta el final del día
+          
+          const metricas = {
+            totalAtenciones: 0,
+            porTipo: {}, // Ej: Cliente, Turno, Asesoría
+            clientesRegistradosUnicos: 0
+          };
+          
+          // 1. Filtrar Borrador para Atenciones y Tipos
+          const borrador = window.AppStore.cacheDatos.value["Borrador"] || [];
+          borrador.forEach(row => {
+            const fechaRow = parseDateRobust(row[0] || row[13]); // Usar hora ingreso
+            if (isNaN(fechaRow) || fechaRow < msInicio || fechaRow > msFin) return;
+            
+            const asignado = row[19]; // Col T (Agente OATC)
+            if (!esMiRegistro(asignado, nick, nombreCompleto)) return;
+            
+            const resolucion = String(row[20] || '').toLowerCase().trim(); // Col U (Hora Resol.)
+            // Consideramos completada si tiene hora de resolución y NO dice cancelado
+            if (!resolucion.includes('cancelado') && (resolucion.includes('terminado') || resolucion.match(/\d{1,2}:\d{2}/))) {
+              metricas.totalAtenciones++;
+              const tipo = String(row[18] || 'Indefinido').trim(); // Col S
+              metricas.porTipo[tipo] = (metricas.porTipo[tipo] || 0) + 1;
+            }
+          });
+          
+          // 2. Contar Clientes Únicos Registrados (Usando el Set ya calculado en clientesAgente)
+          // clientesAgente ya tiene los clientes globales del agente filtrados de OATC global
+          // Para hacerlo dependiente del rango de fechas, deberíamos filtrar el OATC en el rango, pero 'clientesAgente' lo calcula globalmente.
+          // El usuario pidió "cantidad de clientes únicos atendidos en todo el historial que estén registrados también en la hoja Clientes". 
+          // Eso es literalmente la longitud de clientesAgente.value!
+          metricas.clientesRegistradosUnicos = clientesAgente.value.length;
+          
+          return metricas;
         });
 
         // 6. Estado del Turno (Cálculo de Posición en la Cola desde Borrador)
@@ -982,6 +1036,7 @@
           obtenerClaseEstadoCSS,
           obtenerEncabezadosTabla,
           clientesAgente,
+          metricasAgente,
           obtenerDatosVisualizables,
 
           // =========================================================================
