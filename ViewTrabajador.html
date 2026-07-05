@@ -556,9 +556,9 @@
 
             <!-- BOTONES DE ACCIÓN RÁPIDA -->
             <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-              <button @click="accionModalAtencion(AppStore.modalDetalles.value.card[15] === 'Asesoría' ? 'comenzar' : 'terminar')" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-md">
-                <span class="text-lg">{{ AppStore.modalDetalles.value.card[15] === 'Asesoría' ? '▶️' : '✅' }}</span>
-                <span class="text-[9px] uppercase tracking-wide">{{ AppStore.modalDetalles.value.card[15] === 'Asesoría' ? 'Comenzar Atención' : 'Terminar Atención' }}</span>
+              <button @click="accionModalAtencion(AppStore.modalDetalles.value.card[18] === 'Asesoría' ? 'comenzar' : 'terminar')" class="bg-indigo-600 hover:bg-indigo-700 text-white p-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-md">
+                <span class="text-lg">{{ AppStore.modalDetalles.value.card[18] === 'Asesoría' ? '▶️' : '✅' }}</span>
+                <span class="text-[9px] uppercase tracking-wide">{{ AppStore.modalDetalles.value.card[18] === 'Asesoría' ? 'Comenzar Atención' : 'Terminar Atención' }}</span>
               </button>
               
               <button @click="accionModalAtencion('editar')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 p-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-sm border border-slate-200 dark:border-slate-700">
@@ -566,9 +566,9 @@
                 <span class="text-[9px] uppercase tracking-wide">Editar Nombre</span>
               </button>
 
-              <button @click="accionModalAtencion(AppStore.modalDetalles.value.card[15] === 'Asesoría' ? 'cancelar' : 'insumos')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 p-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-sm border border-slate-200 dark:border-slate-700">
-                <span class="text-lg">{{ AppStore.modalDetalles.value.card[15] === 'Asesoría' ? '❌' : '📦' }}</span>
-                <span class="text-[9px] uppercase tracking-wide">{{ AppStore.modalDetalles.value.card[15] === 'Asesoría' ? 'Cancelar Atención' : 'Solicitar Insumos' }}</span>
+              <button @click="accionModalAtencion(AppStore.modalDetalles.value.card[18] === 'Asesoría' ? 'cancelar' : 'insumos')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 p-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-sm border border-slate-200 dark:border-slate-700">
+                <span class="text-lg">{{ AppStore.modalDetalles.value.card[18] === 'Asesoría' ? '❌' : '📦' }}</span>
+                <span class="text-[9px] uppercase tracking-wide">{{ AppStore.modalDetalles.value.card[18] === 'Asesoría' ? 'Cancelar Atención' : 'Solicitar Insumos' }}</span>
               </button>
 
               <button @click="accionModalAtencion('ficha')" class="bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 p-2.5 rounded-xl font-bold flex flex-col items-center justify-center gap-1 active:scale-95 transition-all shadow-sm border border-slate-200 dark:border-slate-700">
