@@ -548,24 +548,24 @@
           
           if (!nick || baseClientes.length === 0) return [];
           
-          // 1. Extraer DNIs/Nombres únicos del historial del agente actual
+          // 1. Extraer DNIs/Nombres únicos del historial del agente actual (Normalizados)
           const identificadoresAgente = new Set();
           historialOatc.forEach(row => {
             if (esMiRegistro(row[6], nick, nombreCompleto)) {
               if (row[4]) {
                 const partes = String(row[4]).split('|').map(p => p.trim());
-                identificadoresAgente.add(partes[0].toLowerCase()); // Nombre
-                if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase()); // DNI
-                if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase()); // Celular
+                identificadoresAgente.add(partes[0].toLowerCase().replace(/\s+/g, '')); // Nombre
+                if (partes[1]) identificadoresAgente.add(partes[1].toLowerCase().replace(/\s+/g, '')); // DNI
+                if (partes[2]) identificadoresAgente.add(partes[2].toLowerCase().replace(/\s+/g, '')); // Celular
               }
             }
           });
 
-          // 2. Filtrar base global de clientes
+          // 2. Filtrar base global de clientes (Normalizando espacios)
           return baseClientes.filter(row => {
-            const nombreCompletoCliente = `${String(row[1] || '').trim()} ${String(row[2] || '').trim()}`.toLowerCase().trim();
-            const dniCliente = String(row[3] || '').toLowerCase().trim();
-            const celularCliente = String(row[5] || '').toLowerCase().trim();
+            const nombreCompletoCliente = `${String(row[1] || '')}${String(row[2] || '')}`.toLowerCase().replace(/\s+/g, '');
+            const dniCliente = String(row[3] || '').toLowerCase().replace(/\s+/g, '');
+            const celularCliente = String(row[5] || '').toLowerCase().replace(/\s+/g, '');
             return identificadoresAgente.has(nombreCompletoCliente) || identificadoresAgente.has(dniCliente) || identificadoresAgente.has(celularCliente);
           });
         });
