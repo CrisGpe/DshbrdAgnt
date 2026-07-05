@@ -1010,8 +1010,8 @@
           forzarRefrescoDatos,
           limpiarFiltroFechas,
           
-          alternarModalCola,
-          cerrarModalHistorial,
+          alternarModalCola: () => { window.AppStore.modalCola.value = !window.AppStore.modalCola.value; },
+          cerrarModalHistorial: () => { window.AppStore.modalHistorialAtenciones.value.visible = false; },
           setFiltroCola: (f) => { window.AppStore.filtroCola.value = f; },
           mostrarToast,
           alternarTema,
