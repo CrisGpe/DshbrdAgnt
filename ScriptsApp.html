@@ -563,10 +563,10 @@
 
           // 2. Filtrar base global de clientes
           return baseClientes.filter(row => {
-            const nombreCliente = String(row[1] || '').toLowerCase().trim();
+            const nombreCompletoCliente = `${String(row[1] || '').trim()} ${String(row[2] || '').trim()}`.toLowerCase().trim();
             const dniCliente = String(row[3] || '').toLowerCase().trim();
             const celularCliente = String(row[5] || '').toLowerCase().trim();
-            return identificadoresAgente.has(nombreCliente) || identificadoresAgente.has(dniCliente) || identificadoresAgente.has(celularCliente);
+            return identificadoresAgente.has(nombreCompletoCliente) || identificadoresAgente.has(dniCliente) || identificadoresAgente.has(celularCliente);
           });
         });
 
