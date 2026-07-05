@@ -53,6 +53,7 @@
       
       // UX Modal Detalles
       modalDetalles: Vue.ref({ visible: false, card: null, origen: '' }),
+      modalHistorialAtenciones: Vue.ref({ visible: false, clienteNombre: '', registros: [] }),
       modalCola: Vue.ref(false),
       filtroCola: Vue.ref('Todos'), // 'Todos', 'Estilismo', 'Cosmiatría'
       toast: Vue.ref({ visible: false, mensaje: '', tipo: 'success' }),
@@ -357,6 +358,11 @@
           let hojaReal = MAPA_PESTANAS[tab] || tab;
           window.AppStore.cacheDatos.value[hojaReal] = [];
           solicitarMatrizAlServidor(hojaReal);
+          
+          if (tab === 'Mis Clientes') {
+             window.AppStore.cacheDatos.value['OATC'] = [];
+             solicitarMatrizAlServidor('OATC');
+          }
         };
 
         const parseDateRobust = (val) => {
@@ -848,7 +854,44 @@
               }
             });
           } else if (tipo === 'historialAtenciones') {
-            mostrarToast('Funcionalidad de historial en desarrollo...', 'info');
+            const nombreCompleto = `${String(card[1] || '')} ${String(card[2] || '')}`.trim();
+            const cadenaCliente = `${String(card[1] || '')}${String(card[2] || '')}${String(card[3] || '')}${String(card[5] || '')}`.toLowerCase().replace(/\s+/g, '');
+            
+            const historialOatc = window.AppStore.cacheDatos.value["OATC"] || [];
+            const registrosCliente = [];
+            
+            historialOatc.forEach(row => {
+               let encontrado = false;
+               [row[3], row[4]].forEach(celda => {
+                 if (!encontrado && celda && String(celda).includes('|')) {
+                    const cadenaEstricta = String(celda).toLowerCase().replace(/[\s|]+/g, '');
+                    if (cadenaEstricta.length > 0 && cadenaEstricta === cadenaCliente) {
+                       encontrado = true;
+                    }
+                 }
+               });
+               if (encontrado) {
+                  // OATC: colA (hora) = row[0], colC (tipo/servicio) = row[2], colD (fecha) = row[3] (wait, row[3] es Cliente en D, la fecha es row[1] o row[0]?)
+                  // Let's assume colA = row[0], colC = row[2], colD = row[3]. 
+                  // Wait, earlier I saw row[3] is col D and has the pipe string "LUCY X | | 987754978"
+                  // I should just push the whole row to the modal and let the UI parse it!
+                  registrosCliente.push({
+                     hora: row[0], // Col A
+                     idTurno: row[1], // Col B
+                     tipo: row[2], // Col C
+                     fecha: row[3] && !String(row[3]).includes('|') ? row[3] : (row[0] || 'N/A'), // Fallback if D is Cliente
+                     clienteRaw1: row[3], // Col D
+                     clienteRaw2: row[4], // Col E
+                     agente: row[6] // Col G
+                  });
+               }
+            });
+            
+            window.AppStore.modalHistorialAtenciones.value = {
+              visible: true,
+              clienteNombre: nombreCompleto,
+              registros: registrosCliente.reverse() // Reverse to show latest first (assuming chronological)
+            };
           } else if (tipo === 'editarClienteHist') {
             cerrarModalDetalles();
             const nombreAntiguo = `${String(card[1] || '')} ${String(card[2] || '')}`.trim();
@@ -913,7 +956,8 @@
           forzarRefrescoDatos,
           limpiarFiltroFechas,
           
-          alternarModalCola: () => { window.AppStore.modalCola.value = !window.AppStore.modalCola.value; },
+          alternarModalCola,
+          cerrarModalHistorial,
           setFiltroCola: (f) => { window.AppStore.filtroCola.value = f; },
           mostrarToast,
           alternarTema,

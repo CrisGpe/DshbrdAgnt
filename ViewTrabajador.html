@@ -684,6 +684,37 @@
     </div>
   </transition>
 
+  <!-- MODAL DE HISTORIAL DE ATENCIONES -->
+  <transition name="toast">
+    <div v-if="AppStore.modalHistorialAtenciones.value.visible" 
+         class="fixed inset-0 z-[10000] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4"
+         @click.self="cerrarModalHistorial()">
+      <div class="bg-white dark:bg-slate-950 w-full max-w-sm rounded-[24px] shadow-2xl overflow-hidden animate-slideUp">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-900">
+          <h3 class="font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider text-sm flex items-center gap-2">
+            <span>📚</span> Historial Atenciones
+          </h3>
+          <button @click="cerrarModalHistorial()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-rose-100 hover:text-rose-500 transition-colors">
+            ✕
+          </button>
+        </div>
+        <div class="p-4 max-h-[60vh] overflow-y-auto space-y-3">
+          <div v-if="AppStore.modalHistorialAtenciones.value.registros.length === 0" class="text-center text-slate-500 py-6 text-xs italic">No hay historial registrado.</div>
+          <div v-else v-for="(item, i) in AppStore.modalHistorialAtenciones.value.registros" :key="i" class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px]">
+            <div class="flex justify-between items-center mb-1">
+              <span class="font-black text-indigo-600 dark:text-indigo-400 text-xs">{{ formatearFechaUHoraVisual(item.fecha, false) }}</span>
+              <span class="px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 font-bold uppercase">{{ item.tipo || 'Atención' }}</span>
+            </div>
+            <div class="text-slate-500 dark:text-slate-400 font-mono flex gap-2">
+              <span>🕒 {{ formatearFechaUHoraVisual(item.hora, true) }}</span>
+              <span v-if="item.agente">• 👤 {{ item.agente }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </transition>
+
   <!-- MODAL DE COLA DE TURNOS -->
   <transition name="toast">
     <div v-if="AppStore.modalCola.value" 
