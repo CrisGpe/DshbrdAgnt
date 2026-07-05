@@ -716,6 +716,36 @@
             
             metricas.porTipo[bucket] = (metricas.porTipo[bucket] || 0) + 1;
           });
+
+          // 1.5 Filtrar OATC para Atenciones Históricas
+          const oatc = window.AppStore.cacheDatos.value["OATC"] || [];
+          oatc.forEach(row => {
+            const fechaRow = parseDateRobust(row[3] || row[0]); // Col D (Fecha) o Col A (Hora)
+            if (isNaN(fechaRow) || fechaRow < msInicio || fechaRow > msFin) return;
+            
+            const asignado = row[6]; // Col G (Agente OATC)
+            if (!esMiRegistro(asignado, nick, nombreCompleto)) return;
+            
+            metricas.totalAtenciones++;
+            
+            const tipoOriginal = String(row[2] || '').trim(); // Col C (Tipo)
+            const tipoLower = tipoOriginal.toLowerCase();
+            const resolucionLower = String(row[7] || '').toLowerCase().trim(); // Col H (Resolución)
+            
+            let bucket = 'Otras Atenciones';
+            
+            if (tipoLower.includes('asesoría') && resolucionLower.includes('cancelado')) {
+               bucket = 'Asesorías Canceladas';
+            } else if (tipoLower.includes('cliente')) {
+               bucket = 'Atenciones a Clientes';
+            } else if (tipoLower.includes('turno')) {
+               bucket = 'Atenciones a Turnos';
+            } else if (tipoOriginal) {
+               bucket = tipoOriginal; 
+            }
+            
+            metricas.porTipo[bucket] = (metricas.porTipo[bucket] || 0) + 1;
+          });
           
           // 2. Contar Clientes Únicos Registrados (Usando el Set ya calculado en clientesAgente)
           // clientesAgente ya tiene los clientes globales del agente filtrados de OATC global
