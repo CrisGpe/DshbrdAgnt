@@ -774,11 +774,14 @@
               botonAuxiliar: 'Seleccionar de Mis Clientes',
               mostrarSelectorClientes: false,
               onBotonAuxiliar: () => {
-                // Al hacer clic, cargamos la hoja de clientes si no está y mostramos el selector
+                // Al hacer clic, cargamos la hoja de clientes y OATC si no están, y mostramos el selector
                 window.AppStore.dialogo.value.mostrarSelectorClientes = !window.AppStore.dialogo.value.mostrarSelectorClientes;
                 if (window.AppStore.dialogo.value.mostrarSelectorClientes) {
                    if (!window.AppStore.cacheDatos.value['Clientes'] || window.AppStore.cacheDatos.value['Clientes'].length === 0) {
                       solicitarMatrizAlServidor('Clientes');
+                   }
+                   if (!window.AppStore.cacheDatos.value['OATC'] || window.AppStore.cacheDatos.value['OATC'].length === 0) {
+                      solicitarMatrizAlServidor('OATC');
                    }
                 }
               },
