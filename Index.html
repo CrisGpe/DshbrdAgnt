@@ -17,19 +17,14 @@
       
       <!-- ENRUTADOR POLIMÓRFICO DE SECCIONES DE ACUERDO A LA ESPECIALIDAD (COL L) -->
       
-      <!-- CASO TRABAJADOR: Estilismo o Cosmiatría -->
-      <template v-if="AppStore.agente.value.especialidad === 'Estilismo' || AppStore.agente.value.especialidad === 'Cosmiatría'">
+      <!-- CASO TRABAJADOR Y JEFE OPERATIVO -->
+      <template v-if="['Estilismo', 'Cosmiatría', 'Jefe Operativo'].includes(AppStore.agente.value.especialidad)">
         <?!= include('ViewTrabajador.html'); ?>
       </template>
 
       <!-- CASO ADMINISTRACIÓN -->
       <template v-else-if="AppStore.agente.value.especialidad === 'Administracion'">
         <?!= include('ViewAdministracion.html'); ?>
-      </template>
-
-      <!-- CASO JEFE OPERATIVO -->
-      <template v-else-if="AppStore.agente.value.especialidad === 'Jefe Operativo'">
-        <?!= include('ViewJefeOperativo.html'); ?>
       </template>
 
       <!-- CASO DE RESGUARDO: Rol no mapeado en el Frontend -->

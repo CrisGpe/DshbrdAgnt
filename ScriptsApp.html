@@ -265,9 +265,12 @@
                 if (res.especialidad === 'Estilismo' || res.especialidad === 'Cosmiatría') {
                   window.AppStore.filtroCola.value = res.especialidad;
                   cambiarPestana('Botonera');
+                } else if (res.especialidad === 'Jefe Operativo') {
+                  window.AppStore.filtroCola.value = 'Todos';
+                  cambiarPestana('Botonera');
                 } else {
                   window.AppStore.filtroCola.value = 'Todos';
-                  cambiarPestana('Borrador'); // Arranque estándar por tabla para Admin/Jefe
+                  cambiarPestana('Borrador'); // Arranque estándar por tabla para Admin
                 }
               } else {
                 mostrarToast(res.mensaje || "PIN incorrecto.", "error");

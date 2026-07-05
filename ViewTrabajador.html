@@ -27,40 +27,80 @@
     <!-- PESTAÑA: BOTONERA DE ALERTAS Y BAR -->
     <section v-if="AppStore.pestanaActiva.value === 'Botonera' || AppStore.pestanaActiva.value === 'Borrador'" class="space-y-6 animate-fadeIn w-full">
       
-      <!-- Bloque A: Alertas Inmediatas -->
-      <div class="space-y-3">
-        <div class="text-center mb-2">
-          <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400">🚨 Panel de Alertas Inmediatas</h3>
-          <p class="text-[11px] text-slate-400 mt-0.5">Presiona para notificar al panel de recepción al instante.</p>
+      <!-- VISTA TRABAJADOR REGULAR (Estilismo / Cosmiatría) -->
+      <template v-if="['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad)">
+        <!-- Bloque A: Alertas Inmediatas -->
+        <div class="space-y-3">
+          <div class="text-center mb-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400">🚨 Panel de Alertas Inmediatas</h3>
+            <p class="text-[11px] text-slate-400 mt-0.5">Presiona para notificar al panel de recepción al instante.</p>
+          </div>
+          
+          <!-- Grid Táctil de 6 Estados -->
+          <div class="grid grid-cols-2 gap-3 w-full">
+            <button @click="dispararAlertaBotonera('Ya llegué')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+              <span class="text-2xl">👋</span>
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Ya llegué</span>
+            </button>
+
+            <button @click="dispararAlertaBotonera('Voy a comer')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+              <span class="text-2xl">🍕</span>
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Voy a comer</span>
+            </button>
+
+            <button @click="dispararAlertaBotonera('Regresé de comer')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+              <span class="text-2xl">🔄</span>
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Regresé</span>
+            </button>
+
+            <button @click="dispararAlertaBotonera('Acabó mi día')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+              <span class="text-2xl">🏁</span>
+              <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Acabó mi día</span>
+            </button>
+          </div>
         </div>
-        
-        <!-- Grid Táctil de 6 Estados -->
-        <div class="grid grid-cols-2 gap-3 w-full">
-          <button @click="dispararAlertaBotonera('Ya llegué')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
-            <span class="text-2xl">👋</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Ya llegué</span>
-          </button>
+      </template>
 
-          <button @click="dispararAlertaBotonera('Voy a comer')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
-            <span class="text-2xl">🍕</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Voy a comer</span>
-          </button>
+      <!-- VISTA JEFE OPERATIVO -->
+      <template v-else-if="AppStore.agente.value.especialidad === 'Jefe Operativo'">
+        <div class="flex-1 flex flex-col justify-center py-4 space-y-4">
+          <div class="text-center mb-2">
+            <span class="text-xs font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">Mando Operativo</span>
+            <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight mt-3">🚨 Alertas Tácticas</h3>
+            <p class="text-xs text-slate-500 mt-1">Gobernanza inmediata. Emite un token de alerta a la recepción.</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3.5 w-full">
+            <button @click="dispararAlertaBotonera('Soporte Técnico')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-amber-600 hover:bg-amber-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-amber-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]">
+              <span class="text-3xl">🛠️</span>
+              <span class="text-xs font-black uppercase tracking-wide text-white">Soporte</span>
+            </button>
 
-          <button @click="dispararAlertaBotonera('Regresé de comer')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
-            <span class="text-2xl">🔄</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Regresé</span>
-          </button>
+            <button @click="dispararAlertaBotonera('Cliente Listo')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-emerald-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]">
+              <span class="text-3xl">✅</span>
+              <span class="text-xs font-black uppercase tracking-wide text-white text-center">Cliente Listo</span>
+            </button>
 
-          <button @click="dispararAlertaBotonera('Acabó mi día')" :disabled="AppStore.procesandoAlerta.value"
-            class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
-            <span class="text-2xl">🏁</span>
-            <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Acabó mi día</span>
-          </button>
+            <button @click="dispararAlertaBotonera('Supervisor Urgente')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-rose-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]">
+              <span class="text-3xl">⚠️</span>
+              <span class="text-xs font-black uppercase tracking-wide text-white text-center">Urgencia</span>
+            </button>
+
+            <button @click="dispararAlertaBotonera('Abastecimiento')" :disabled="AppStore.procesandoAlerta.value"
+              class="bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-indigo-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]">
+              <span class="text-3xl">📦</span>
+              <span class="text-xs font-black uppercase tracking-wide text-white text-center">Insumos</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </template>
 
       <!-- Bloque B: Sección Bar -->
       <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-4 shadow-lg dark:shadow-xl">
