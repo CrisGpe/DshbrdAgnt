@@ -766,10 +766,11 @@
               }
             });
           } else if (tipo === 'comenzar') {
+            const etiqueta = card[18] === 'Cita' ? 'cita' : 'asesoría';
             mostrarDialogo({
               tipo: 'confirm',
               titulo: 'Comenzar Atención',
-              mensaje: `¿Estás seguro de comenzar la asesoría de ${clienteActual}?`,
+              mensaje: `¿Estás seguro de comenzar la ${etiqueta} de ${clienteActual}?`,
               onConfirm: () => {
                 dispararAlertaBotonera(`Comenzó atención: ${clienteActual} (ID: ${idTurno})`);
                 mostrarToast('Alerta de inicio enviada a recepción', 'exito');
@@ -777,12 +778,13 @@
               }
             });
           } else if (tipo === 'cancelar') {
+            const etiqueta = card[18] === 'Cita' ? 'cita' : 'asesoría';
             mostrarDialogo({
               tipo: 'confirm',
-              titulo: 'Cancelar Atención',
-              mensaje: `¿Estás seguro de cancelar la asesoría de ${clienteActual}?`,
+              titulo: card[18] === 'Cita' ? 'Cancelar Cita' : 'Cancelar Atención',
+              mensaje: `¿Estás seguro de cancelar la ${etiqueta} de ${clienteActual}?`,
               onConfirm: () => {
-                dispararAlertaBotonera(`Canceló atención: ${clienteActual} (ID: ${idTurno})`);
+                dispararAlertaBotonera(`Canceló ${etiqueta}: ${clienteActual} (ID: ${idTurno})`);
                 mostrarToast('Alerta de cancelación enviada a recepción', 'exito');
                 cerrarModalDetalles();
               }
