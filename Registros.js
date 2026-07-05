@@ -127,8 +127,8 @@ function registrarCitaBBDD(sede, payload, nicknameAgente) {
     return { exito: true, mensaje: "Cita guardada exitosamente." };
   } catch (e) {
     return { exito: false, mensaje: e.toString() };
+  }
 }
-
 /**
  * Edita los datos de un cliente existente y sincroniza retroactivamente su historial en OATC.
  * 
