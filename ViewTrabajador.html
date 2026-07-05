@@ -238,14 +238,14 @@
       </div>
 
       <!-- Estado Vacío Personalizado -->
-      <div v-else-if="obtenerDatosVisualizables.length === 0" class="text-center py-12 bg-slate-950/50 border border-slate-800/60 rounded-2xl">
+      <div v-else-if="AppStore.pestanaActiva.value !== 'Mis Indicadores' && obtenerDatosVisualizables.length === 0" class="text-center py-12 bg-slate-950/50 border border-slate-800/60 rounded-2xl">
         <span class="text-3xl block mb-2">📂</span>
         <h4 class="text-xs font-bold text-slate-300">Sin asignaciones</h4>
         <p class="text-[11px] text-slate-500 mt-1 max-w-[200px] mx-auto">No se encontraron tareas registradas para el rango seleccionado.</p>
       </div>
 
       <!-- PANEL DE INDICADORES / MÉTRICAS -->
-      <div v-if="AppStore.pestanaActiva.value === 'Mis Indicadores'" class="w-full space-y-4 animate-fadeIn">
+      <div v-else-if="AppStore.pestanaActiva.value === 'Mis Indicadores'" class="w-full space-y-4 animate-fadeIn">
         <div class="bg-gradient-to-br from-indigo-500 to-sky-500 dark:from-indigo-600 dark:to-sky-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
           <div class="absolute -right-6 -top-6 text-white/10 text-8xl">📊</div>
           <h3 class="text-xs font-black uppercase tracking-wider text-indigo-100 mb-1">Desempeño del Periodo</h3>
