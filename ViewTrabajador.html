@@ -178,8 +178,8 @@
         <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
           <span v-if="AppStore.pestanaActiva.value === 'Mis Clientes'">Clientes encontrados: </span>
           <span v-else-if="AppStore.pestanaActiva.value === 'Mis Atenciones'">Atenciones en Curso: </span>
-          <span v-else>Registros Asignados: </span>
-          <span class="text-indigo-600 dark:text-indigo-400 font-black">{{ obtenerDatosVisualizables.length }}</span>
+          <span v-else>Total de Registros: </span>
+          <strong class="ml-1 text-slate-800 dark:text-slate-100">{{ AppStore.pestanaActiva.value === 'Mis Atenciones' ? obtenerDatosVisualizables.filter(c => c[18] !== 'Cita').length : obtenerDatosVisualizables.length }}</strong>
         </h3>
         <button @click="forzarRefrescoDatos" :disabled="AppStore.cargando.value" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 bg-white dark:bg-slate-950 px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-800/80 active:scale-95 shadow-sm">
           <span :class="{'animate-spin': AppStore.cargando.value}">🔄</span> Refrescar
@@ -276,8 +276,8 @@
                 <template v-else>#{{ card[1] || '---' }}</template>
               </span>
               <span class="text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider" 
-                    :class="AppStore.pestanaActiva.value === 'Mis Atenciones' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400' : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400'">
-                {{ AppStore.pestanaActiva.value === 'Mis Atenciones' ? 'En Curso' : (card[7] || 'Finalizado') }}
+                    :class="AppStore.pestanaActiva.value === 'Mis Atenciones' ? (card[18] === 'Cita' ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-400' : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400') : 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400'">
+                {{ AppStore.pestanaActiva.value === 'Mis Atenciones' ? (card[18] === 'Cita' ? 'CITA' : 'En Curso') : (card[7] || 'Finalizado') }}
               </span>
             </div>
           </div>
