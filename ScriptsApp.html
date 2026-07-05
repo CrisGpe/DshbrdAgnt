@@ -695,13 +695,26 @@
             const asignado = row[19]; // Col T (Agente OATC)
             if (!esMiRegistro(asignado, nick, nombreCompleto)) return;
             
-            const resolucion = String(row[20] || '').toLowerCase().trim(); // Col U (Hora Resol.)
-            // Consideramos completada si tiene hora de resolución y NO dice cancelado
-            if (!resolucion.includes('cancelado') && (resolucion.includes('terminado') || resolucion.match(/\d{1,2}:\d{2}/))) {
-              metricas.totalAtenciones++;
-              const tipo = String(row[18] || 'Indefinido').trim(); // Col S
-              metricas.porTipo[tipo] = (metricas.porTipo[tipo] || 0) + 1;
+            // Incrementamos el total de ASIGNADAS al agente sin importar el estado
+            metricas.totalAtenciones++;
+            
+            const tipoOriginal = String(row[18] || '').trim(); // Col S
+            const tipoLower = tipoOriginal.toLowerCase();
+            const resolucionLower = String(row[20] || '').toLowerCase().trim(); // Col U (Hora Resol.)
+            
+            let bucket = 'Otras Atenciones';
+            
+            if (tipoLower.includes('asesoría') && resolucionLower.includes('cancelado')) {
+               bucket = 'Asesorías Canceladas';
+            } else if (tipoLower.includes('cliente')) {
+               bucket = 'Atenciones a Clientes';
+            } else if (tipoLower.includes('turno')) {
+               bucket = 'Atenciones a Turnos';
+            } else if (tipoOriginal) {
+               bucket = tipoOriginal; 
             }
+            
+            metricas.porTipo[bucket] = (metricas.porTipo[bucket] || 0) + 1;
           });
           
           // 2. Contar Clientes Únicos Registrados (Usando el Set ya calculado en clientesAgente)
