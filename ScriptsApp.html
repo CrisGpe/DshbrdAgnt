@@ -49,6 +49,7 @@
       mostrarMenuBurbujas: Vue.ref(false),
       
       calendarioFechaActiva: Vue.ref(new Date()), // Fecha seleccionada para el calendario
+      subPestanaAdminAlertas: Vue.ref('Botones'), // Sub-pestaña en el módulo Alertas del perfil Administración
 
       // Data caches (Matriz de memoria local)      
       loginForm: Vue.ref({ nickname: '', pin: '', sede: 'RD' }),
@@ -736,6 +737,34 @@
           });
           return Array.from(nombres).sort();
         });
+        
+        // 5.0.1 Lista de Administradores Presentes (Módulo Admin > Alertas)
+        const adminPresentesSede = Vue.computed(() => {
+           const m = window.AppStore.cacheDatos.value["Borrador"] || [];
+           const sedeActual = window.AppStore.agente.value.sede;
+           
+           return m.filter(row => {
+              const dependiente = String(row[1] || '').trim();
+              const sedeRow = String(row[2] || '').trim();
+              const especialidad = String(row[10] || '').toLowerCase().trim();
+              const estado = String(row[8] || '').toLowerCase().trim();
+              
+              // Excluir si no es de la sede o si no es administración o si no tiene estado
+              if (sedeRow !== sedeActual || especialidad !== 'administracion' || !dependiente || !estado) return false;
+              
+              // Excluir estados que significan ausencia o fin de jornada
+              if (estado === 'fuera de sede' || estado === 'libre' || estado === 'acabó su día') return false;
+              
+              return true;
+           }).map(row => {
+              return {
+                 nombre: String(row[1] || '').trim(),
+                 nickname: String(row[7] || '').trim(),
+                 estado: String(row[8] || '').trim(),
+                 ultimaActividad: parseDateRobust(row[12])
+              };
+           }).sort((a, b) => b.ultimaActividad - a.ultimaActividad); // Más recientes primero
+        });
 
         // 5.1 Planilla Administrativa (Horario Semanal de todos los administradores)
         const planillaAdministrativa = Vue.computed(() => {
@@ -1377,6 +1406,7 @@
           enviarPedidoBarConsolidado,  // Función que procesa el string final y limpia el estado
           
           isStaffActiveInHour,
+          adminPresentesSede,
           
           // Calendario Diario
           calendarioDiaAnterior,
