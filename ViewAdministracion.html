@@ -209,57 +209,63 @@
     </section>
 
     <!-- SUB-PESTAÑA 3: HORARIO SEMANAL (CALENDARIO) -->
-    <section v-else-if="AppStore.pestanaActiva.value === 'Horario'" class="space-y-4 animate-fadeIn w-full flex-1 flex flex-col py-2">
-      <div class="text-center mb-2">
-        <span class="text-xs font-bold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">Mi Horario</span>
-        <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight mt-3">📅 Horario Semanal</h3>
+    <section v-else-if="AppStore.pestanaActiva.value === 'Horario'" class="space-y-4 animate-fadeIn w-full flex-1 flex flex-col py-2 h-[calc(100vh-140px)]">
+      <div class="text-center mb-2 shrink-0">
+        <span class="text-xs font-bold uppercase tracking-widest text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">Calendario Grupal</span>
+        <h3 class="text-base font-black text-slate-900 dark:text-white tracking-tight mt-3">📅 Horario Administrativo</h3>
         <p class="text-[11px] text-slate-500 mt-1">Sede asignada: {{ AppStore.agente.value.sedeBase || AppStore.agente.value.sede }}</p>
       </div>
 
-      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
-        <div class="grid grid-cols-1 divide-y divide-slate-100 dark:divide-slate-800/50">
-          <!-- Generación dinámica de días -->
-          <div v-for="dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']" :key="dia" 
-               class="p-4 transition-colors">
-            
-            <div class="flex items-center gap-3 mb-3">
-              <div class="w-9 h-9 rounded-full flex items-center justify-center font-black text-xs shadow-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50">
-                {{ dia.substring(0,3).toUpperCase() }}
-              </div>
-              <p class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">{{ dia }}</p>
-            </div>
-            
-            <!-- Lista de Staff para este día -->
-            <div class="space-y-2 pl-12 pr-2 pb-1">
-              <div v-if="planillaAdministrativa.length === 0" class="text-[10px] text-slate-400 italic">Cargando planilla...</div>
-              
-              <div v-for="staff in planillaAdministrativa" :key="staff.nick" 
-                   class="flex items-center justify-between text-[11px] p-2 rounded-xl transition-all"
-                   :class="staff.esYo ? 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 shadow-sm' : 'bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/50'">
-                 
-                 <div class="flex items-center gap-2 min-w-0">
-                   <div v-if="!staff.esYo" class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[8px] font-black text-slate-500 shrink-0">
-                     {{ staff.nick.substring(0,1).toUpperCase() }}
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm flex flex-col flex-1 relative">
+        <div class="flex flex-1 overflow-auto relative bg-slate-50 dark:bg-slate-950/30">
+          
+          <!-- Eje Y (Horas fijas a la izquierda) -->
+          <div class="sticky left-0 z-20 bg-slate-50 dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800/80 w-12 shrink-0 pt-8" style="height: 840px;">
+             <!-- Las horas (8am a 10pm) -->
+             <div v-for="h in 15" :key="h" class="text-[9px] font-bold text-slate-400 dark:text-slate-500 text-right pr-2 absolute w-full" :style="{ top: ((h-1)*56 + 32) + 'px', transform: 'translateY(-50%)' }">
+                {{ (h+7) > 12 ? (h+7-12) : (h+7) }} {{ (h+7) >= 12 && (h+7) < 24 ? 'PM' : 'AM' }}
+             </div>
+          </div>
+
+          <!-- Grilla de Días (Scroll X) -->
+          <div class="flex grow relative pt-8 min-w-[700px]" style="height: 840px;">
+             
+             <!-- Líneas horizontales de guía (fondo) -->
+             <div class="absolute inset-0 pointer-events-none mt-8 z-0">
+               <div v-for="h in 15" :key="'line-'+h" class="border-t border-slate-200 dark:border-slate-800 absolute w-full" :style="{ top: ((h-1)*56) + 'px' }"></div>
+             </div>
+             
+             <!-- Columnas de Días -->
+             <div v-for="(dia, index) in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']" :key="dia" 
+                  class="flex-1 relative border-r border-slate-200 dark:border-slate-800/50 min-w-[100px] z-10">
+                
+                <!-- Cabecera del Día (Sticky top) -->
+                <div class="absolute top-0 w-full -mt-8 h-8 border-b border-slate-200 dark:border-slate-800 flex items-center justify-center bg-white/90 dark:bg-slate-950/90 backdrop-blur z-30 text-[10px] font-black uppercase tracking-wider"
+                     :class="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase() ? 'text-rose-500' : 'text-slate-600 dark:text-slate-400'">
+                  {{ dia.substring(0,3) }}
+                  <span v-if="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase()" class="absolute -top-1 -right-1 flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                </div>
+                
+                <!-- Badges (Bloques de horario) -->
+                <template v-for="(staff, sIndex) in planillaAdministrativa">
+                   <div v-if="staff.diaDescanso?.toLowerCase() !== dia.toLowerCase() && staff.entrada && staff.entrada !== '--:--'" 
+                        class="absolute w-[86%] left-[7%] rounded-md overflow-hidden shadow-sm p-1.5 flex flex-col transition-all cursor-default border"
+                        :class="staff.esYo ? 'bg-indigo-500 border-indigo-400 text-white z-20 hover:scale-[1.02]' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 opacity-90 hover:opacity-100 hover:scale-[1.02]'"
+                        :style="{ top: getBlockTop(staff.entrada), height: getBlockHeight(staff.entrada, staff.salida), marginLeft: (sIndex * 3) + 'px', zIndex: staff.esYo ? 30 : (10 + sIndex) }">
+                      
+                      <span class="text-[9px] font-black leading-tight truncate">
+                         {{ staff.nick }} <span v-if="staff.esYo" class="opacity-80">(Tú)</span>
+                      </span>
+                      <span class="text-[7.5px] font-bold mt-auto leading-none opacity-90 truncate">
+                         {{ staff.entrada.replace(' am','a').replace(' pm','p') }} - {{ staff.salida.replace(' am','a').replace(' pm','p') }}
+                      </span>
                    </div>
-                   <div v-else class="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-[8px] font-black text-white shrink-0">
-                     {{ staff.nick.substring(0,1).toUpperCase() }}
-                   </div>
+                </template>
 
-                   <span class="font-bold truncate max-w-[90px]" :class="staff.esYo ? 'text-indigo-700 dark:text-indigo-300 text-xs' : 'text-slate-600 dark:text-slate-400'">
-                     {{ staff.nick }}
-                   </span>
-                   <span v-if="staff.esYo" class="text-[7px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full uppercase tracking-widest font-black shrink-0">Tú</span>
-                 </div>
-
-                 <div class="shrink-0 text-right">
-                   <span v-if="staff.diaDescanso?.toLowerCase() === dia.toLowerCase()" class="inline-flex px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-500 text-[9px] font-black rounded uppercase tracking-widest border border-slate-300 dark:border-slate-700">Libre</span>
-                   <span v-else class="font-mono text-[10px] font-bold tracking-tight" :class="staff.esYo ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400'">
-                     {{ staff.entrada }} <span class="text-slate-300 dark:text-slate-600 mx-0.5">-</span> {{ staff.salida }}
-                   </span>
-                 </div>
-              </div>
-            </div>
-
+             </div>
           </div>
         </div>
       </div>
