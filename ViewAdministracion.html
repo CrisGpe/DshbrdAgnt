@@ -220,29 +220,46 @@
         <div class="grid grid-cols-1 divide-y divide-slate-100 dark:divide-slate-800/50">
           <!-- Generación dinámica de días -->
           <div v-for="dia in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']" :key="dia" 
-               class="p-3 flex items-center justify-between transition-colors"
-               :class="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase() ? 'bg-slate-50 dark:bg-slate-950' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'">
-            <div class="flex items-center gap-3">
-              <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-xs"
-                   :class="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase() ? 'bg-slate-200 dark:bg-slate-800 text-slate-500' : 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400'">
+               class="p-4 transition-colors">
+            
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center font-black text-xs shadow-sm bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800/50">
                 {{ dia.substring(0,3).toUpperCase() }}
               </div>
-              <div>
-                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ dia }}</p>
-                <p v-if="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase()" class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Día de Descanso</p>
-                <p v-else class="text-[11px] text-slate-500 font-medium">Asistencia Obligatoria</p>
-              </div>
+              <p class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">{{ dia }}</p>
             </div>
             
-            <div class="text-right">
-              <div v-if="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase()">
-                <span class="inline-block px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-black rounded-lg uppercase">LIBRE</span>
-              </div>
-              <div v-else class="flex flex-col items-end gap-0.5">
-                <span class="text-xs font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.horarioEntrada || '--:--' }}</span>
-                <span class="text-[10px] font-bold text-slate-400">a {{ AppStore.agente.value.horarioSalida || '--:--' }}</span>
+            <!-- Lista de Staff para este día -->
+            <div class="space-y-2 pl-12 pr-2 pb-1">
+              <div v-if="planillaAdministrativa.length === 0" class="text-[10px] text-slate-400 italic">Cargando planilla...</div>
+              
+              <div v-for="staff in planillaAdministrativa" :key="staff.nick" 
+                   class="flex items-center justify-between text-[11px] p-2 rounded-xl transition-all"
+                   :class="staff.esYo ? 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800/40 shadow-sm' : 'bg-slate-50 dark:bg-slate-950/50 border border-slate-100 dark:border-slate-800/50'">
+                 
+                 <div class="flex items-center gap-2 min-w-0">
+                   <div v-if="!staff.esYo" class="w-5 h-5 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center text-[8px] font-black text-slate-500 shrink-0">
+                     {{ staff.nick.substring(0,1).toUpperCase() }}
+                   </div>
+                   <div v-else class="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center text-[8px] font-black text-white shrink-0">
+                     {{ staff.nick.substring(0,1).toUpperCase() }}
+                   </div>
+
+                   <span class="font-bold truncate max-w-[90px]" :class="staff.esYo ? 'text-indigo-700 dark:text-indigo-300 text-xs' : 'text-slate-600 dark:text-slate-400'">
+                     {{ staff.nick }}
+                   </span>
+                   <span v-if="staff.esYo" class="text-[7px] bg-indigo-600 text-white px-1.5 py-0.5 rounded-full uppercase tracking-widest font-black shrink-0">Tú</span>
+                 </div>
+
+                 <div class="shrink-0 text-right">
+                   <span v-if="staff.diaDescanso?.toLowerCase() === dia.toLowerCase()" class="inline-flex px-2 py-0.5 bg-slate-200 dark:bg-slate-800 text-slate-500 text-[9px] font-black rounded uppercase tracking-widest border border-slate-300 dark:border-slate-700">Libre</span>
+                   <span v-else class="font-mono text-[10px] font-bold tracking-tight" :class="staff.esYo ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-500 dark:text-slate-400'">
+                     {{ staff.entrada }} <span class="text-slate-300 dark:text-slate-600 mx-0.5">-</span> {{ staff.salida }}
+                   </span>
+                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>

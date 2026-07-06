@@ -22,7 +22,8 @@
       "Mis Clientes": "Clientes",
       "Mis Indicadores": "OATC",
       "Mi Perfil": "Agentes",
-      "Botonera": "Borrador"
+      "Botonera": "Borrador",
+      "Horario": "Agentes"
     };
 
     // 1. Estructuración del Almacén Máster en window
@@ -726,7 +727,67 @@
           return Array.from(nombres).sort();
         });
 
-        // 5.1 Cálculo de Métricas e Indicadores
+        // 5.1 Planilla Administrativa (Horario Semanal de todos los administradores)
+        const planillaAdministrativa = Vue.computed(() => {
+          const m = window.AppStore.cacheDatos.value["Agentes"] || [];
+          const sedeActual = window.AppStore.agente.value.sede;
+          const miNombre = String(window.AppStore.agente.value.nombre).trim();
+          
+          const formatHora = (isoStr) => {
+            if (!isoStr || !isoStr.includes('T')) return isoStr || '--:--';
+            try {
+              const d = new Date(isoStr);
+              let h = d.getHours();
+              let min = d.getMinutes().toString().padStart(2, '0');
+              const ampm = h >= 12 ? 'pm' : 'am';
+              h = h % 12;
+              h = h ? h : 12;
+              return h + ':' + min + ' ' + ampm;
+            } catch (e) {
+              return '--:--';
+            }
+          };
+
+          let planilla = [];
+          
+          // Omitir cabecera (index 0) si existe
+          for (let i = 1; i < m.length; i++) {
+            const row = m[i];
+            const sedeAsignada = String(row[4] || '').trim(); // Col E
+            const rol = String(row[11] || '').toLowerCase().trim(); // Col L
+            const estado = String(row[10] || '').toLowerCase().trim(); // Col K
+            
+            // Administracion u otros roles de staff
+            if (sedeAsignada === sedeActual && estado === 'activo' && 
+                ['administración', 'administracion', 'recepción', 'recepcion'].includes(rol)) {
+              
+              const nombre = String(row[2] || '').trim(); // Col C
+              const nick = String(row[13] || '').trim(); // Col N
+              if (!nombre) continue;
+
+              planilla.push({
+                nombre: nombre,
+                nick: nick || nombre.split(' ')[0],
+                esYo: nombre === miNombre,
+                rol: String(row[11] || '').trim(),
+                entrada: formatHora(row[5]), // Col F
+                salida: formatHora(row[6]), // Col G
+                diaDescanso: String(row[7] || '').trim() // Col H
+              });
+            }
+          }
+          
+          // Ordenar: yo primero, luego alfabéticamente
+          planilla.sort((a, b) => {
+            if (a.esYo && !b.esYo) return -1;
+            if (!a.esYo && b.esYo) return 1;
+            return a.nombre.localeCompare(b.nombre);
+          });
+          
+          return planilla;
+        });
+
+        // 5.2 Cálculo de Métricas e Indicadores
         const metricasAgente = Vue.computed(() => {
           const especialidad = window.AppStore.agente.value.especialidad;
           const esJefe = (especialidad === 'Jefe Operativo');
@@ -1195,6 +1256,7 @@
           AppStore: window.AppStore,
           estadoTurnoAgente,
           atencionesActivasSede, // <-- Exportado aquí
+          planillaAdministrativa, // <-- Exportado aquí
           agendaAgrupada,
           listaAgentesSede,
           metricasDemanda,
