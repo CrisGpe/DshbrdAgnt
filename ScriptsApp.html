@@ -58,7 +58,11 @@
       modalCola: Vue.ref(false),
       filtroCola: Vue.ref('Todos'), // 'Todos', 'Estilismo', 'Cosmiatría'
       toast: Vue.ref({ visible: false, mensaje: '', tipo: 'success' }),
+      
+      // Control de Jefe Operativo
       toggleInicioJefe: Vue.ref('Mando'), // 'Mando', 'Botonera', 'Bar'
+      toggleIndicadoresJefe: Vue.ref('Sede'), // 'Sede' o 'Mi Rendimiento'
+      agenteSeleccionadoSede: Vue.ref('Todos'), // Para el módulo 4
       
       // UX Diálogo Universal Tailwind (Confirm/Prompt)
       dialogo: Vue.ref({ 
@@ -569,10 +573,16 @@
         const clientesAgente = Vue.computed(() => {
           const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
           const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
+          const especialidad = window.AppStore.agente.value.especialidad;
           const historialOatc = window.AppStore.cacheDatos.value["OATC"] || [];
           const baseClientes = window.AppStore.cacheDatos.value["Clientes"] || [];
           
           if (!nick || baseClientes.length === 0) return [];
+          
+          // SÚPER PODER: Jefe Operativo tiene acceso a toda la base de datos de clientes
+          if (especialidad === 'Jefe Operativo') {
+            return baseClientes;
+          }
           
           // 1. Extraer identificadores de bloque estricto del historial del agente actual
           const identificadoresAgente = new Set();
@@ -680,10 +690,31 @@
           return filtered;
         });
 
+        // 5.0 Lista de Agentes de la Sede (Para Módulo 4 del Jefe Operativo)
+        const listaAgentesSede = Vue.computed(() => {
+          const m = window.AppStore.cacheDatos.value["Agentes"] || [];
+          const sedeActual = window.AppStore.agente.value.sede;
+          const nombres = new Set();
+          
+          m.forEach(row => {
+            if (String(row[4] || '') === sedeActual) {
+               const rol = String(row[11] || '').toLowerCase().trim();
+               if (rol !== 'jefe operativo' && rol !== 'administracion' && row[1]) {
+                 nombres.add(String(row[1]).trim());
+               }
+            }
+          });
+          return Array.from(nombres).sort();
+        });
+
         // 5.1 Cálculo de Métricas e Indicadores
         const metricasAgente = Vue.computed(() => {
-          const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
-          const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
+          const especialidad = window.AppStore.agente.value.especialidad;
+          const esJefe = (especialidad === 'Jefe Operativo');
+          const agenteSeleccionado = window.AppStore.agenteSeleccionadoSede.value; // 'Todos' o Nombre de agente
+          
+          let nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
+          let nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
           
           const msInicio = parseDateRobust(window.AppStore.filtroFechaInicio.value);
           const msFin = parseDateRobust(window.AppStore.filtroFechaFin.value) + 86399999; // Hasta el final del día
@@ -694,6 +725,15 @@
             clientesRegistradosUnicos: 0
           };
           
+          // Helper para saber si contamos el registro
+          const debeContarRegistro = (asignadoRaw) => {
+             if (!esJefe) return esMiRegistro(asignadoRaw, nick, nombreCompleto);
+             if (agenteSeleccionado === 'Todos') return true;
+             // Si el jefe seleccionó a alguien, comparamos contra el nombre seleccionado
+             const nombreElegidoLower = agenteSeleccionado.toLowerCase().trim();
+             return String(asignadoRaw || '').toLowerCase().includes(nombreElegidoLower);
+          };
+          
           // 1. Filtrar Borrador para Atenciones y Tipos
           const borrador = window.AppStore.cacheDatos.value["Borrador"] || [];
           borrador.forEach(row => {
@@ -701,9 +741,8 @@
             if (isNaN(fechaRow) || fechaRow < msInicio || fechaRow > msFin) return;
             
             const asignado = row[19]; // Col T (Agente OATC)
-            if (!esMiRegistro(asignado, nick, nombreCompleto)) return;
+            if (!debeContarRegistro(asignado)) return;
             
-            // Incrementamos el total de ASIGNADAS al agente sin importar el estado
             metricas.totalAtenciones++;
             
             const tipoOriginal = String(row[18] || '').trim(); // Col S
@@ -711,7 +750,6 @@
             const resolucionLower = String(row[20] || '').toLowerCase().trim(); // Col U (Hora Resol.)
             
             let bucket = 'Otras Atenciones';
-            
             if (tipoLower.includes('asesoría') && resolucionLower.includes('cancelado')) {
                bucket = 'Asesorías Canceladas';
             } else if (tipoLower.includes('cliente')) {
@@ -732,7 +770,7 @@
             if (isNaN(fechaRow) || fechaRow < msInicio || fechaRow > msFin) return;
             
             const asignado = row[6]; // Col G (Agente OATC)
-            if (!esMiRegistro(asignado, nick, nombreCompleto)) return;
+            if (!debeContarRegistro(asignado)) return;
             
             metricas.totalAtenciones++;
             
@@ -741,7 +779,6 @@
             const resolucionLower = String(row[7] || '').toLowerCase().trim(); // Col H (Resolución)
             
             let bucket = 'Otras Atenciones';
-            
             if (tipoLower.includes('asesoría') && resolucionLower.includes('cancelado')) {
                bucket = 'Asesorías Canceladas';
             } else if (tipoLower.includes('cliente')) {
@@ -755,14 +792,89 @@
             metricas.porTipo[bucket] = (metricas.porTipo[bucket] || 0) + 1;
           });
           
-          // 2. Contar Clientes Únicos Registrados (Usando el Set ya calculado en clientesAgente)
-          // clientesAgente ya tiene los clientes globales del agente filtrados de OATC global
-          // Para hacerlo dependiente del rango de fechas, deberíamos filtrar el OATC en el rango, pero 'clientesAgente' lo calcula globalmente.
-          // El usuario pidió "cantidad de clientes únicos atendidos en todo el historial que estén registrados también en la hoja Clientes". 
-          // Eso es literalmente la longitud de clientesAgente.value!
-          metricas.clientesRegistradosUnicos = clientesAgente.value.length;
+          // 2. Contar Clientes Únicos Registrados
+          if (esJefe && agenteSeleccionado === 'Todos') {
+             // Si ve 'Todos', ve a todos los clientes de la base global
+             const baseClientes = window.AppStore.cacheDatos.value["Clientes"] || [];
+             metricas.clientesRegistradosUnicos = baseClientes.length;
+          } else {
+             // Aproximación rápida para el agente individual
+             metricas.clientesRegistradosUnicos = clientesAgente.value.length;
+          }
           
           return metricas;
+        });
+
+        // 5.2 Módulo 3: Comportamiento de Demanda (Sede)
+        const metricasDemanda = Vue.computed(() => {
+          const oatc = window.AppStore.cacheDatos.value["OATC"] || [];
+          const msInicio = parseDateRobust(window.AppStore.filtroFechaInicio.value);
+          const msFin = parseDateRobust(window.AppStore.filtroFechaFin.value) + 86399999;
+          
+          const demanda = {
+             totalAtenciones: 0,
+             cancelaciones: 0,
+             diaMasFuerte: '',
+             maxAfluencia: 0,
+             franjasAfluencia: {}
+          };
+          
+          const cuentaDias = {};
+          
+          oatc.forEach(row => {
+            const fechaRow = parseDateRobust(row[3] || row[0]); // Col D (Fecha) o Col A (Hora)
+            if (isNaN(fechaRow) || fechaRow < msInicio || fechaRow > msFin) return;
+            
+            demanda.totalAtenciones++;
+            
+            // Detectar Cancelaciones
+            const resolucion = String(row[7] || '').toLowerCase().trim();
+            if (resolucion.includes('cancelado') || resolucion.includes('cancelada')) {
+               demanda.cancelaciones++;
+            }
+            
+            // Conteo por Día de la semana
+            const objFecha = new Date(fechaRow);
+            const diaSemana = objFecha.toLocaleDateString('es-ES', { weekday: 'long' });
+            cuentaDias[diaSemana] = (cuentaDias[diaSemana] || 0) + 1;
+            
+            // Conteo por franja horaria (bloques de 1 hora)
+            const hora = objFecha.getHours();
+            const ampm = hora >= 12 ? 'PM' : 'AM';
+            const horaVisual = `${hora % 12 || 12} ${ampm}`;
+            demanda.franjasAfluencia[horaVisual] = (demanda.franjasAfluencia[horaVisual] || 0) + 1;
+          });
+          
+          // Calcular Día más Fuerte
+          let maxDiaVal = 0;
+          for (let d in cuentaDias) {
+             if (cuentaDias[d] > maxDiaVal) {
+                maxDiaVal = cuentaDias[d];
+                demanda.diaMasFuerte = d;
+             }
+          }
+          
+          // Calcular Franjas Afluencia (ordenarlas)
+          // Convertimos las llaves a un array y ordenamos por hora 24h
+          const parseHoraToNum = (hStr) => {
+             const [h, ampm] = hStr.split(' ');
+             let num = parseInt(h);
+             if (ampm === 'PM' && num < 12) num += 12;
+             if (ampm === 'AM' && num === 12) num = 0;
+             return num;
+          };
+          
+          const ordenadas = {};
+          const keys = Object.keys(demanda.franjasAfluencia).sort((a,b) => parseHoraToNum(a) - parseHoraToNum(b));
+          keys.forEach(k => {
+             ordenadas[k] = demanda.franjasAfluencia[k];
+             if (demanda.franjasAfluencia[k] > demanda.maxAfluencia) {
+                demanda.maxAfluencia = demanda.franjasAfluencia[k];
+             }
+          });
+          demanda.franjasAfluencia = ordenadas;
+          
+          return demanda;
         });
 
         // 6. Estado del Turno (Cálculo de Posición en la Cola desde Borrador)
@@ -817,6 +929,22 @@
           
           const cola = agentesCola.map(a => ({ nombre: a[1], especialidad: String(a[10] || 'Técnico') })); // Retornar array de objetos
           return { posicion, total: totalCola, estadoActual, cola };
+        });
+
+        // 6.5. Mando Operativo: Atenciones en Curso Globales
+        const atencionesActivasSede = Vue.computed(() => {
+          const m = window.AppStore.cacheDatos.value["Borrador"] || [];
+          if (m.length === 0) return [];
+          
+          return m.filter(row => {
+            if (!row[13]) return false; // Debe ser OATC (tener hora de orden en Col N)
+            
+            const resolucion = String(row[20] || '').toLowerCase().trim(); // Col U (Hora Resol.)
+            if (resolucion.includes('cancelado') || resolucion.includes('terminado') || resolucion.match(/\d{1,2}:\d{2}/)) {
+               return false;
+            }
+            return true;
+          }).sort((a, b) => parseDateRobust(a[13]) - parseDateRobust(b[13])); // Más antiguos primero
         });
 
         // 7. Agenda Agrupada (Clasificación temporal para Mi Agenda)
@@ -1047,7 +1175,10 @@
           // Estado Global existente
           AppStore: window.AppStore,
           estadoTurnoAgente,
+          atencionesActivasSede, // <-- Exportado aquí
           agendaAgrupada,
+          listaAgentesSede,
+          metricasDemanda,
 
           // Funciones de navegación y autenticación existentes
           cambiarPestana,

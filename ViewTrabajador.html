@@ -106,6 +106,43 @@
               <span class="text-xs font-black uppercase tracking-wide text-white text-center">Insumos</span>
             </button>
           </div>
+          
+          <!-- MANDO: COLA GLOBAL -->
+          <div class="mt-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+            <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span>👥</span> Cola de Sede ({{ estadoTurnoAgente.cola.length }})
+            </h4>
+            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <div v-if="estadoTurnoAgente.cola.length === 0" class="text-[10px] text-center text-slate-500 py-2 font-medium">No hay agentes en cola.</div>
+              <div v-else v-for="(agente, idx) in estadoTurnoAgente.cola" :key="'q'+idx" class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+                <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600 dark:text-slate-400 shrink-0">{{ idx + 1 }}</div>
+                <span class="font-bold text-[11px] text-slate-700 dark:text-slate-300 truncate flex-1">{{ agente.nombre }}</span>
+                <span class="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700">{{ agente.especialidad }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- MANDO: ATENCIONES EN CURSO GLOBAL -->
+          <div class="mt-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
+            <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
+              <span>⚡</span> Atenciones en Curso ({{ atencionesActivasSede.length }})
+            </h4>
+            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
+              <div v-if="atencionesActivasSede.length === 0" class="text-[10px] text-center text-slate-500 py-2 font-medium">No hay atenciones activas en la sede.</div>
+              <div v-else v-for="(item, idx) in atencionesActivasSede" :key="'a'+idx" class="flex flex-col gap-1 p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-900/30 relative overflow-hidden">
+                <div class="flex justify-between items-center">
+                  <span class="font-bold text-[11px] text-indigo-700 dark:text-indigo-400 truncate">{{ item[3] || item[4] || 'Cliente Sin Nombre' }}</span>
+                  <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 uppercase shrink-0">{{ item[18] || 'Atención' }}</span>
+                </div>
+                <div class="flex items-center gap-1.5 text-[10px] text-slate-600 dark:text-slate-400 font-medium">
+                   <span class="truncate max-w-[120px]">👤 {{ item[19] }}</span>
+                   <span>•</span>
+                   <span>🕒 {{ formatearFechaUHoraVisual(item[13], true) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </template>
 
@@ -295,34 +332,101 @@
 
       <!-- PANEL DE INDICADORES / MÉTRICAS -->
       <div v-else-if="AppStore.pestanaActiva.value === 'Mis Indicadores'" class="w-full space-y-4 animate-fadeIn">
-        <div class="bg-gradient-to-br from-indigo-500 to-sky-500 dark:from-indigo-600 dark:to-sky-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
-          <div class="absolute -right-6 -top-6 text-white/10 text-8xl">📊</div>
-          <h3 class="text-xs font-black uppercase tracking-wider text-indigo-100 mb-1">Desempeño del Periodo</h3>
-          <p class="text-4xl font-black mb-1">{{ metricasAgente.totalAtenciones }}</p>
-          <p class="text-xs font-medium text-indigo-100 mb-4">Atenciones Asignadas</p>
+        
+        <!-- Toggle Jefe Operativo para Indicadores -->
+        <div v-if="AppStore.agente.value.especialidad === 'Jefe Operativo'" class="bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl flex items-center gap-1 shadow-inner">
+          <button @click="AppStore.toggleIndicadoresJefe.value = 'Rendimiento'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleIndicadoresJefe.value === 'Rendimiento' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">Rendimiento</button>
+          <button @click="AppStore.toggleIndicadoresJefe.value = 'Sede'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleIndicadoresJefe.value === 'Sede' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">Demanda Sede</button>
+        </div>
+
+        <template v-if="AppStore.agente.value.especialidad !== 'Jefe Operativo' || AppStore.toggleIndicadoresJefe.value === 'Rendimiento'">
+          <!-- Módulo 4: Indicadores de Rendimiento -->
           
-          <div class="grid grid-cols-2 gap-3 mt-4">
-            <div class="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-3">
-               <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-wide">👥 Clientes Únicos</p>
-               <p class="text-2xl font-black mt-1">{{ metricasAgente.clientesRegistradosUnicos }}</p>
-            </div>
-            <div class="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-3">
-               <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-wide">📌 Efectividad</p>
-               <p class="text-sm font-bold mt-1 text-indigo-100 pt-1">Ver Reportes</p>
+          <!-- Dropdown para que Jefe seleccione agente (Solo visible para Jefe) -->
+          <div v-if="AppStore.agente.value.especialidad === 'Jefe Operativo'" class="bg-white dark:bg-slate-950 p-3 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm animate-fadeIn">
+            <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">Seleccionar Agente</label>
+            <select v-model="AppStore.agenteSeleccionadoSede.value" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-2.5 border border-slate-300 dark:border-slate-800 focus:outline-none focus:border-indigo-500 font-bold">
+               <option value="Todos">Toda la Sede (Consolidado)</option>
+               <option v-for="nombre in listaAgentesSede" :key="nombre" :value="nombre">{{ nombre }}</option>
+            </select>
+          </div>
+
+          <div class="bg-gradient-to-br from-indigo-500 to-sky-500 dark:from-indigo-600 dark:to-sky-600 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+            <div class="absolute -right-6 -top-6 text-white/10 text-8xl">📊</div>
+            <h3 class="text-xs font-black uppercase tracking-wider text-indigo-100 mb-1">Desempeño del Periodo</h3>
+            <p class="text-4xl font-black mb-1">{{ metricasAgente.totalAtenciones }}</p>
+            <p class="text-xs font-medium text-indigo-100 mb-4">Atenciones Asignadas</p>
+            
+            <div class="grid grid-cols-2 gap-3 mt-4">
+              <div class="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-3">
+                 <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-wide">👥 Clientes Únicos</p>
+                 <p class="text-2xl font-black mt-1">{{ metricasAgente.clientesRegistradosUnicos }}</p>
+              </div>
+              <div class="bg-white/10 backdrop-blur border border-white/20 rounded-xl p-3">
+                 <p class="text-[10px] font-bold text-indigo-100 uppercase tracking-wide">📌 Efectividad</p>
+                 <p class="text-sm font-bold mt-1 text-indigo-100 pt-1">Ver Reportes</p>
+              </div>
             </div>
           </div>
-        </div>
-        
-        <h4 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 pt-2">Desglose de Servicios</h4>
-        <div class="grid grid-cols-2 gap-3">
-           <div v-for="(count, tipo) in metricasAgente.porTipo" :key="tipo" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between items-start hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
-              <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">{{ tipo }}</span>
-              <span class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ count }}</span>
-           </div>
-           <div v-if="metricasAgente.totalAtenciones === 0" class="col-span-2 text-center text-slate-400 py-4 text-xs italic">
-              No hay desglose disponible
-           </div>
-        </div>
+          
+          <h4 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 pt-2">Desglose de Servicios</h4>
+          <div class="grid grid-cols-2 gap-3">
+             <div v-for="(count, tipo) in metricasAgente.porTipo" :key="tipo" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 shadow-sm flex flex-col justify-between items-start hover:border-indigo-300 dark:hover:border-indigo-700 transition-colors">
+                <span class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">{{ tipo }}</span>
+                <span class="text-2xl font-black text-slate-800 dark:text-slate-100">{{ count }}</span>
+             </div>
+             <div v-if="metricasAgente.totalAtenciones === 0" class="col-span-2 text-center text-slate-400 py-4 text-xs italic">
+                No hay desglose disponible
+             </div>
+          </div>
+
+          <!-- ESQUELETO DE VENTAS E INSUMOS -->
+          <h4 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-wider px-1 pt-4">Ventas e Insumos</h4>
+          <div class="bg-slate-100 dark:bg-slate-900/50 border border-dashed border-slate-300 dark:border-slate-700 rounded-2xl p-6 text-center space-y-2 opacity-70">
+            <span class="text-3xl opacity-50">🚧</span>
+            <p class="text-xs font-bold text-slate-600 dark:text-slate-400">Módulo en Construcción</p>
+            <p class="text-[10px] text-slate-500">Próximamente conexión con GS (Luxury/RD).</p>
+          </div>
+        </template>
+
+        <template v-else-if="AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleIndicadoresJefe.value === 'Sede'">
+          <!-- Módulo 3: Comportamiento de Demanda (Sede) -->
+          <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-5 shadow-sm space-y-4 animate-fadeIn">
+             <h3 class="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-wide border-b border-slate-200 dark:border-slate-800 pb-2 flex items-center gap-2">
+                <span>📈</span> Comportamiento de Demanda
+             </h3>
+             
+             <div class="grid grid-cols-2 gap-3">
+               <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 border border-slate-100 dark:border-slate-800 text-center">
+                  <p class="text-[9px] font-extrabold uppercase text-slate-400 mb-1">Total Atenciones</p>
+                  <p class="text-xl font-black text-indigo-600 dark:text-indigo-400">{{ metricasDemanda.totalAtenciones }}</p>
+               </div>
+               <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 border border-slate-100 dark:border-slate-800 text-center flex flex-col justify-center">
+                  <p class="text-[9px] font-extrabold uppercase text-slate-400 mb-1">Día Más Fuerte</p>
+                  <p class="text-[11px] font-black text-slate-700 dark:text-slate-300 mt-1 uppercase">{{ metricasDemanda.diaMasFuerte || '---' }}</p>
+               </div>
+             </div>
+
+             <div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 border border-slate-100 dark:border-slate-800">
+                <p class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">Franjas Horarias (Afluencia)</p>
+                <div class="space-y-2">
+                  <div v-for="(cantidad, hora) in metricasDemanda.franjasAfluencia" :key="hora" class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold w-12 text-slate-600 dark:text-slate-400 text-right">{{ hora }}</span>
+                    <div class="flex-1 bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                       <div class="bg-indigo-500 h-full rounded-full transition-all duration-1000" :style="{ width: Math.max(5, (cantidad / metricasDemanda.maxAfluencia) * 100) + '%' }"></div>
+                    </div>
+                    <span class="text-[9px] font-black w-6 text-slate-500">{{ cantidad }}</span>
+                  </div>
+                  <div v-if="Object.keys(metricasDemanda.franjasAfluencia).length === 0" class="text-center text-[10px] text-slate-400 py-2">Sin datos para graficar</div>
+                </div>
+             </div>
+
+             <div class="bg-rose-50 dark:bg-rose-900/10 rounded-xl p-3 border border-rose-100 dark:border-rose-900/30 flex items-center justify-between">
+                <span class="text-[10px] font-extrabold uppercase text-rose-600 dark:text-rose-400">Cancelaciones</span>
+                <span class="text-lg font-black text-rose-700 dark:text-rose-400">{{ metricasDemanda.cancelaciones }}</span>
+             </div>
+          </div>
+        </template>
       </div>
 
       <!-- MÓDULO DE PRESENTACIÓN PREMIUM DE CARDS MÓVILES (CRONOLÓGICO DESCENDENTE Y AGRUPADO) -->
