@@ -107,37 +107,47 @@
             </button>
           </div>
           
-          <!-- MANDO: COLA GLOBAL -->
-          <div class="mt-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-            <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span>👥</span> Cola de Sede ({{ estadoTurnoAgente.cola.length }})
-            </h4>
-            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
-              <div v-if="estadoTurnoAgente.cola.length === 0" class="text-[10px] text-center text-slate-500 py-2 font-medium">No hay agentes en cola.</div>
-              <div v-else v-for="(agente, idx) in estadoTurnoAgente.cola" :key="'q'+idx" class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <!-- MANDO: TABS DE COLA Y ATENCIONES -->
+          <div class="mt-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm animate-fadeIn">
+            
+            <!-- Cabecera de Tabs -->
+            <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 mb-3">
+              <div class="flex gap-4">
+                <button @click="AppStore.toggleMandoTab.value = 'Cola'" :class="['text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all', AppStore.toggleMandoTab.value === 'Cola' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-2 -mb-[9px]' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 pb-2 -mb-[9px]']">
+                  <span>👥</span> Cola Sede
+                </button>
+                <button @click="AppStore.toggleMandoTab.value = 'EnCurso'" :class="['text-xs font-black uppercase tracking-wider flex items-center gap-1.5 transition-all', AppStore.toggleMandoTab.value === 'EnCurso' ? 'text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400 pb-2 -mb-[9px]' : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 pb-2 -mb-[9px]']">
+                  <span>⚡</span> En Curso
+                </button>
+              </div>
+              <!-- Contador Total del Tab Activo -->
+              <span class="bg-slate-100 dark:bg-slate-900 text-slate-500 font-black text-[10px] px-2 py-0.5 rounded-md">
+                {{ AppStore.toggleMandoTab.value === 'Cola' ? estadoTurnoAgente.cola.length : atencionesActivasSede.length }}
+              </span>
+            </div>
+
+            <!-- Contenido: COLA GLOBAL -->
+            <div v-show="AppStore.toggleMandoTab.value === 'Cola'" class="space-y-2 max-h-48 overflow-y-auto pr-1 animate-fadeIn">
+              <div v-if="estadoTurnoAgente.cola.length === 0" class="text-[10px] text-center text-slate-500 py-4 font-medium italic bg-slate-50 dark:bg-slate-900/50 rounded-xl">No hay agentes disponibles en cola en este momento.</div>
+              <div v-else v-for="(agente, idx) in estadoTurnoAgente.cola" :key="'q'+idx" class="flex items-center gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 transition-colors hover:border-indigo-200 dark:hover:border-indigo-800">
                 <div class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-800 flex items-center justify-center font-black text-[10px] text-slate-600 dark:text-slate-400 shrink-0">{{ idx + 1 }}</div>
                 <span class="font-bold text-[11px] text-slate-700 dark:text-slate-300 truncate flex-1">{{ agente.nombre }}</span>
                 <span class="text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider bg-slate-200 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border border-slate-300 dark:border-slate-700">{{ agente.especialidad }}</span>
               </div>
             </div>
-          </div>
 
-          <!-- MANDO: ATENCIONES EN CURSO GLOBAL -->
-          <div class="mt-4 bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm">
-            <h4 class="text-xs font-black text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-3 flex items-center gap-2">
-              <span>⚡</span> Atenciones en Curso ({{ atencionesActivasSede.length }})
-            </h4>
-            <div class="space-y-2 max-h-48 overflow-y-auto pr-1">
-              <div v-if="atencionesActivasSede.length === 0" class="text-[10px] text-center text-slate-500 py-2 font-medium">No hay atenciones activas en la sede.</div>
-              <div v-else v-for="(item, idx) in atencionesActivasSede" :key="'a'+idx" class="flex flex-col gap-1 p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-900/30 relative overflow-hidden">
+            <!-- Contenido: ATENCIONES EN CURSO -->
+            <div v-show="AppStore.toggleMandoTab.value === 'EnCurso'" class="space-y-2 max-h-48 overflow-y-auto pr-1 animate-fadeIn">
+              <div v-if="atencionesActivasSede.length === 0" class="text-[10px] text-center text-slate-500 py-4 font-medium italic bg-slate-50 dark:bg-slate-900/50 rounded-xl">No hay atenciones activas en la sede actualmente.</div>
+              <div v-else v-for="(item, idx) in atencionesActivasSede" :key="'a'+idx" class="flex flex-col gap-1.5 p-2.5 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-xl border border-indigo-100 dark:border-indigo-900/30 relative overflow-hidden transition-colors hover:bg-indigo-50 dark:hover:bg-indigo-900/20">
                 <div class="flex justify-between items-center">
                   <span class="font-bold text-[11px] text-indigo-700 dark:text-indigo-400 truncate">{{ item[3] || item[4] || 'Cliente Sin Nombre' }}</span>
                   <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 uppercase shrink-0">{{ item[18] || 'Atención' }}</span>
                 </div>
                 <div class="flex items-center gap-1.5 text-[10px] text-slate-600 dark:text-slate-400 font-medium">
-                   <span class="truncate max-w-[120px]">👤 {{ item[19] }}</span>
+                   <span class="truncate max-w-[140px]">👤 {{ item[19] }}</span>
                    <span>•</span>
-                   <span>🕒 {{ formatearFechaUHoraVisual(item[13], true) }}</span>
+                   <span class="font-mono">🕒 {{ formatearFechaUHoraVisual(item[13], true) }}</span>
                 </div>
               </div>
             </div>
