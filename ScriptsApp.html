@@ -367,6 +367,13 @@
           if (!dataExistente || dataExistente.length === 0) {
             solicitarMatrizAlServidor(hojaReal);
           }
+
+          // Inyección especial: Para Jefe Operativo en Indicadores, necesitamos la matriz Agentes para poblar su Dropdown
+          if (nuevaPestana === 'Mis Indicadores' && window.AppStore.agente.value.especialidad === 'Jefe Operativo') {
+             if (window.AppStore.cacheDatos.value['Agentes'].length === 0) {
+                solicitarMatrizAlServidor('Agentes');
+             }
+          }
         };
 
         const cargarMasResultados = () => {
@@ -388,6 +395,11 @@
              window.AppStore.cacheDatos.value['Clientes'] = [];
              solicitarMatrizAlServidor('Borrador');
              solicitarMatrizAlServidor('Clientes');
+             
+             if (window.AppStore.agente.value.especialidad === 'Jefe Operativo') {
+               window.AppStore.cacheDatos.value['Agentes'] = [];
+               solicitarMatrizAlServidor('Agentes');
+             }
           }
         };
 
