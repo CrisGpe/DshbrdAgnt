@@ -64,6 +64,7 @@
       toggleIndicadoresJefe: Vue.ref('Sede'), // 'Sede' o 'Mi Rendimiento'
       toggleMandoTab: Vue.ref('Cola'), // 'Cola' o 'EnCurso'
       agenteSeleccionadoSede: Vue.ref('Todos'), // Para el módulo 4
+      limiteResultados: Vue.ref(50), // Límite de tarjetas por pestaña
       
       // UX Diálogo Universal Tailwind (Confirm/Prompt)
       dialogo: Vue.ref({ 
@@ -357,6 +358,7 @@
 
         const cambiarPestana = (nuevaPestana) => {
           window.AppStore.pestanaActiva.value = nuevaPestana;
+          window.AppStore.limiteResultados.value = 50; // Reiniciar límite al cambiar de pestaña
           if (nuevaPestana === 'Botonera') return;
 
           let hojaReal = MAPA_PESTANAS[nuevaPestana] || nuevaPestana;
@@ -365,6 +367,10 @@
           if (!dataExistente || dataExistente.length === 0) {
             solicitarMatrizAlServidor(hojaReal);
           }
+        };
+
+        const cargarMasResultados = () => {
+          window.AppStore.limiteResultados.value += 50;
         };
 
         const forzarRefrescoDatos = () => {
@@ -1183,6 +1189,7 @@
 
           // Funciones de navegación y autenticación existentes
           cambiarPestana,
+          cargarMasResultados,
           dispararAlertaBotonera,
           cargarNicknamesSede,
           ejecutarLogin,
