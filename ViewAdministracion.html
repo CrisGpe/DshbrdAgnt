@@ -38,46 +38,30 @@
         <p class="text-xs text-slate-400 mt-1">Notifica incidencias críticas directamente al centro de control.</p>
       </div>
       
-      <!-- Grid Táctil de Alta Resonancia (48px h-click mínimo) -->
-      <div class="grid grid-cols-2 gap-3.5 w-full">
-        <!-- Alerta 1: Soporte Técnico -->
-        <button 
-          @click="dispararAlertaBotonera('Soporte Técnico')"
-          :disabled="AppStore.procesandoAlerta.value"
-          class="bg-amber-600 hover:bg-amber-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-amber-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]"
-        >
-          <span class="text-3xl">🛠️</span>
-          <span class="text-xs font-black uppercase tracking-wide text-white">Soporte</span>
+      <!-- Grid Táctil de 4 Estados -->
+      <div class="grid grid-cols-2 gap-3 w-full">
+        <button @click="dispararAlertaBotonera('Ya llegué')" :disabled="AppStore.procesandoAlerta.value"
+          class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+          <span class="text-2xl">👋</span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Ya llegué</span>
         </button>
-        
-        <!-- Alerta 2: Cierre o Confirmación -->
-        <button 
-          @click="dispararAlertaBotonera('Cliente Listo')"
-          :disabled="AppStore.procesandoAlerta.value"
-          class="bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-emerald-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]"
-        >
-          <span class="text-3xl">✅</span>
-          <span class="text-xs font-black uppercase tracking-wide text-white">Listo</span>
+
+        <button @click="dispararAlertaBotonera('Voy a comer')" :disabled="AppStore.procesandoAlerta.value"
+          class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+          <span class="text-2xl">🍕</span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Voy a comer</span>
         </button>
-        
-        <!-- Alerta 3: Supervisor Fuerte -->
-        <button 
-          @click="dispararAlertaBotonera('Supervisor Urgente')"
-          :disabled="AppStore.procesandoAlerta.value"
-          class="bg-rose-600 hover:bg-rose-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-rose-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]"
-        >
-          <span class="text-3xl">⚠️</span>
-          <span class="text-xs font-black uppercase tracking-wide text-white">Supervisor</span>
+
+        <button @click="dispararAlertaBotonera('Regresé de comer')" :disabled="AppStore.procesandoAlerta.value"
+          class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+          <span class="text-2xl">🔄</span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Regresé</span>
         </button>
-        
-        <!-- Alerta 4: Insumos o Abastecimiento -->
-        <button 
-          @click="dispararAlertaBotonera('Abastecimiento')"
-          :disabled="AppStore.procesandoAlerta.value"
-          class="bg-blue-600 hover:bg-blue-500 disabled:bg-slate-800 p-5 rounded-2xl shadow-lg border border-blue-500/20 flex flex-col items-center justify-center gap-2 transition-all active:scale-95 min-h-[110px]"
-        >
-          <span class="text-3xl">📦</span>
-          <span class="text-xs font-black uppercase tracking-wide text-white">Insumos</span>
+
+        <button @click="dispararAlertaBotonera('Acabó mi día')" :disabled="AppStore.procesandoAlerta.value"
+          class="bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 disabled:bg-slate-100 dark:disabled:bg-slate-950 p-4 rounded-xl shadow border border-slate-200 dark:border-slate-800 flex flex-col items-center justify-center gap-1.5 transition-all active:scale-95 min-h-[85px]">
+          <span class="text-2xl">🏁</span>
+          <span class="text-[10px] font-bold uppercase tracking-wide text-slate-700 dark:text-slate-200">Acabó mi día</span>
         </button>
       </div>
       
@@ -118,7 +102,35 @@
             <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
               <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Día de Descanso</span>
               <div class="flex items-center gap-2">
-                <span class="font-black text-indigo-600 dark:text-indigo-400 capitalize">{{ AppStore.agente.value.diaDescanso || 'No asignado' }}</span>
+                <span class="font-black text-emerald-600 dark:text-emerald-400 capitalize">{{ AppStore.agente.value.diaDescanso || 'No asignado' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">DNI</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.dni || '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Celular</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.celular || '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Cumpleaños</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.cumpleanos || '---' }}</span>
+                <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
+              </div>
+            </div>
+            <div @click="iniciarEdicionPerfil" class="flex justify-between items-center bg-slate-100 dark:bg-slate-900/50 p-2.5 rounded-xl cursor-pointer active:scale-[0.98] transition-all hover:bg-slate-200 dark:hover:bg-slate-800/80 group">
+              <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider">Género</span>
+              <div class="flex items-center gap-2">
+                <span class="font-black text-slate-800 dark:text-slate-200">{{ AppStore.agente.value.genero || '---' }}</span>
                 <span class="opacity-50 group-hover:opacity-100 text-indigo-500 text-[10px]">✏️</span>
               </div>
             </div>
@@ -147,6 +159,27 @@
               <option value="Viernes">Viernes</option>
               <option value="Sábado">Sábado</option>
               <option value="Domingo">Domingo</option>
+            </select>
+          </div>
+          
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">DNI</label>
+            <input type="text" v-model="AppStore.perfilForm.value.dni" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Celular</label>
+            <input type="text" v-model="AppStore.perfilForm.value.celular" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Cumpleaños (DD/MM)</label>
+            <input type="text" v-model="AppStore.perfilForm.value.cumpleanos" placeholder="Ej: 15/08" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+          </div>
+          <div class="space-y-2">
+            <label class="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Género</label>
+            <select v-model="AppStore.perfilForm.value.genero" class="w-full bg-slate-100 dark:bg-slate-900 text-slate-900 dark:text-white rounded-lg px-3 py-2 border border-slate-300 dark:border-slate-700 focus:border-indigo-500 focus:outline-none transition-colors">
+              <option value="">Selecciona...</option>
+              <option value="Femenino">Femenino</option>
+              <option value="Masculino">Masculino</option>
             </select>
           </div>
           
