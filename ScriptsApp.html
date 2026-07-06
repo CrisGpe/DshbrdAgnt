@@ -34,13 +34,23 @@
       
       agente: Vue.ref({
         filaOriginal: null,
-        sede: '',
-        nombre: '',
-        nickname: '',
-        especialidad: '', // Campo pivote del enrutador de Index.html
-        autenticado: false
+        sede: "",
+        sedeBase: "",
+        nombre: "",
+        especialidad: "",
+        nickname: "",
+        horarioEntrada: "",
+        horarioSalida: "",
+        diaDescanso: ""
       }),
       
+      limiteResultados: Vue.ref(50),
+      filtroCola: Vue.ref('Todos'), // 'Todos', 'Estilismo', 'Cosmiatría'
+      mostrarMenuBurbujas: Vue.ref(false),
+      
+      calendarioFechaActiva: Vue.ref(new Date()), // Fecha seleccionada para el calendario
+
+      // Data caches (Matriz de memoria local)      
       loginForm: Vue.ref({ nickname: '', pin: '', sede: 'RD' }),
       listaNicknamesDisponibles: Vue.ref([]),
       cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] }),
@@ -1278,6 +1288,34 @@
            return shiftStart < slotEnd && shiftEnd > slotStart;
         };
 
+        // =========================================================================
+        // NAVEGACIÓN Y FORMATO DEL CALENDARIO DIARIO
+        // =========================================================================
+        const diasSemana = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        
+        const calendarioDiaAnterior = () => {
+           const d = window.AppStore.calendarioFechaActiva.value;
+           window.AppStore.calendarioFechaActiva.value = new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1);
+        };
+        
+        const calendarioDiaSiguiente = () => {
+           const d = window.AppStore.calendarioFechaActiva.value;
+           window.AppStore.calendarioFechaActiva.value = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+        };
+        
+        const calendarioNombreDiaActivo = Vue.computed(() => {
+           const d = window.AppStore.calendarioFechaActiva.value;
+           return diasSemana[d.getDay()];
+        });
+        
+        const calendarioDiaVisible = Vue.computed(() => {
+           const d = window.AppStore.calendarioFechaActiva.value;
+           const diaStr = diasSemana[d.getDay()];
+           const fechaStr = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+           return `${diaStr} ${fechaStr}`;
+        });
+        // =========================================================================
+
         return {
           // Estado Global existente
           AppStore: window.AppStore,
@@ -1338,7 +1376,13 @@
           tieneItemsParaEnviar,       // Propiedad computada que muestra/oculta el botón de envío
           enviarPedidoBarConsolidado,  // Función que procesa el string final y limpia el estado
           
-          isStaffActiveInHour
+          isStaffActiveInHour,
+          
+          // Calendario Diario
+          calendarioDiaAnterior,
+          calendarioDiaSiguiente,
+          calendarioNombreDiaActivo,
+          calendarioDiaVisible
         };
       }
     });
