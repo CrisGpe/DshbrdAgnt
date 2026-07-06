@@ -887,7 +887,7 @@
         // 6. Estado del Turno (Cálculo de Posición en la Cola desde Borrador)
         const estadoTurnoAgente = Vue.computed(() => {
           const m = window.AppStore.cacheDatos.value["Borrador"] || [];
-          if (m.length === 0) return { posicion: 0, total: 0 };
+          if (m.length === 0) return { posicion: 0, total: 0, cola: [] };
           
           const nick = window.AppStore.agente.value.nickname.toLowerCase().trim();
           const nombreCompleto = window.AppStore.agente.value.nombre.toLowerCase().trim();
