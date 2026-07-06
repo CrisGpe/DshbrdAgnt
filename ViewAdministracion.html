@@ -237,10 +237,10 @@
              
              <!-- Columnas de Días -->
              <div v-for="(dia, index) in ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']" :key="dia" 
-                  class="flex-1 relative border-r border-slate-200 dark:border-slate-800/50 min-w-[100px] z-10">
+                  class="flex-1 relative border-r border-slate-200 dark:border-slate-800/50 min-w-[100px] z-10 flex flex-col">
                 
                 <!-- Cabecera del Día (Sticky top) -->
-                <div class="absolute top-0 w-full -mt-8 h-8 border-b border-slate-200 dark:border-slate-800 flex items-center justify-center bg-white/90 dark:bg-slate-950/90 backdrop-blur z-30 text-[10px] font-black uppercase tracking-wider"
+                <div class="sticky top-0 w-full h-8 -mt-8 border-b border-slate-200 dark:border-slate-800 flex items-center justify-center bg-white/95 dark:bg-slate-950/95 backdrop-blur z-30 text-[10px] font-black uppercase tracking-wider"
                      :class="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase() ? 'text-rose-500' : 'text-slate-600 dark:text-slate-400'">
                   {{ dia.substring(0,3) }}
                   <span v-if="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase()" class="absolute -top-1 -right-1 flex h-2 w-2">
@@ -249,22 +249,19 @@
                   </span>
                 </div>
                 
-                <!-- Badges (Bloques de horario) -->
-                <template v-for="(staff, sIndex) in planillaAdministrativa">
-                   <div v-if="staff.diaDescanso?.toLowerCase() !== dia.toLowerCase() && staff.entrada && staff.entrada !== '--:--'" 
-                        class="absolute w-[86%] left-[7%] rounded-md overflow-hidden shadow-sm p-1.5 flex flex-col transition-all cursor-default border"
-                        :class="staff.esYo ? 'bg-indigo-500 border-indigo-400 text-white z-20 hover:scale-[1.02]' : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 opacity-90 hover:opacity-100 hover:scale-[1.02]'"
-                        :style="{ top: getBlockTop(staff.entrada), height: getBlockHeight(staff.entrada, staff.salida), marginLeft: (sIndex * 3) + 'px', zIndex: staff.esYo ? 30 : (10 + sIndex) }">
-                      
-                      <span class="text-[9px] font-black leading-tight truncate">
-                         {{ staff.nick }} <span v-if="staff.esYo" class="opacity-80">(Tú)</span>
-                      </span>
-                      <span class="text-[7.5px] font-bold mt-auto leading-none opacity-90 truncate">
-                         {{ staff.entrada.replace(' am','a').replace(' pm','p') }} - {{ staff.salida.replace(' am','a').replace(' pm','p') }}
-                      </span>
-                   </div>
-                </template>
+                <!-- Celdas por Hora -->
+                <div v-for="h in 15" :key="'cell-'+dia+'-'+h" class="h-[56px] relative p-1 flex flex-col gap-1 overflow-hidden hover:overflow-y-auto"
+                     :class="AppStore.agente.value.diaDescanso?.toLowerCase() === dia.toLowerCase() ? 'bg-slate-50/50 dark:bg-slate-900/20' : ''">
+                   
+                   <template v-for="staff in planillaAdministrativa">
+                      <div v-if="isStaffActiveInHour(staff, h, dia)" 
+                           class="w-full rounded flex items-center gap-1.5 px-1.5 py-1 text-[9px] font-black cursor-default transition-transform hover:scale-[1.02]"
+                           :class="staff.esYo ? 'bg-indigo-500 text-white shadow-sm' : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300'">
+                         <span class="truncate">{{ staff.nick }}</span>
+                      </div>
+                   </template>
 
+                </div>
              </div>
           </div>
         </div>

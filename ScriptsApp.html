@@ -1251,30 +1251,12 @@
           }
         };
 
-        // Funciones para Grilla de Calendario
-        const getBlockTop = (horaStr) => {
-          if (!horaStr || horaStr === '--:--') return '0px';
-          // format expected: "11:00 am" or "8:30 pm"
-          const match = horaStr.match(/(\d+):(\d+)\s*(am|pm)/i);
-          if (!match) return '0px';
-          let h = parseInt(match[1], 10);
-          const m = parseInt(match[2], 10);
-          const isPm = match[3].toLowerCase() === 'pm';
-          
-          if (isPm && h !== 12) h += 12;
-          if (!isPm && h === 12) h = 0;
-          
-          // Eje Y empieza a las 8:00 AM (8.0 horas)
-          const inicioY = 8;
-          let offsetHours = (h + m/60) - inicioY;
-          if (offsetHours < 0) offsetHours = 0; // Top clamp
-          
-          return (offsetHours * 56) + 'px'; // 56px per hour
-        };
-
-        const getBlockHeight = (entradaStr, salidaStr) => {
+        // Función para Grilla de Calendario (Slots por hora)
+        const isStaffActiveInHour = (staff, hIndex, diaStr) => {
+           if (!staff || !staff.entrada || staff.entrada === '--:--') return false;
+           if (staff.diaDescanso && staff.diaDescanso.toLowerCase() === diaStr.toLowerCase()) return false;
+           
            const parseHours = (str) => {
-              if (!str || str === '--:--') return 0;
               const match = str.match(/(\d+):(\d+)\s*(am|pm)/i);
               if (!match) return 0;
               let h = parseInt(match[1], 10);
@@ -1285,12 +1267,15 @@
               return h + m/60;
            };
            
-           const ent = parseHours(entradaStr);
-           let sal = parseHours(salidaStr);
-           if (sal < ent) sal += 24; // Turno cruza la medianoche
+           const shiftStart = parseHours(staff.entrada);
+           let shiftEnd = parseHours(staff.salida);
+           if (shiftEnd <= shiftStart) shiftEnd += 24;
            
-           const duration = sal - ent;
-           return (duration * 56) + 'px';
+           // hIndex goes from 1 to 15. hIndex 1 is 8:00 AM.
+           const slotStart = hIndex + 7;
+           const slotEnd = slotStart + 1;
+           
+           return shiftStart < slotEnd && shiftEnd > slotStart;
         };
 
         return {
@@ -1353,8 +1338,7 @@
           tieneItemsParaEnviar,       // Propiedad computada que muestra/oculta el botón de envío
           enviarPedidoBarConsolidado,  // Función que procesa el string final y limpia el estado
           
-          getBlockTop,
-          getBlockHeight
+          isStaffActiveInHour
         };
       }
     });
