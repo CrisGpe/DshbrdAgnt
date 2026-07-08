@@ -139,23 +139,28 @@
             
             <div v-else class="space-y-2">
                <div v-for="(agente, idx) in estadoTurnoAgente.cola" :key="'q'+idx" 
-                    class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-800 transition-colors">
-                  
-                  <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center font-black text-xs text-slate-500 shrink-0">
+                 class="flex items-center gap-3 p-3 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 transition-all hover:shadow-md">
+                  <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-black text-xs text-slate-500 shadow-inner">
                      #{{ idx + 1 }}
                   </div>
-                  
                   <div class="flex-1 min-w-0">
-                     <p class="text-xs font-black text-slate-900 dark:text-white truncate">{{ agente[1] }}</p>
+                     <p class="text-xs font-black text-slate-900 dark:text-white truncate">{{ agente.nombre }}</p>
                      <p class="text-[9px] font-bold text-slate-500 dark:text-slate-400 mt-0.5 truncate flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full" :class="agente[10] === 'Estilismo' ? 'bg-pink-400' : 'bg-teal-400'"></span>
-                        {{ agente[10] }}
+                        <span class="w-1.5 h-1.5 rounded-full" :class="agente.especialidad === 'Estilismo' ? 'bg-pink-400' : 'bg-teal-400'"></span>
+                        {{ agente.especialidad }}
                      </p>
                   </div>
-                  
-                  <div class="text-right shrink-0">
-                     <p class="text-[9px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">{{ agente[8] }}</p>
-                     <p class="text-[8px] text-slate-400 font-mono mt-1 font-bold">{{ formatearFechaUHoraVisual(agente[12], true) }}</p>
+                  <div class="text-right">
+                     <span class="inline-block px-2 py-1 text-[9px] font-black uppercase tracking-wider rounded-md border"
+                           :class="[
+                             agente.estado === 'Disponible' ? 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' : 
+                             'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800'
+                           ]">
+                        {{ agente.estado }}
+                     </span>
+                     <p class="text-[9px] text-slate-400 mt-1" v-if="agente.ultimaActividad">
+                        {{ formatearFechaUHoraVisual(agente.ultimaActividad, true) }}
+                     </p>
                   </div>
                </div>
             </div>

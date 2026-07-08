@@ -741,25 +741,23 @@
         // 5.0.1 Lista de Administradores Presentes (Módulo Admin > Alertas)
         const adminPresentesSede = Vue.computed(() => {
            const m = window.AppStore.cacheDatos.value["Borrador"] || [];
-           const sedeActual = window.AppStore.agente.value.sede;
            
            return m.filter(row => {
               const dependiente = String(row[1] || '').trim();
-              const sedeRow = String(row[2] || '').trim();
               const especialidad = String(row[10] || '').toLowerCase().trim();
               const estado = String(row[8] || '').toLowerCase().trim();
               
-              // Excluir si no es de la sede o si no es administración o si no tiene estado
-              if (sedeRow !== sedeActual || especialidad !== 'administracion' || !dependiente || !estado) return false;
+              // Excluir si no es administración o si no tiene estado
+              if (especialidad !== 'administracion' || !dependiente || !estado) return false;
               
               // Excluir estados que significan ausencia o fin de jornada
-              if (estado === 'fuera de sede' || estado === 'libre' || estado === 'acabó su día') return false;
+              if (estado === 'fuera de sede' || estado === 'libre' || estado === 'acabó su día' || estado === 'no registrado') return false;
               
               return true;
            }).map(row => {
               return {
                  nombre: String(row[1] || '').trim(),
-                 nickname: String(row[7] || '').trim(),
+                 nickname: String(row[7] || '').trim(), // Col H
                  estado: String(row[8] || '').trim(),
                  ultimaActividad: parseDateRobust(row[12])
               };
@@ -1046,7 +1044,12 @@
             }
           }
           
-          const cola = agentesCola.map(a => ({ nombre: a[1], especialidad: String(a[10] || 'Técnico') })); // Retornar array de objetos
+          const cola = agentesCola.map(a => ({ 
+             nombre: a[1], 
+             especialidad: String(a[10] || 'Técnico'),
+             estado: String(a[8] || 'Disponible'),
+             ultimaActividad: a[12]
+          }));
           return { posicion, total: totalCola, estadoActual, cola };
         });
 
