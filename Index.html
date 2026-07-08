@@ -96,8 +96,11 @@
           <div class="overflow-y-auto flex-1 mb-4 pr-1 space-y-3">
             <div v-for="(campo, idx) in AppStore.modalFormulario.value.campos" :key="idx" class="flex flex-col gap-1">
               <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">{{ campo.label }}</label>
-              <input v-if="campo.tipo !== 'textarea'" :type="campo.tipo || 'text'" v-model="campo.valor" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors" />
-              <textarea v-else v-model="campo.valor" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors resize-none"></textarea>
+              <input v-if="campo.tipo !== 'textarea' && campo.tipo !== 'select'" :type="campo.tipo || 'text'" v-model="campo.valor" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors" />
+              <textarea v-else-if="campo.tipo === 'textarea'" v-model="campo.valor" rows="3" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors resize-none"></textarea>
+              <select v-else-if="campo.tipo === 'select'" v-model="campo.valor" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-xs rounded-xl p-3 border border-slate-300 dark:border-slate-700 focus:outline-none focus:border-indigo-500 transition-colors">
+                <option v-for="op in campo.opciones" :key="op.value || op" :value="op.value || op">{{ op.text || op }}</option>
+              </select>
             </div>
           </div>
 
