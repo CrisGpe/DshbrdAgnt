@@ -293,12 +293,13 @@
                   </div>
                   
                   <div class="space-y-1 relative group">
-                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">DNI / Documento</label>
-                    <input type="tel" v-model="AppStore.wizardCliente.value.datos.dni" placeholder="Ej. 76543210" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all shadow-inner" />
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">DNI / Carnet de Extranjería</label>
+                    <input type="text" v-model="AppStore.wizardCliente.value.datos.dni" placeholder="Ej. 76543210" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all shadow-inner" />
+                    <p v-if="AppStore.wizardCliente.value.datos.dni && AppStore.wizardCliente.value.datos.dni.length < 8" class="text-[10px] text-rose-500 font-bold ml-1 absolute -bottom-4">Debe tener al menos 8 caracteres (DNI/CE).</p>
                   </div>
                 </div>
 
-                <button @click="AppStore.wizardCliente.value.pasoActivo++" :disabled="!AppStore.wizardCliente.value.datos.nombre || !AppStore.wizardCliente.value.datos.apellido" class="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 text-white bg-emerald-600 shadow-lg mt-8">
+                <button @click="AppStore.wizardCliente.value.pasoActivo++" :disabled="(!AppStore.wizardCliente.value.datos.nombre && !AppStore.wizardCliente.value.datos.apellido) || (AppStore.wizardCliente.value.datos.dni && AppStore.wizardCliente.value.datos.dni.length < 8)" class="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 text-white bg-emerald-600 shadow-lg mt-8">
                   Siguiente →
                 </button>
               </div>
@@ -315,9 +316,15 @@
                 <div class="space-y-4">
                   <div class="space-y-1 relative group">
                     <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Celular</label>
-                    <div class="relative">
-                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500 transition-colors">📱</span>
-                      <input type="tel" v-model="AppStore.wizardCliente.value.datos.celular" placeholder="Ej. 987654321" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 pl-10 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/20 transition-all shadow-inner" />
+                    <div class="flex gap-2 relative">
+                      <select v-model="AppStore.wizardCliente.value.datos.prefijoCelular" class="w-24 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-teal-500 transition-all shadow-inner cursor-pointer appearance-none text-center">
+                        <option value="+51">🇵🇪 +51</option>
+                        <option value="+58">🇻🇪 +58</option>
+                        <option value="+57">🇨🇴 +57</option>
+                        <option value="+56">🇨🇱 +56</option>
+                        <option value="+593">🇪🇨 +593</option>
+                      </select>
+                      <input type="tel" v-model="AppStore.wizardCliente.value.datos.celular" placeholder="Ej. 987654321" class="flex-1 bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/20 transition-all shadow-inner" />
                     </div>
                   </div>
                   
@@ -364,7 +371,7 @@
                     <div class="grid grid-cols-2 gap-2">
                       <div>
                         <p class="text-[9px] uppercase font-bold text-slate-500">Celular</p>
-                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">📱 {{ AppStore.wizardCliente.value.datos.celular }}</p>
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">📱 {{ AppStore.wizardCliente.value.datos.prefijoCelular }} {{ AppStore.wizardCliente.value.datos.celular }}</p>
                       </div>
                       <div v-if="AppStore.wizardCliente.value.datos.dni">
                         <p class="text-[9px] uppercase font-bold text-slate-500">DNI</p>

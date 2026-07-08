@@ -126,6 +126,7 @@
           apellido: '',
           dni: '',
           cumpleanos: '',
+          prefijoCelular: '+51',
           celular: '',
           correo: ''
         }
@@ -306,6 +307,7 @@
               apellido: '',
               dni: '',
               cumpleanos: '',
+              prefijoCelular: '+51',
               celular: '',
               correo: ''
             }
@@ -330,7 +332,7 @@
             apellido: datos.apellido,
             dni: datos.dni,
             cumpleanos: cumpleFormato,
-            celular: datos.celular,
+            celular: datos.celular ? `${datos.prefijoCelular} ${datos.celular}` : '',
             correo: datos.correo
           };
           
