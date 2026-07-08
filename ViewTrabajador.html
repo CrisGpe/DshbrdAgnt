@@ -34,8 +34,14 @@
         <button @click="AppStore.toggleInicioJefe.value = 'Bar'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleInicioJefe.value === 'Bar' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">🍹 Bar</button>
       </div>
 
+      <!-- Toggle Trabajador Regular (Solo visible para Estilismo y Cosmiatría) -->
+      <div v-if="['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad)" class="bg-slate-100 dark:bg-slate-900 p-1.5 rounded-xl flex items-center gap-1 shadow-inner mb-4">
+        <button @click="AppStore.toggleInicioTrabajador.value = 'Alertas'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleInicioTrabajador.value === 'Alertas' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">🔔 Alertas</button>
+        <button @click="AppStore.toggleInicioTrabajador.value = 'Bar'" class="flex-1 py-1.5 rounded-lg text-[11px] font-black tracking-wide transition-all" :class="AppStore.toggleInicioTrabajador.value === 'Bar' ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'">🍹 Bar</button>
+      </div>
+
       <!-- VISTA TRABAJADOR REGULAR (O Jefe cuando selecciona Botonera) -->
-      <template v-if="['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad) || (AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleInicioJefe.value === 'Botonera')">
+      <template v-if="( ['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad) && AppStore.toggleInicioTrabajador.value === 'Alertas' ) || (AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleInicioJefe.value === 'Botonera')">
         <!-- Bloque A: Alertas Inmediatas -->
         <div class="space-y-3 animate-fadeIn">
           <div class="text-center mb-2">
@@ -157,7 +163,7 @@
       </template>
 
       <!-- Bloque B: Sección Bar (Trabajador regular o Jefe cuando selecciona Bar) -->
-      <template v-if="['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad) || (AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleInicioJefe.value === 'Bar')">
+      <template v-if="( ['Estilismo', 'Cosmiatría'].includes(AppStore.agente.value.especialidad) && AppStore.toggleInicioTrabajador.value === 'Bar' ) || (AppStore.agente.value.especialidad === 'Jefe Operativo' && AppStore.toggleInicioJefe.value === 'Bar')">
         <div class="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 space-y-4 shadow-lg dark:shadow-xl animate-fadeIn">
           <div class="text-center border-b border-slate-200 dark:border-slate-900 pb-2">
             <h3 class="text-xs font-black uppercase tracking-wider text-indigo-400 flex items-center justify-center gap-1">🍹 Sección Bar</h3>
