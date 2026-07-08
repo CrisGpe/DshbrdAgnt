@@ -104,6 +104,19 @@
         onSubmit: null
       }),
 
+      // UX Wizard Citas 10x
+      wizardCita: Vue.ref({
+        visible: false,
+        pasoActivo: 1, // 1: Servicio, 2: Fecha/Hora, 3: Datos
+        datos: {
+          servicio: '',
+          fecha: '',
+          hora: '',
+          tipoCliente: 'Nuevo',
+          cliente: ''
+        }
+      }),
+
       // UX Menú Burbujas
       mostrarMenuBurbujas: Vue.ref(false),
 
@@ -180,30 +193,91 @@
           cerrarDialogo();
         };
 
+        // ==========================================
+        // LÓGICA DE MODALES DE FORMULARIO GENÉRICO
+        // ==========================================
         const mostrarModalFormulario = (config) => {
-          const camposMapeados = (config.campos || []).map(c => ({ ...c, valor: '' }));
           window.AppStore.modalFormulario.value = {
             visible: true,
             titulo: config.titulo || 'Formulario',
-            campos: camposMapeados,
             textoBoton: config.textoBoton || 'Guardar',
-            onSubmit: config.onSubmit || null
+            onSubmit: config.onSubmit || null,
+            campos: (config.campos || []).map(c => ({ ...c, valor: c.valor || '' }))
           };
         };
-
         const cerrarModalFormulario = () => {
           window.AppStore.modalFormulario.value.visible = false;
         };
-
+        
         const enviarModalFormulario = () => {
           const state = window.AppStore.modalFormulario.value;
-          if (state.onSubmit) {
-            // Extraer valores en un objeto { idCampo: valor }
-            const payload = {};
-            state.campos.forEach(c => payload[c.id] = c.valor);
-            state.onSubmit(payload);
+          if (state.onSubmit && typeof state.onSubmit === 'function') {
+            const formData = {};
+            state.campos.forEach(c => formData[c.id] = c.valor);
+            state.onSubmit(formData);
           }
           cerrarModalFormulario();
+        };
+
+        // ==========================================
+        // LÓGICA DE WIZARD 10x PARA CITAS
+        // ==========================================
+        const abrirWizardCita = () => {
+          // Si el input date requiere el valor en YYYY-MM-DD
+          const hoy = new Date();
+          const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+          const dia = String(hoy.getDate()).padStart(2, '0');
+          const fechaDef = `${hoy.getFullYear()}-${mes}-${dia}`;
+          
+          window.AppStore.wizardCita.value = {
+            visible: true,
+            pasoActivo: 1,
+            datos: {
+              servicio: '',
+              fecha: fechaDef,
+              hora: '',
+              tipoCliente: 'Nuevo',
+              cliente: ''
+            }
+          };
+        };
+        
+        const cerrarWizardCita = () => {
+          window.AppStore.wizardCita.value.visible = false;
+        };
+        
+        const enviarWizardCita = () => {
+          const datos = window.AppStore.wizardCita.value.datos;
+          // Transformar YYYY-MM-DD a DD/MM/YYYY para compatibilidad
+          let fechaFormatoBBDD = datos.fecha;
+          if (fechaFormatoBBDD && fechaFormatoBBDD.includes('-')) {
+            const parts = fechaFormatoBBDD.split('-');
+            fechaFormatoBBDD = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+          
+          const payloadCita = {
+            cliente: datos.cliente,
+            tipoCliente: datos.tipoCliente,
+            fechaCita: fechaFormatoBBDD,
+            horaCita: datos.hora,
+            servicio: datos.servicio
+          };
+          
+          cerrarWizardCita();
+          window.AppStore.cargando.value = true;
+          
+          google.script.run.withSuccessHandler(res => {
+            window.AppStore.cargando.value = false;
+            if(res.exito){
+              mostrarToast(res.mensaje, 'success');
+              forzarRefrescoDatos();
+            } else {
+              mostrarToast(res.mensaje, 'error');
+            }
+          }).withFailureHandler(err => {
+            window.AppStore.cargando.value = false;
+            mostrarToast(err.message, 'error');
+          }).registrarCitaBBDD(window.AppStore.agente.value.sede, payloadCita, window.AppStore.agente.value.nickname);
         };
 
         const seleccionarClienteDialogo = (clienteRaw) => {
@@ -1387,9 +1461,13 @@
           cerrarDialogo,
           confirmarDialogo,
           
+          solicitarMatrizAlServidor,
           mostrarModalFormulario,
           cerrarModalFormulario,
           enviarModalFormulario,
+          abrirWizardCita,
+          cerrarWizardCita,
+          enviarWizardCita,
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
           seleccionarClienteDialogo,

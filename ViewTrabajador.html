@@ -290,8 +290,8 @@
 
       <!-- BOTONES DE ACCIÓN RÁPIDA -->
       <div v-if="AppStore.pestanaActiva.value === 'Mi Agenda'" class="w-full mb-3 animate-fadeIn">
-        <button @click="mostrarModalFormulario({ titulo: 'Registrar Nueva Cita', textoBoton: 'Registrar', campos: [{ id: 'cliente', label: 'Cliente (Nombre/DNI)', tipo: 'text' }, { id: 'fechaCita', label: 'Fecha Cita', tipo: 'date' }, { id: 'horaCita', label: 'Hora Cita', tipo: 'time' }, { id: 'tipoCliente', label: 'Tipo Cliente', tipo: 'select', opciones: ['Nuevo', 'Recurrente', 'VIP'] }, { id: 'servicio', label: 'Servicio', tipo: 'select', opciones: ['Corte', 'Color/Tinte', 'Manicure', 'Pedicure', 'Masaje', 'Tratamiento Facial', 'Depilación', 'Asesoría', 'Otros'] }], onSubmit: (data) => { if(data.fechaCita && data.fechaCita.includes('-')) { const parts = data.fechaCita.split('-'); data.fechaCita = `${parts[2]}/${parts[1]}/${parts[0]}`; } window.AppStore.cargando.value = true; google.script.run.withSuccessHandler(res => { window.AppStore.cargando.value = false; if(res.exito){ mostrarToast(res.mensaje, 'success'); forzarRefrescoDatos(); } else { mostrarToast(res.mensaje, 'error'); } }).withFailureHandler(err => { window.AppStore.cargando.value = false; mostrarToast(err.message, 'error'); }).registrarCitaBBDD(window.AppStore.agente.value.sede, data, window.AppStore.agente.value.nickname); } })" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-          <span>➕</span> Registrar Nueva Cita
+        <button @click="abrirWizardCita" class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-black tracking-wide text-sm py-4 rounded-2xl shadow-xl shadow-indigo-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+          <span class="text-lg">✨</span> Registrar Cita 10x
         </button>
       </div>
       
