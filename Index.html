@@ -245,6 +245,150 @@
         </div>
       </div>
     </transition>
+
+    <!-- WIZARD 10x PARA CLIENTES -->
+    <transition name="toast">
+      <div v-if="AppStore.wizardCliente.value.visible" class="fixed inset-0 z-[10011] flex items-end sm:items-center justify-center bg-slate-900/70 backdrop-blur-md" @click.self="cerrarWizardCliente">
+        <div class="bg-white dark:bg-slate-950 w-full sm:max-w-md h-[85vh] sm:h-auto sm:max-h-[85vh] sm:rounded-3xl rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.3)] border-t sm:border border-slate-200 dark:border-slate-800/80 animate-slideUp flex flex-col overflow-hidden relative">
+          
+          <!-- Header de Navegación -->
+          <div class="px-5 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-950/50 backdrop-blur z-10 shrink-0">
+            <button v-if="AppStore.wizardCliente.value.pasoActivo > 1" @click="AppStore.wizardCliente.value.pasoActivo--" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500 hover:text-emerald-500 transition-colors">
+              <span class="text-lg font-black">←</span>
+            </button>
+            <div v-else class="w-8 h-8"></div>
+            
+            <h3 class="text-sm font-black tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-teal-500">Nuevo Cliente</h3>
+            
+            <button @click="cerrarWizardCliente" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 dark:bg-slate-900 text-slate-500 hover:text-rose-500 transition-colors">
+              <span class="text-lg font-black">×</span>
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="h-1 w-full bg-slate-100 dark:bg-slate-900 shrink-0">
+            <div class="h-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500 ease-out" :style="{ width: (AppStore.wizardCliente.value.pasoActivo * 33.33) + '%' }"></div>
+          </div>
+
+          <!-- Contenido Deslizante -->
+          <div class="flex-1 overflow-y-auto overflow-x-hidden p-5 relative custom-scrollbar min-h-[300px]">
+            
+            <!-- PASO 1: Datos Personales -->
+            <transition name="toast">
+              <div v-if="AppStore.wizardCliente.value.pasoActivo === 1" class="absolute inset-0 p-5 space-y-4 bg-white dark:bg-slate-950 h-max">
+                <div class="text-center mb-6">
+                  <h4 class="text-lg font-black text-slate-900 dark:text-white">Datos Personales</h4>
+                  <p class="text-xs text-slate-500 mt-1">Ingresa la información básica</p>
+                </div>
+                
+                <div class="space-y-4">
+                  <div class="space-y-1 relative group">
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Nombres</label>
+                    <input type="text" v-model="AppStore.wizardCliente.value.datos.nombre" placeholder="Ej. Ana María" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all shadow-inner" />
+                  </div>
+                  
+                  <div class="space-y-1 relative group">
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Apellidos</label>
+                    <input type="text" v-model="AppStore.wizardCliente.value.datos.apellido" placeholder="Ej. García López" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all shadow-inner" />
+                  </div>
+                  
+                  <div class="space-y-1 relative group">
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">DNI / Documento</label>
+                    <input type="tel" v-model="AppStore.wizardCliente.value.datos.dni" placeholder="Ej. 76543210" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/20 transition-all shadow-inner" />
+                  </div>
+                </div>
+
+                <button @click="AppStore.wizardCliente.value.pasoActivo++" :disabled="!AppStore.wizardCliente.value.datos.nombre || !AppStore.wizardCliente.value.datos.apellido" class="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 text-white bg-emerald-600 shadow-lg mt-8">
+                  Siguiente →
+                </button>
+              </div>
+            </transition>
+
+            <!-- PASO 2: Contacto -->
+            <transition name="toast">
+              <div v-if="AppStore.wizardCliente.value.pasoActivo === 2" class="absolute inset-0 p-5 space-y-4 bg-white dark:bg-slate-950 h-max">
+                <div class="text-center mb-6">
+                  <h4 class="text-lg font-black text-slate-900 dark:text-white">Datos de Contacto</h4>
+                  <p class="text-xs text-slate-500 mt-1">Para comunicaciones y cumpleaños</p>
+                </div>
+
+                <div class="space-y-4">
+                  <div class="space-y-1 relative group">
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Celular</label>
+                    <div class="relative">
+                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500 transition-colors">📱</span>
+                      <input type="tel" v-model="AppStore.wizardCliente.value.datos.celular" placeholder="Ej. 987654321" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 pl-10 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/20 transition-all shadow-inner" />
+                    </div>
+                  </div>
+                  
+                  <div class="space-y-1 relative group">
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Correo Electrónico (Opcional)</label>
+                    <div class="relative">
+                      <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-teal-500 transition-colors">✉️</span>
+                      <input type="email" v-model="AppStore.wizardCliente.value.datos.correo" placeholder="ejemplo@correo.com" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 pl-10 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/20 transition-all shadow-inner" />
+                    </div>
+                  </div>
+                  
+                  <div class="space-y-1">
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Fecha de Cumpleaños</label>
+                    <input type="date" v-model="AppStore.wizardCliente.value.datos.cumpleanos" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-teal-500 transition-colors shadow-inner" />
+                  </div>
+                </div>
+
+                <button @click="AppStore.wizardCliente.value.pasoActivo++" :disabled="!AppStore.wizardCliente.value.datos.celular" class="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 text-white bg-teal-600 shadow-lg mt-8">
+                  Continuar →
+                </button>
+              </div>
+            </transition>
+
+            <!-- PASO 3: Resumen -->
+            <transition name="toast">
+              <div v-if="AppStore.wizardCliente.value.pasoActivo === 3" class="absolute inset-0 p-5 space-y-6 bg-white dark:bg-slate-950 h-max">
+                <div class="text-center mb-4">
+                  <h4 class="text-lg font-black text-slate-900 dark:text-white">Confirma los Datos</h4>
+                  <p class="text-xs text-slate-500 mt-1">Revisa que la información sea correcta</p>
+                </div>
+
+                <!-- Resumen Final -->
+                <div class="mt-4 p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-100 dark:border-emerald-900/50 relative overflow-hidden">
+                  <div class="absolute -right-4 -top-4 text-7xl opacity-5">👤</div>
+                  
+                  <h5 class="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400 mb-4">Perfil del Cliente</h5>
+                  
+                  <div class="space-y-3 relative z-10">
+                    <div>
+                      <p class="text-[9px] uppercase font-bold text-slate-500">Nombre Completo</p>
+                      <p class="text-sm font-black text-slate-800 dark:text-slate-100">{{ AppStore.wizardCliente.value.datos.nombre }} {{ AppStore.wizardCliente.value.datos.apellido }}</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                      <div>
+                        <p class="text-[9px] uppercase font-bold text-slate-500">Celular</p>
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">📱 {{ AppStore.wizardCliente.value.datos.celular }}</p>
+                      </div>
+                      <div v-if="AppStore.wizardCliente.value.datos.dni">
+                        <p class="text-[9px] uppercase font-bold text-slate-500">DNI</p>
+                        <p class="text-xs font-bold text-slate-700 dark:text-slate-300">🆔 {{ AppStore.wizardCliente.value.datos.dni }}</p>
+                      </div>
+                    </div>
+                    
+                    <div v-if="AppStore.wizardCliente.value.datos.cumpleanos">
+                      <p class="text-[9px] uppercase font-bold text-slate-500">Cumpleaños</p>
+                      <p class="text-xs font-bold text-slate-700 dark:text-slate-300">🎂 {{ AppStore.wizardCliente.value.datos.cumpleanos }}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button @click="enviarWizardCliente" class="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all active:scale-95 text-white bg-gradient-to-r from-emerald-600 to-teal-600 shadow-lg mt-8 shadow-emerald-500/30 flex items-center justify-center gap-2">
+                  <span v-if="AppStore.cargando.value" class="animate-spin text-lg">⏳</span>
+                  <span v-else>✅ Guardar Cliente</span>
+                </button>
+              </div>
+            </transition>
+          </div>
+        </div>
+      </div>
+    </transition>
     
     <div class="fixed top-4 left-1/2 -translate-x-1/2 z-[10000] flex flex-col gap-2 pointer-events-none w-[90%] max-w-sm">
       <transition-group name="toast">

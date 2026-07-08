@@ -117,6 +117,20 @@
         }
       }),
 
+      // UX Wizard Clientes 10x
+      wizardCliente: Vue.ref({
+        visible: false,
+        pasoActivo: 1, // 1: Datos Personales, 2: Contacto, 3: Resumen
+        datos: {
+          nombre: '',
+          apellido: '',
+          dni: '',
+          cumpleanos: '',
+          celular: '',
+          correo: ''
+        }
+      }),
+
       // UX Menú Burbujas
       mostrarMenuBurbujas: Vue.ref(false),
 
@@ -278,6 +292,63 @@
             window.AppStore.cargando.value = false;
             mostrarToast(err.message, 'error');
           }).registrarCitaBBDD(window.AppStore.agente.value.sede, payloadCita, window.AppStore.agente.value.nickname);
+        };
+
+        // ==========================================
+        // LÓGICA DE WIZARD 10x PARA CLIENTES
+        // ==========================================
+        const abrirWizardCliente = () => {
+          window.AppStore.wizardCliente.value = {
+            visible: true,
+            pasoActivo: 1,
+            datos: {
+              nombre: '',
+              apellido: '',
+              dni: '',
+              cumpleanos: '',
+              celular: '',
+              correo: ''
+            }
+          };
+        };
+        
+        const cerrarWizardCliente = () => {
+          window.AppStore.wizardCliente.value.visible = false;
+        };
+        
+        const enviarWizardCliente = () => {
+          const datos = window.AppStore.wizardCliente.value.datos;
+          // Transformar YYYY-MM-DD a DD/MM/YYYY para compatibilidad
+          let cumpleFormato = datos.cumpleanos;
+          if (cumpleFormato && cumpleFormato.includes('-')) {
+            const parts = cumpleFormato.split('-');
+            cumpleFormato = `${parts[2]}/${parts[1]}/${parts[0]}`;
+          }
+          
+          const payloadCliente = {
+            nombre: datos.nombre,
+            apellido: datos.apellido,
+            dni: datos.dni,
+            cumpleanos: cumpleFormato,
+            celular: datos.celular,
+            correo: datos.correo
+          };
+          
+          cerrarWizardCliente();
+          window.AppStore.cargando.value = true;
+          
+          google.script.run.withSuccessHandler(res => {
+            window.AppStore.cargando.value = false;
+            if(res.exito){
+              mostrarToast(res.mensaje, 'success');
+              forzarRefrescoDatos();
+            } else {
+              mostrarToast(res.mensaje, 'error');
+            }
+          }).withFailureHandler(err => {
+            window.AppStore.cargando.value = false;
+            mostrarToast(err.message, 'error');
+          }).registrarClienteBBDD(window.AppStore.agente.value.sede, payloadCliente);
         };
 
         const seleccionarClienteDialogo = (clienteRaw) => {
@@ -1468,6 +1539,9 @@
           abrirWizardCita,
           cerrarWizardCita,
           enviarWizardCita,
+          abrirWizardCliente,
+          cerrarWizardCliente,
+          enviarWizardCliente,
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
           seleccionarClienteDialogo,

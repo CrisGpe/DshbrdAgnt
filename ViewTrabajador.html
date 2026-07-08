@@ -296,8 +296,8 @@
       </div>
       
       <div v-if="AppStore.pestanaActiva.value === 'Mis Clientes'" class="w-full mb-3 animate-fadeIn">
-        <button @click="mostrarModalFormulario({ titulo: 'Registrar Nuevo Cliente', textoBoton: 'Guardar Cliente', campos: [{ id: 'nombre', label: 'Nombres', tipo: 'text' }, { id: 'apellido', label: 'Apellidos', tipo: 'text' }, { id: 'dni', label: 'DNI', tipo: 'text' }, { id: 'cumpleanos', label: 'Cumpleaños', tipo: 'date' }, { id: 'celular', label: 'Celular', tipo: 'tel' }, { id: 'correo', label: 'Correo', tipo: 'email' }], onSubmit: (data) => { if(data.cumpleanos && data.cumpleanos.includes('-')) { const parts = data.cumpleanos.split('-'); data.cumpleanos = `${parts[2]}/${parts[1]}/${parts[0]}`; } window.AppStore.cargando.value = true; google.script.run.withSuccessHandler(res => { window.AppStore.cargando.value = false; if(res.exito){ mostrarToast(res.mensaje, 'success'); forzarRefrescoDatos(); } else { mostrarToast(res.mensaje, 'error'); } }).withFailureHandler(err => { window.AppStore.cargando.value = false; mostrarToast(err.message, 'error'); }).registrarClienteBBDD(window.AppStore.agente.value.sede, data); } })" class="w-full bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 text-white font-bold text-sm py-3 rounded-xl shadow-md active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
-          <span>➕</span> Registrar Nuevo Cliente
+        <button @click="abrirWizardCliente" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-black tracking-wide text-sm py-4 rounded-2xl shadow-xl shadow-emerald-500/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+          <span class="text-lg">✨</span> Nuevo Cliente 10x
         </button>
       </div>
 
