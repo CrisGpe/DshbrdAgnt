@@ -177,12 +177,14 @@
 
                 <div class="space-y-2">
                   <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Fecha</label>
-                  <input type="date" v-model="AppStore.wizardCita.value.datos.fecha" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 transition-colors shadow-inner" />
+                  <input type="date" :min="new Date().toISOString().split('T')[0]" v-model="AppStore.wizardCita.value.datos.fecha" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 transition-colors shadow-inner" />
                 </div>
 
-                <div class="space-y-2">
+                <div class="space-y-2 relative">
                   <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Hora</label>
-                  <input type="time" v-model="AppStore.wizardCita.value.datos.hora" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-3xl text-center font-black tracking-widest rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 transition-colors shadow-inner" />
+                  <input type="time" step="900" v-model="AppStore.wizardCita.value.datos.hora" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-3xl text-center font-black tracking-widest rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 transition-colors shadow-inner" />
+                  <p v-if="AppStore.wizardCita.value.datos.hora && !(AppStore.wizardCita.value.datos.hora.endsWith(':00') || AppStore.wizardCita.value.datos.hora.endsWith(':15') || AppStore.wizardCita.value.datos.hora.endsWith(':30') || AppStore.wizardCita.value.datos.hora.endsWith(':45'))" class="text-[10px] text-rose-500 font-bold ml-1 absolute -bottom-4">Solo intervalos de 15 min.</p>
+
                   
                   <div class="flex flex-wrap gap-2 pt-2 justify-center">
                     <button v-for="hora in ['09:00', '11:00', '13:00', '15:00', '17:00']" :key="hora" @click="AppStore.wizardCita.value.datos.hora = hora" 
@@ -193,7 +195,7 @@
                   </div>
                 </div>
 
-                <button @click="AppStore.wizardCita.value.pasoActivo++" :disabled="!AppStore.wizardCita.value.datos.fecha || !AppStore.wizardCita.value.datos.hora" class="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 text-white bg-indigo-600 shadow-lg mt-8">
+                <button @click="AppStore.wizardCita.value.pasoActivo++" :disabled="!AppStore.wizardCita.value.datos.fecha || !AppStore.wizardCita.value.datos.hora || (AppStore.wizardCita.value.datos.hora && !(AppStore.wizardCita.value.datos.hora.endsWith(':00') || AppStore.wizardCita.value.datos.hora.endsWith(':15') || AppStore.wizardCita.value.datos.hora.endsWith(':30') || AppStore.wizardCita.value.datos.hora.endsWith(':45')))" class="w-full py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all disabled:opacity-50 disabled:scale-100 active:scale-95 text-white bg-indigo-600 shadow-lg mt-8">
                   Continuar →
                 </button>
               </div>
@@ -219,7 +221,12 @@
                 </div>
 
                 <div class="space-y-2 relative">
-                  <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Nombre o DNI</label>
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider ml-1">Nombre o DNI</label>
+                    <button @click="buscarClienteCita" class="text-[10px] font-bold text-indigo-500 hover:text-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1 rounded-md transition-colors shadow-sm">
+                      🔍 Buscar Cliente
+                    </button>
+                  </div>
                   <div class="relative group">
                     <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-indigo-500 transition-colors">👤</span>
                     <input type="text" v-model="AppStore.wizardCita.value.datos.cliente" placeholder="Escribe el nombre completo..." class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-sm font-bold rounded-xl p-4 pl-10 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/20 transition-all shadow-inner" />

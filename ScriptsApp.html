@@ -238,23 +238,34 @@
         // LÓGICA DE WIZARD 10x PARA CITAS
         // ==========================================
         const abrirWizardCita = () => {
-          // Si el input date requiere el valor en YYYY-MM-DD
-          const hoy = new Date();
-          const mes = String(hoy.getMonth() + 1).padStart(2, '0');
-          const dia = String(hoy.getDate()).padStart(2, '0');
-          const fechaDef = `${hoy.getFullYear()}-${mes}-${dia}`;
-          
           window.AppStore.wizardCita.value = {
             visible: true,
             pasoActivo: 1,
             datos: {
               servicio: '',
-              fecha: fechaDef,
+              fecha: '',
               hora: '',
-              tipoCliente: 'Nuevo',
-              cliente: ''
+              cliente: '',
+              tipoCliente: 'Nuevo'
             }
           };
+        };
+
+        const buscarClienteCita = () => {
+          if (!window.AppStore.cacheDatos.value['Clientes'] || window.AppStore.cacheDatos.value['Clientes'].length === 0) {
+            solicitarMatrizAlServidor('Clientes');
+          }
+          mostrarDialogo({
+            tipo: 'alert',
+            titulo: 'Buscar Cliente',
+            mensaje: 'Selecciona un cliente de tu lista:',
+            mostrarSelectorClientes: true,
+            onSeleccionarCliente: (clienteRaw) => {
+               // clienteRaw = [Timestamp, Nombre, Apellido, DNI, Cumpleanos, Celular, Correo, Agente]
+               const nombreCompleto = `${clienteRaw[1]} ${clienteRaw[2]}`.trim();
+               window.AppStore.wizardCita.value.datos.cliente = nombreCompleto;
+            }
+          });
         };
         
         const cerrarWizardCita = () => {
@@ -262,20 +273,25 @@
         };
         
         const enviarWizardCita = () => {
-          const datos = window.AppStore.wizardCita.value.datos;
+          const { servicio, fecha, hora, cliente, tipoCliente } = window.AppStore.wizardCita.value.datos;
+          if (!cliente) {
+            mostrarToast('Debe ingresar los datos del cliente', 'error');
+            return;
+          }
+          
           // Transformar YYYY-MM-DD a DD/MM/YYYY para compatibilidad
-          let fechaFormatoBBDD = datos.fecha;
+          let fechaFormatoBBDD = fecha;
           if (fechaFormatoBBDD && fechaFormatoBBDD.includes('-')) {
             const parts = fechaFormatoBBDD.split('-');
             fechaFormatoBBDD = `${parts[2]}/${parts[1]}/${parts[0]}`;
           }
           
           const payloadCita = {
-            cliente: datos.cliente,
-            tipoCliente: datos.tipoCliente,
+            cliente: cliente,
+            tipoCliente: tipoCliente,
             fechaCita: fechaFormatoBBDD,
-            horaCita: datos.hora,
-            servicio: datos.servicio
+            horaCita: hora,
+            servicio: servicio
           };
           
           cerrarWizardCita();
@@ -1544,6 +1560,7 @@
           abrirWizardCliente,
           cerrarWizardCliente,
           enviarWizardCliente,
+          buscarClienteCita,
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
           seleccionarClienteDialogo,
