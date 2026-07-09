@@ -513,27 +513,6 @@
                   <span class="text-indigo-500 dark:text-indigo-400 font-black text-[10px] uppercase bg-indigo-500/10 px-2 py-0.5 rounded-md">Ver Más &rarr;</span>
                 </div>
               </div>
-              
-              <!-- SECCIÓN FINANCIERA Y PRODUCTOS (Inyectada desde ERP) -->
-              <div v-if="card.ventasInfo && (card.ventasInfo.montoServicio || (card.ventasInfo.productos && card.ventasInfo.productos.length > 0))" class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5 text-[10px]">
-                 <div v-if="card.ventasInfo.montoServicio" class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-1.5 rounded-md">
-                   <span class="font-bold text-emerald-700 dark:text-emerald-400">Servicio Facturado</span>
-                   <div class="flex gap-2 font-mono">
-                     <span class="font-black text-emerald-600 dark:text-emerald-500" title="Monto cobrado">S/ {{ card.ventasInfo.montoServicio.toFixed(2) }}</span>
-                     <span class="text-emerald-500/70 dark:text-emerald-400/70 font-bold" title="Comisión">(S/ {{ card.ventasInfo.comisionServicio.toFixed(2) }})</span>
-                   </div>
-                 </div>
-                 
-                 <div v-if="card.ventasInfo.productos && card.ventasInfo.productos.length > 0" class="space-y-1">
-                    <div class="font-bold text-slate-600 dark:text-slate-400 mb-1 mt-2 flex items-center gap-1">🛍️ Productos Adquiridos</div>
-                    <div v-for="prod in card.ventasInfo.productos" class="flex justify-between items-center bg-white dark:bg-slate-950 p-1.5 rounded-md border border-slate-100 dark:border-slate-800/60 shadow-sm">
-                      <span class="text-slate-600 dark:text-slate-300 truncate max-w-[150px]" :title="prod.nombre">
-                        <span class="font-black text-slate-800 dark:text-slate-100">{{ prod.cantidad }}x</span> {{ prod.nombre }}
-                      </span>
-                      <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">S/ {{ (prod.precio * prod.cantidad).toFixed(2) }}</span>
-                    </div>
-                 </div>
-              </div>
             </template>
 
             <!-- Estructura optimizada para "Mi Agenda" - VISTA RESUMIDA UX -->
@@ -914,6 +893,34 @@
               <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">🧾 Referencia / Factura</label>
               <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-bold">{{ AppStore.modalDetalles.value.card[3] || 'N/A' }}</div>
             </div>
+            
+            <!-- SECCIÓN FINANCIERA Y PRODUCTOS ERP (Dentro de Modal Detalles) -->
+            <div v-if="AppStore.modalDetalles.value.card.ventasInfo && (AppStore.modalDetalles.value.card.ventasInfo.montoServicio || (AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0))" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800 space-y-3">
+               <div v-if="AppStore.modalDetalles.value.card.ventasInfo.montoServicio">
+                 <label class="block text-[10px] font-extrabold uppercase text-emerald-600 dark:text-emerald-500 tracking-wider">💳 Servicio Facturado en Caja</label>
+                 <div class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-2.5 rounded-xl border border-emerald-200 dark:border-emerald-900/50 mt-1">
+                   <span class="font-black text-emerald-700 dark:text-emerald-400 font-mono text-lg" title="Monto cobrado">S/ {{ AppStore.modalDetalles.value.card.ventasInfo.montoServicio.toFixed(2) }}</span>
+                   <div class="text-right">
+                     <span class="block text-[9px] font-bold text-emerald-500 uppercase">Comisión</span>
+                     <span class="text-emerald-600 dark:text-emerald-400 font-bold font-mono">S/ {{ AppStore.modalDetalles.value.card.ventasInfo.comisionServicio.toFixed(2) }}</span>
+                   </div>
+                 </div>
+               </div>
+               
+               <div v-if="AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0">
+                  <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">🛍️ Productos Adquiridos (ERP)</label>
+                  <div class="space-y-2">
+                    <div v-for="prod in AppStore.modalDetalles.value.card.ventasInfo.productos" class="flex justify-between items-center bg-white dark:bg-slate-950 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+                      <div class="flex-1 min-w-0 pr-2">
+                        <span class="block text-xs text-slate-800 dark:text-slate-200 font-bold truncate" :title="prod.nombre">{{ prod.nombre }}</span>
+                        <span class="block text-[10px] font-mono text-slate-500">Cant: <strong class="text-slate-700 dark:text-slate-300">{{ prod.cantidad }}</strong> x S/ {{ prod.precio.toFixed(2) }}</span>
+                      </div>
+                      <span class="font-black text-slate-700 dark:text-slate-300 font-mono text-sm shrink-0">S/ {{ (prod.precio * prod.cantidad).toFixed(2) }}</span>
+                    </div>
+                  </div>
+               </div>
+            </div>
+            
           </template>
 
           <!-- SECCIÓN: CLIENTES (Mis Clientes) -->
