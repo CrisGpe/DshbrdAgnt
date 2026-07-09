@@ -967,6 +967,27 @@
               <span>🕒 {{ formatearFechaUHoraVisual(item.hora, true) }}</span>
               <span v-if="item.agente">• 👤 {{ item.agente }}</span>
             </div>
+            
+            <!-- SECCIÓN FINANCIERA Y PRODUCTOS -->
+            <div v-if="item.montoServicio || (item.productos && item.productos.length > 0)" class="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 space-y-1.5">
+               <div v-if="item.montoServicio" class="flex justify-between items-center bg-emerald-50 dark:bg-emerald-900/20 p-1.5 rounded-md">
+                 <span class="font-bold text-emerald-700 dark:text-emerald-400">Servicio Facturado</span>
+                 <div class="flex gap-2 font-mono">
+                   <span class="font-black text-emerald-600 dark:text-emerald-500" title="Monto cobrado">S/ {{ item.montoServicio.toFixed(2) }}</span>
+                   <span class="text-emerald-500/70 dark:text-emerald-400/70 font-bold" title="Comisión">(S/ {{ item.comisionServicio.toFixed(2) }})</span>
+                 </div>
+               </div>
+               
+               <div v-if="item.productos && item.productos.length > 0" class="space-y-1">
+                  <div class="font-bold text-slate-600 dark:text-slate-400 mb-1 mt-2 flex items-center gap-1">🛍️ Productos Adquiridos</div>
+                  <div v-for="prod in item.productos" class="flex justify-between items-center bg-white dark:bg-slate-950 p-1.5 rounded-md border border-slate-100 dark:border-slate-800/60 shadow-sm">
+                    <span class="text-slate-600 dark:text-slate-300 truncate max-w-[150px]" :title="prod.nombre">
+                      <span class="font-black text-slate-800 dark:text-slate-100">{{ prod.cantidad }}x</span> {{ prod.nombre }}
+                    </span>
+                    <span class="font-bold text-slate-700 dark:text-slate-300 font-mono">S/ {{ (prod.precio * prod.cantidad).toFixed(2) }}</span>
+                  </div>
+               </div>
+            </div>
           </div>
         </div>
       </div>

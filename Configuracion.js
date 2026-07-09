@@ -12,11 +12,15 @@ const SEDES = {
   "RD": { 
     idAdmin: "1U0TkAI74Q0Opqs6UcuVxYtqN41UApPorusopaQDk-3E",       // ID donde está "Agentes"
     idOperaciones: "1kbj7BGZyIWcXMj2aqNelSkw25ISuFRUY6AArTt8WjzI", // ID donde está "Borrador" y "OATC"
+    idVentas: "1J2efkmlDygvOE9wIK0hsp-WzUevNzP8_kWi_Nz7RYGk",      // ID donde está "Registro ventas caja"
+    idErp: "1RQpMXqorsIzmMyoYAv0Jp0QS2PL-w5pzDEKBMKugfXc",         // ID ERP "Vetas_Tickets", "Ventas_Detalle", "BBDD_Productos"
     nombre: "Sede RD" 
   },
   "Luxury": { 
     idAdmin: "1w2ZiQPfDfUWM6ODpHQoKn14FGBwwNhzIKxe5-RmEfBw",       // ID Unificado
     idOperaciones: "1w2ZiQPfDfUWM6ODpHQoKn14FGBwwNhzIKxe5-RmEfBw", // ID Unificado
+    idVentas: "1w2ZiQPfDfUWM6ODpHQoKn14FGBwwNhzIKxe5-RmEfBw",      // Fallback
+    idErp: "1w2ZiQPfDfUWM6ODpHQoKn14FGBwwNhzIKxe5-RmEfBw",         // Fallback
     nombre: "Sede Luxury" 
   }
 };
@@ -39,8 +43,12 @@ function getHoja(sede, nombreHoja) {
   // Enrutamiento inteligente según el tipo de datos requerido
   if (nombreHoja === "Agentes") {
     idLibroTarget = sedeConfig.idAdmin;
+  } else if (nombreHoja === "Registro ventas caja") {
+    idLibroTarget = sedeConfig.idVentas;
+  } else if (["Vetas_Tickets", "Ventas_Detalle", "BBDD_Productos"].includes(nombreHoja)) {
+    idLibroTarget = sedeConfig.idErp;
   } else {
-    // Para "Borrador", "OATC", "Alertas", etc.
+    // Para "Borrador", "OATC", "Alertas", "Clientes", etc.
     idLibroTarget = sedeConfig.idOperaciones;
   }
   

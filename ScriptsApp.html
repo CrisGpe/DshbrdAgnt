@@ -54,8 +54,8 @@
       // Data caches (Matriz de memoria local)      
       loginForm: Vue.ref({ nickname: '', pin: '', sede: 'RD' }),
       listaNicknamesDisponibles: Vue.ref([]),
-      cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] }),
-      cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [] }),
+      cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [], "Registro ventas caja": [], "Vetas_Tickets": [], "Ventas_Detalle": [], "BBDD_Productos": [] }),
+      cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [], "Registro ventas caja": [], "Vetas_Tickets": [], "Ventas_Detalle": [], "BBDD_Productos": [] }),
       filtroFechaInicio: Vue.ref(fechaAyerStr),
       filtroFechaFin: Vue.ref(fechaAyerStr),
       filtroBusquedaCliente: Vue.ref(''), // Búsqueda de Mis Clientes
@@ -551,6 +551,15 @@
             solicitarMatrizAlServidor(hojaReal);
           }
 
+          if (['Mi Historial', 'Mis Clientes', 'Mis Indicadores'].includes(nuevaPestana)) {
+             const sheetsVentas = ["Registro ventas caja", "Vetas_Tickets", "Ventas_Detalle", "BBDD_Productos"];
+             sheetsVentas.forEach(s => {
+               if (window.AppStore.cacheDatos.value[s].length === 0) {
+                  solicitarMatrizAlServidor(s);
+               }
+             });
+          }
+
           // Inyección especial: Para Jefe Operativo en Indicadores, necesitamos la matriz Agentes para poblar su Dropdown
           if (nuevaPestana === 'Mis Indicadores' && window.AppStore.agente.value.especialidad === 'Jefe Operativo') {
              if (window.AppStore.cacheDatos.value['Agentes'].length === 0) {
@@ -573,6 +582,15 @@
              window.AppStore.cacheDatos.value['OATC'] = [];
              solicitarMatrizAlServidor('OATC');
           }
+          
+          if (['Mi Historial', 'Mis Clientes', 'Mis Indicadores'].includes(tab)) {
+             const sheetsVentas = ["Registro ventas caja", "Vetas_Tickets", "Ventas_Detalle", "BBDD_Productos"];
+             sheetsVentas.forEach(s => {
+               window.AppStore.cacheDatos.value[s] = [];
+               solicitarMatrizAlServidor(s);
+             });
+          }
+          
           if (tab === 'Mis Indicadores') {
              window.AppStore.cacheDatos.value['Borrador'] = [];
              window.AppStore.cacheDatos.value['Clientes'] = [];
@@ -1409,10 +1427,75 @@
                  }
                });
                if (encontrado) {
-                  // OATC: colA (hora) = row[0], colC (tipo/servicio) = row[2], colD (fecha) = row[3] (wait, row[3] es Cliente en D, la fecha es row[1] o row[0]?)
-                  // Let's assume colA = row[0], colC = row[2], colD = row[3]. 
-                  // Wait, earlier I saw row[3] is col D and has the pipe string "LUCY X | | 987754978"
-                  // I should just push the whole row to the modal and let the UI parse it!
+                  // OATC: colA (hora) = row[0], colB (id) = row[1], colC (tipo) = row[2], colD (fecha) = row[3]
+                  const idOatc = String(row[1] || '').trim();
+                  
+                  // Buscar en Registro ventas caja (Col C = ID_OATC y/o Ticket ID)
+                  let montoServicio = 0;
+                  let comisionServicio = 0;
+                  const ticketsEncontrados = [];
+                  
+                  const ventasCaja = window.AppStore.cacheDatos.value["Registro ventas caja"] || [];
+                  const vetasTickets = window.AppStore.cacheDatos.value["Vetas_Tickets"] || [];
+                  const ventasDetalle = window.AppStore.cacheDatos.value["Ventas_Detalle"] || [];
+                  const bbddProductos = window.AppStore.cacheDatos.value["BBDD_Productos"] || [];
+                  
+                  // Validar tickets de ERP
+                  const ticketsValidos = new Set();
+                  vetasTickets.forEach(t => {
+                     const estado = String(t[6] || '').toUpperCase(); // Col G
+                     const metodo = String(t[9] || '').toUpperCase(); // Col J
+                     if (estado !== 'ANULADO' && metodo !== 'PRESTAMO') {
+                        ticketsValidos.add(String(t[0] || '').trim()); // Col A = Ticket ID
+                     }
+                  });
+                  
+                  // Cruzar con Ventas Caja
+                  if (idOatc) {
+                     ventasCaja.forEach(vc => {
+                        const colC = String(vc[2] || '');
+                        if (colC.includes(idOatc)) {
+                           montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
+                           comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
+                           
+                           // Buscar si hay algún Ticket ID válido en esta misma celda Col C
+                           ticketsValidos.forEach(tId => {
+                              if (tId && colC.includes(tId)) {
+                                 ticketsEncontrados.push(tId);
+                              }
+                           });
+                        }
+                     });
+                  }
+                  
+                  // Obtener detalles de productos para los tickets encontrados
+                  const productosComprados = [];
+                  ticketsEncontrados.forEach(tId => {
+                     ventasDetalle.forEach(vd => {
+                        if (String(vd[1] || '').trim() === tId) { // Col B = Ticket ID
+                           const sku = String(vd[2] || '').trim(); // Col C = SKU
+                           const cantidad = parseFloat(vd[4] || 0) || 0; // Col E
+                           const precio = parseFloat(vd[6] || 0) || 0; // Col G
+                           
+                           // Buscar nombre del producto
+                           let nombreProd = sku;
+                           bbddProductos.forEach(p => {
+                              if (String(p[0] || '').trim() === sku) {
+                                 nombreProd = `${p[3]} ${p[4] || ''}`.trim(); // Col D = Nombre, Col E = Presentacion
+                              }
+                           });
+                           
+                           productosComprados.push({
+                              ticket: tId,
+                              sku: sku,
+                              nombre: nombreProd,
+                              cantidad: cantidad,
+                              precio: precio
+                           });
+                        }
+                     });
+                  });
+
                   registrosCliente.push({
                      hora: row[0], // Col A
                      idTurno: row[1], // Col B
@@ -1420,7 +1503,10 @@
                      fecha: row[3] && !String(row[3]).includes('|') ? row[3] : (row[0] || 'N/A'), // Fallback if D is Cliente
                      clienteRaw1: row[3], // Col D
                      clienteRaw2: row[4], // Col E
-                     agente: row[6] // Col G
+                     agente: row[6], // Col G
+                     montoServicio: montoServicio,
+                     comisionServicio: comisionServicio,
+                     productos: productosComprados
                   });
                }
             });
