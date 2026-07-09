@@ -244,9 +244,10 @@
             datos: {
               servicio: '',
               fecha: '',
-              hora: '',
+              horaSelect: '',
+              minutoSelect: '',
               cliente: '',
-              tipoCliente: 'Nuevo'
+              tipoCliente: 'Cita'
             }
           };
         };
@@ -273,11 +274,13 @@
         };
         
         const enviarWizardCita = () => {
-          const { servicio, fecha, hora, cliente, tipoCliente } = window.AppStore.wizardCita.value.datos;
+          const { servicio, fecha, horaSelect, minutoSelect, cliente, tipoCliente } = window.AppStore.wizardCita.value.datos;
           if (!cliente) {
             mostrarToast('Debe ingresar los datos del cliente', 'error');
             return;
           }
+          
+          const hora = `${horaSelect}:${minutoSelect}`;
           
           // Transformar YYYY-MM-DD a DD/MM/YYYY para compatibilidad
           let fechaFormatoBBDD = fecha;
