@@ -1544,11 +1544,11 @@
                      ventasCaja.forEach(vc => {
                         const colC = String(vc[2] || '').trim();
                         const agenteCaja = String(vc[4] || '').trim().toLowerCase();
-                        const tokensCaja = colC.split(/[\s,]+/);
+                        const tokensCaja = colC.split(/[\s,]+/); // Separar por espacios o comas
                         
                         const timeVc = parseDateRobust(vc[0]) || 0;
                         
-                        // Validar con el filtro de fechas global
+                        // 1era Pasada: Validar servicio con OATC
                         if (tokensCaja.includes(idOatc) && timeVc >= filterMsInicio && timeVc <= filterMsFin && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
                            const sNombre = String(vc[6] || 'Servicio').trim() || 'Servicio';
                            const sMonto = parseFloat(vc[12] || 0) || 0; // Col M
@@ -1562,14 +1562,39 @@
                               servicios.push({ nombre: sNombre, monto: sMonto, comision: sComision });
                            }
                            
-                           // Buscar si hay algún Ticket ID válido en esta misma celda Col C
-                           ticketsValidos.forEach(tId => {
-                              if (tId && tokensCaja.includes(tId) && !ticketsEncontrados.includes(tId)) {
-                                 ticketsEncontrados.push(tId);
-                              }
-                           });
+                           const recibo = String(vc[16] || '').trim(); // Col Q = Documento Emitido
+                           if (recibo) {
+                              recibosAsociados.add(recibo);
+                           } else {
+                              // Fallback: si no hay documento, buscar tickets en esta misma celda
+                              ticketsValidos.forEach(tId => {
+                                 if (tId && tokensCaja.includes(tId) && !ticketsEncontrados.includes(tId)) {
+                                    ticketsEncontrados.push(tId);
+                                 }
+                              });
+                           }
                         }
                      });
+                     
+                     // 2da Pasada: Extraer todos los tickets vinculados a los mismos documentos emitidos
+                     if (recibosAsociados.size > 0) {
+                        ventasCaja.forEach(vc => {
+                           const recibo = String(vc[16] || '').trim();
+                           if (recibo && recibosAsociados.has(recibo)) {
+                              // Validar agente (asegura servir solo lo del usuario)
+                              const agenteCaja = String(vc[4] || '').trim().toLowerCase();
+                              if (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja) {
+                                 const colC = String(vc[2] || '').trim();
+                                 const tokensCaja = colC.split(/[\s,]+/);
+                                 ticketsValidos.forEach(tId => {
+                                    if (tId && tokensCaja.includes(tId) && !ticketsEncontrados.includes(tId)) {
+                                       ticketsEncontrados.push(tId);
+                                    }
+                                 });
+                              }
+                           }
+                        });
+                     }
                   }
                   
                   // Obtener detalles de productos para los tickets encontrados
