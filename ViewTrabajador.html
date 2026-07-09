@@ -894,7 +894,23 @@
                 <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">⏱️ Tiempos</label>
                 <div class="bg-slate-50 dark:bg-slate-900 p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 mt-1 font-mono font-bold text-[11px] space-y-1.5 h-[54px] flex flex-col justify-center">
                   <div class="flex justify-between items-center"><span>Reg:</span> <span>{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[0], true) }}</span></div>
-                  <div v-if="AppStore.modalDetalles.value.card[7]" class="flex justify-between items-center text-indigo-600 dark:text-indigo-400"><span>Fin:</span> <span>{{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[7], true) }}</span></div>
+                  <div v-if="AppStore.modalDetalles.value.card[7]" class="flex justify-between items-center text-indigo-600 dark:text-indigo-400">
+                    <span>Fin:</span> 
+                    <span :class="{'text-red-500': String(AppStore.modalDetalles.value.card[7]).toUpperCase().startsWith('CANCELADO')}">
+                      {{ formatearFechaUHoraVisual(AppStore.modalDetalles.value.card[7], true) }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- MOTIVO CANCELACIÓN -->
+              <div v-if="AppStore.modalDetalles.value.card[7] && String(AppStore.modalDetalles.value.card[7]).toUpperCase().startsWith('CANCELADO') && AppStore.modalDetalles.value.card[20]" class="col-span-2">
+                <div class="bg-red-50 dark:bg-red-900/10 p-2.5 rounded-xl border border-red-200 dark:border-red-900/30 flex flex-col gap-1">
+                  <span class="text-[10px] font-extrabold uppercase text-red-600 dark:text-red-400 tracking-wider flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    Motivo de Cancelación
+                  </span>
+                  <span class="text-xs text-red-800 dark:text-red-300 font-medium leading-tight">{{ AppStore.modalDetalles.value.card[20] }}</span>
                 </div>
               </div>
             </div>
