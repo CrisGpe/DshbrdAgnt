@@ -905,7 +905,63 @@
           }
 
           // Paso D: Ordenamiento final
-          if (t === "Mi Historial") return filtered.sort((a,b) => parseDateRobust(b[3]) - parseDateRobust(a[3]));
+          if (t === "Mi Historial") {
+            const ordenado = filtered.sort((a,b) => parseDateRobust(b[3]) - parseDateRobust(a[3]));
+            // Enriquecer cada fila con la información de Ventas y ERP
+            const ventasCaja = window.AppStore.cacheDatos.value["Registro ventas caja"] || [];
+            const vetasTickets = window.AppStore.cacheDatos.value["Vetas_Tickets"] || [];
+            const ventasDetalle = window.AppStore.cacheDatos.value["Ventas_Detalle"] || [];
+            const bbddProductos = window.AppStore.cacheDatos.value["BBDD_Productos"] || [];
+            
+            const ticketsValidos = new Set();
+            vetasTickets.forEach(tk => {
+               if (String(tk[6] || '').toUpperCase() !== 'ANULADO' && String(tk[9] || '').toUpperCase() !== 'PRESTAMO') {
+                  ticketsValidos.add(String(tk[0] || '').trim());
+               }
+            });
+
+            return ordenado.map(row => {
+               const idOatc = String(row[1] || '').trim(); // Col B (ID_OATC en OATC)
+               let montoServicio = 0;
+               let comisionServicio = 0;
+               const ticketsEncontrados = [];
+               
+               if (idOatc) {
+                  ventasCaja.forEach(vc => {
+                     const colC = String(vc[2] || '');
+                     if (colC.includes(idOatc)) {
+                        montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
+                        comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
+                        ticketsValidos.forEach(tId => {
+                           if (tId && colC.includes(tId)) ticketsEncontrados.push(tId);
+                        });
+                     }
+                  });
+               }
+               
+               const productosComprados = [];
+               ticketsEncontrados.forEach(tId => {
+                  ventasDetalle.forEach(vd => {
+                     if (String(vd[1] || '').trim() === tId) {
+                        const sku = String(vd[2] || '').trim();
+                        let nombreProd = sku;
+                        bbddProductos.forEach(p => {
+                           if (String(p[0] || '').trim() === sku) nombreProd = `${p[3]} ${p[4] || ''}`.trim();
+                        });
+                        productosComprados.push({
+                           ticket: tId, sku: sku, nombre: nombreProd, 
+                           cantidad: parseFloat(vd[4] || 0) || 0, 
+                           precio: parseFloat(vd[6] || 0) || 0
+                        });
+                     }
+                  });
+               });
+               
+               // Inyectamos la data sin mutar la longitud original del array
+               row.ventasInfo = { montoServicio, comisionServicio, productos: productosComprados };
+               return row;
+            });
+          }
           if (t === "Mi Agenda") return filtered.sort((a,b) => parseDateRobust(a[1]) - parseDateRobust(b[1])); // Próximas primero
           return filtered;
         });
