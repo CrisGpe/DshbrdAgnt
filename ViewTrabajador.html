@@ -916,12 +916,12 @@
             </div>
             
             <!-- SECCIÓN FINANCIERA Y PRODUCTOS ERP (Dentro de Modal Detalles) -->
-            <div v-if="AppStore.modalDetalles.value.card.ventasInfo && ((AppStore.modalDetalles.value.card.ventasInfo.servicios && AppStore.modalDetalles.value.card.ventasInfo.servicios.length > 0) || (AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0))" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+            <div v-if="AppStore.modalDetalles.value.card.ventasInfo && ((AppStore.modalDetalles.value.card.ventasInfo.servicios?.length > 0) || (AppStore.modalDetalles.value.card.ventasInfo.productos?.length > 0))" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
               <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">🧾 Detalle de Facturación</label>
               
               <div class="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
                 <!-- Servicios -->
-                <template v-if="AppStore.modalDetalles.value.card.ventasInfo.servicios && AppStore.modalDetalles.value.card.ventasInfo.servicios.length > 0">
+                <template v-if="AppStore.modalDetalles.value.card.ventasInfo?.servicios?.length > 0">
                   <div class="p-3">
                     <div v-for="(serv, index) in AppStore.modalDetalles.value.card.ventasInfo.servicios" :key="'serv-'+index" class="flex justify-between items-center mb-3 pb-3 border-b border-slate-200 dark:border-slate-800 last:mb-0 last:pb-0 last:border-0">
                       <div>
@@ -934,7 +934,7 @@
                 </template>
                 
                 <!-- Productos -->
-                <template v-if="AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0">
+                <template v-if="AppStore.modalDetalles.value.card.ventasInfo?.productos?.length > 0">
                    <div class="p-3 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
                       <div v-for="(prod, i) in AppStore.modalDetalles.value.card.ventasInfo.productos" :key="i" class="flex justify-between items-center mb-3 pb-3 border-b border-slate-100 dark:border-slate-800/60 last:mb-0 last:pb-0 last:border-0">
                         <div class="flex-1 min-w-0 pr-2">
@@ -951,8 +951,8 @@
                   <span class="text-[11px] font-extrabold uppercase text-slate-600 dark:text-slate-400">Total Pagado</span>
                   <span class="font-black text-emerald-600 dark:text-emerald-400 font-mono text-base">
                     S/ {{ (
-                      (AppStore.modalDetalles.value.card.ventasInfo.servicios ? AppStore.modalDetalles.value.card.ventasInfo.servicios.reduce((sum, s) => sum + s.monto, 0) : 0) + 
-                      (AppStore.modalDetalles.value.card.ventasInfo.productos ? AppStore.modalDetalles.value.card.ventasInfo.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0) : 0)
+                      (AppStore.modalDetalles.value.card.ventasInfo?.servicios ? AppStore.modalDetalles.value.card.ventasInfo.servicios.reduce((sum, s) => sum + s.monto, 0) : 0) + 
+                      (AppStore.modalDetalles.value.card.ventasInfo?.productos ? AppStore.modalDetalles.value.card.ventasInfo.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0) : 0)
                     ).toFixed(2) }}
                   </span>
                 </div>
@@ -1023,7 +1023,7 @@
           </button>
         </div>
         <div class="p-4 max-h-[60vh] overflow-y-auto space-y-3">
-          <div v-if="AppStore.modalHistorialAtenciones.value.registros.length === 0" class="text-center text-slate-500 py-6 text-xs italic">No hay historial registrado.</div>
+          <div v-if="AppStore.modalHistorialAtenciones.value.registros?.length === 0" class="text-center text-slate-500 py-6 text-xs italic">No hay historial registrado.</div>
           <div v-else v-for="(item, i) in AppStore.modalHistorialAtenciones.value.registros" :key="i" class="p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px]">
             <div class="flex justify-between items-center mb-1">
               <span class="font-black text-indigo-600 dark:text-indigo-400 text-xs">{{ formatearFechaUHoraVisual(item.fecha, false) }}</span>
@@ -1058,7 +1058,7 @@
         </div>
         
         <div class="p-4 max-h-[60vh] overflow-y-auto space-y-2">
-          <div v-if="estadoTurnoAgente.cola && estadoTurnoAgente.cola.length === 0" class="text-center text-slate-500 py-4 text-sm font-medium">
+          <div v-if="estadoTurnoAgente.cola?.length === 0" class="text-center text-slate-500 py-4 text-sm font-medium">
             No hay nadie en cola.
           </div>
           <div v-else v-for="(agente, idx) in estadoTurnoAgente.cola" :key="idx" 
