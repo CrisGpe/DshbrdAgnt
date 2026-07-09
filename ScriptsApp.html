@@ -925,6 +925,11 @@
                const servicios = [];
                const ticketsEncontrados = [];
                
+               const fechaIniStr = window.AppStore.filtroFechaInicio.value;
+               const fechaFinStr = window.AppStore.filtroFechaFin.value;
+               const filterMsInicio = fechaIniStr ? new Date(fechaIniStr + "T00:00:00").getTime() : 0;
+               const filterMsFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
+               
                if (idOatc) {
                   const agenteOatc = String(row[6] || '').trim().toLowerCase();
                   
@@ -936,7 +941,7 @@
                      const timeVc = parseDateRobust(vc[0]) || 0;
                      
                      // Limitar el cruce al rango de fechas seleccionado en el filtro global de la app
-                     if (tokensCaja.includes(idOatc) && timeVc >= msInicio && timeVc <= msFin && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
+                     if (tokensCaja.includes(idOatc) && timeVc >= filterMsInicio && timeVc <= filterMsFin && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
                         const sNombre = String(vc[6] || 'Servicio').trim() || 'Servicio';
                         const sMonto = parseFloat(vc[12] || 0) || 0; // Col M
                         const sComision = parseFloat(vc[13] || 0) || 0; // Col N
@@ -1530,8 +1535,10 @@
                   
                   // Cruzar con Ventas Caja
                   if (idOatc) {
-                     const msInicio = parseDateRobust(window.AppStore.filtroFechaInicio.value);
-                     const msFin = parseDateRobust(window.AppStore.filtroFechaFin.value) + 86399999;
+                     const fechaIniStr = window.AppStore.filtroFechaInicio.value;
+                     const fechaFinStr = window.AppStore.filtroFechaFin.value;
+                     const filterMsInicio = fechaIniStr ? new Date(fechaIniStr + "T00:00:00").getTime() : 0;
+                     const filterMsFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
                      const agenteOatc = String(row[6] || '').trim().toLowerCase();
                      
                      ventasCaja.forEach(vc => {
@@ -1542,7 +1549,7 @@
                         const timeVc = parseDateRobust(vc[0]) || 0;
                         
                         // Validar con el filtro de fechas global
-                        if (tokensCaja.includes(idOatc) && timeVc >= msInicio && timeVc <= msFin && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
+                        if (tokensCaja.includes(idOatc) && timeVc >= filterMsInicio && timeVc <= filterMsFin && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
                            const sNombre = String(vc[6] || 'Servicio').trim() || 'Servicio';
                            const sMonto = parseFloat(vc[12] || 0) || 0; // Col M
                            const sComision = parseFloat(vc[13] || 0) || 0; // Col N
