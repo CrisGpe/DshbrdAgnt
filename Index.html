@@ -60,23 +60,23 @@
             <button v-if="AppStore.dialogo.value.botonAuxiliar" @click="AppStore.dialogo.value.onBotonAuxiliar()" class="w-full mt-3 px-4 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 dark:text-indigo-400 dark:bg-indigo-900/20 hover:bg-indigo-100 dark:hover:bg-indigo-900/40 rounded-xl border border-indigo-200 dark:border-indigo-800 transition-colors flex items-center justify-center gap-2">
               📋 {{ AppStore.dialogo.value.botonAuxiliar }}
             </button>
+          </div>
 
-            <!-- Selector Condicional de Clientes -->
-            <div v-if="AppStore.dialogo.value.mostrarSelectorClientes" class="mt-3 max-h-40 overflow-y-auto bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-200 dark:divide-slate-800 shadow-inner">
-               <div v-if="AppStore.cargando.value" class="p-4 flex flex-col items-center justify-center gap-2 text-[10px] font-bold text-slate-500">
-                  <div class="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
-                  Cargando...
-               </div>
-               <div v-else-if="!clientesAgente || clientesAgente.length === 0" class="p-3 text-center text-[10px] font-bold text-slate-500">
-                  No se encontraron clientes...
-               </div>
-               <button v-else v-for="(cliente, idx) in clientesAgente" :key="idx" 
-                       @click="seleccionarClienteDialogo(cliente)"
-                       class="w-full text-left p-2.5 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors focus:bg-indigo-50 dark:focus:bg-indigo-900/20 outline-none">
-                  <div class="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate">{{ cliente[1] }} {{ cliente[2] }}</div>
-                  <div class="text-[9px] text-slate-500 font-mono mt-0.5 truncate">{{ cliente[3] || 'S/DNI' }} | {{ cliente[5] || 'S/CEL' }}</div>
-               </button>
-            </div>
+          <!-- Selector Condicional de Clientes -->
+          <div v-if="AppStore.dialogo.value.mostrarSelectorClientes" class="mb-4 mt-3 max-h-40 overflow-y-auto bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 divide-y divide-slate-200 dark:divide-slate-800 shadow-inner">
+             <div v-if="AppStore.cargando.value" class="p-4 flex flex-col items-center justify-center gap-2 text-[10px] font-bold text-slate-500">
+                <div class="w-4 h-4 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+                Cargando...
+             </div>
+             <div v-else-if="!clientesAgente || clientesAgente.length === 0" class="p-3 text-center text-[10px] font-bold text-slate-500">
+                No se encontraron clientes...
+             </div>
+             <button v-else v-for="(cliente, idx) in clientesAgente" :key="idx" 
+                     @click="seleccionarClienteDialogo(cliente)"
+                     class="w-full text-left p-2.5 hover:bg-slate-200/50 dark:hover:bg-slate-800/50 transition-colors focus:bg-indigo-50 dark:focus:bg-indigo-900/20 outline-none">
+                <div class="text-[10px] font-bold text-slate-800 dark:text-slate-200 truncate">{{ cliente[1] }} {{ cliente[2] }}</div>
+                <div class="text-[9px] text-slate-500 font-mono mt-0.5 truncate">{{ cliente[3] || 'S/DNI' }} | {{ cliente[5] || 'S/CEL' }}</div>
+             </button>
           </div>
 
           <div class="flex items-center justify-end gap-2 mt-4">
