@@ -927,11 +927,17 @@
                const ticketsEncontrados = [];
                
                if (idOatc) {
+                  const timeOatc = parseDateRobust(row[3] || row[0]) || 0;
+                  
                   ventasCaja.forEach(vc => {
                      const colC = String(vc[2] || '').trim();
                      const tokensCaja = colC.split(/[\s,]+/); // Separar por espacios o comas
                      
-                     if (tokensCaja.includes(idOatc)) {
+                     const timeVc = parseDateRobust(vc[0]) || 0;
+                     const diffDays = (timeOatc > 0 && timeVc > 0) ? Math.abs(timeVc - timeOatc) / 86400000 : 0;
+                     
+                     // Limitar el cruce a una ventana de tiempo de 3 días para evitar colisiones de IDs cortos
+                     if (tokensCaja.includes(idOatc) && (timeOatc === 0 || timeVc === 0 || diffDays <= 3)) {
                         montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
                         comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
                         
@@ -1513,11 +1519,16 @@
                   
                   // Cruzar con Ventas Caja
                   if (idOatc) {
+                     const timeOatc = parseDateRobust(row[3] || row[0]) || 0;
+                     
                      ventasCaja.forEach(vc => {
                         const colC = String(vc[2] || '').trim();
                         const tokensCaja = colC.split(/[\s,]+/);
                         
-                        if (tokensCaja.includes(idOatc)) {
+                        const timeVc = parseDateRobust(vc[0]) || 0;
+                        const diffDays = (timeOatc > 0 && timeVc > 0) ? Math.abs(timeVc - timeOatc) / 86400000 : 0;
+                        
+                        if (tokensCaja.includes(idOatc) && (timeOatc === 0 || timeVc === 0 || diffDays <= 3)) {
                            montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
                            comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
                            
