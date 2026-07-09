@@ -48,7 +48,7 @@
 
     <!-- SISTEMA GLOBAL DE DIÁLOGOS (TAILWIND CONFIRM/PROMPT) -->
     <transition name="toast">
-      <div v-if="AppStore.dialogo.value.visible" class="fixed inset-0 z-[10005] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click.self="cerrarDialogo">
+      <div v-if="AppStore.dialogo.value.visible" class="fixed inset-0 z-[10020] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click.self="cerrarDialogo">
         <div class="bg-white dark:bg-slate-950 w-full max-w-xs rounded-3xl shadow-2xl p-5 border border-slate-200 dark:border-slate-800/80 animate-fadeIn">
           <h3 class="text-indigo-600 dark:text-indigo-400 font-black text-sm uppercase tracking-wider mb-2">{{ AppStore.dialogo.value.titulo }}</h3>
           <p class="text-xs text-slate-700 dark:text-slate-300 mb-4">{{ AppStore.dialogo.value.mensaje }}</p>
