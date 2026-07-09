@@ -900,44 +900,47 @@
             </div>
             
             <!-- SECCIÓN FINANCIERA Y PRODUCTOS ERP (Dentro de Modal Detalles) -->
-            <div v-if="AppStore.modalDetalles.value.card.ventasInfo && (AppStore.modalDetalles.value.card.ventasInfo.montoServicio || (AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0))" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
-               <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">🧾 Detalle de Facturación</label>
-               
-               <div class="bg-white dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                 <div class="p-3 space-y-3">
-                   
-                   <!-- Servicio -->
-                   <div v-if="AppStore.modalDetalles.value.card.ventasInfo.montoServicio" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800/60 pb-2">
-                     <div class="flex-1 pr-2">
-                       <span class="block text-xs text-slate-800 dark:text-slate-200 font-bold">Servicio Realizado</span>
-                       <span class="block text-[9px] font-bold text-emerald-500 uppercase mt-0.5">Comisión: S/ {{ AppStore.modalDetalles.value.card.ventasInfo.comisionServicio.toFixed(2) }}</span>
-                     </div>
-                     <span class="font-black text-slate-800 dark:text-slate-200 font-mono text-sm shrink-0">S/ {{ AppStore.modalDetalles.value.card.ventasInfo.montoServicio.toFixed(2) }}</span>
-                   </div>
-                   
-                   <!-- Productos -->
-                   <template v-if="AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0">
-                      <div v-for="(prod, i) in AppStore.modalDetalles.value.card.ventasInfo.productos" :key="i" class="flex justify-between items-center border-b border-slate-100 dark:border-slate-800/60 pb-2 last:border-0 last:pb-0">
+            <div v-if="AppStore.modalDetalles.value.card.ventasInfo && ((AppStore.modalDetalles.value.card.ventasInfo.servicios && AppStore.modalDetalles.value.card.ventasInfo.servicios.length > 0) || (AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0))" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <label class="block text-[10px] font-extrabold uppercase text-slate-500 tracking-wider mb-2">🧾 Detalle de Facturación</label>
+              
+              <div class="bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <!-- Servicios -->
+                <template v-if="AppStore.modalDetalles.value.card.ventasInfo.servicios && AppStore.modalDetalles.value.card.ventasInfo.servicios.length > 0">
+                  <div class="p-3">
+                    <div v-for="(serv, index) in AppStore.modalDetalles.value.card.ventasInfo.servicios" :key="'serv-'+index" class="flex justify-between items-center mb-3 pb-3 border-b border-slate-200 dark:border-slate-800 last:mb-0 last:pb-0 last:border-0">
+                      <div>
+                        <span class="block text-xs text-slate-800 dark:text-slate-200 font-bold">{{ serv.nombre }}</span>
+                        <span class="block text-[9px] font-bold text-emerald-500 uppercase mt-0.5" v-if="serv.comision > 0">Comisión: S/ {{ serv.comision.toFixed(2) }}</span>
+                      </div>
+                      <span class="font-black text-slate-800 dark:text-slate-200 font-mono text-sm shrink-0">S/ {{ serv.monto.toFixed(2) }}</span>
+                    </div>
+                  </div>
+                </template>
+                
+                <!-- Productos -->
+                <template v-if="AppStore.modalDetalles.value.card.ventasInfo.productos && AppStore.modalDetalles.value.card.ventasInfo.productos.length > 0">
+                   <div class="p-3 bg-white dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800">
+                      <div v-for="(prod, i) in AppStore.modalDetalles.value.card.ventasInfo.productos" :key="i" class="flex justify-between items-center mb-3 pb-3 border-b border-slate-100 dark:border-slate-800/60 last:mb-0 last:pb-0 last:border-0">
                         <div class="flex-1 min-w-0 pr-2">
                           <span class="block text-xs text-slate-800 dark:text-slate-200 font-bold truncate" :title="prod.nombre">🛍️ {{ prod.nombre }}</span>
                           <span class="block text-[10px] font-mono text-slate-500 mt-0.5">Cant: <strong class="text-slate-700 dark:text-slate-300">{{ prod.cantidad }}</strong> x S/ {{ prod.precio.toFixed(2) }}</span>
                         </div>
                         <span class="font-black text-slate-800 dark:text-slate-200 font-mono text-sm shrink-0">S/ {{ (prod.precio * prod.cantidad).toFixed(2) }}</span>
                       </div>
-                   </template>
-                 </div>
-                 
-                 <!-- SUMATORIA TOTAL -->
-                 <div class="bg-slate-50 dark:bg-slate-900 p-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
-                   <span class="text-xs font-extrabold uppercase text-slate-600 dark:text-slate-400">Total Pagado</span>
-                   <span class="font-black text-emerald-600 dark:text-emerald-400 font-mono text-lg">
-                     S/ {{ (
-                       (AppStore.modalDetalles.value.card.ventasInfo.montoServicio || 0) + 
-                       (AppStore.modalDetalles.value.card.ventasInfo.productos ? AppStore.modalDetalles.value.card.ventasInfo.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0) : 0)
-                     ).toFixed(2) }}
-                   </span>
-                 </div>
-               </div>
+                   </div>
+                </template>
+                
+                <!-- SUMATORIA TOTAL -->
+                <div class="bg-slate-100 dark:bg-slate-800/50 p-3 flex justify-between items-center">
+                  <span class="text-[11px] font-extrabold uppercase text-slate-600 dark:text-slate-400">Total Pagado</span>
+                  <span class="font-black text-emerald-600 dark:text-emerald-400 font-mono text-base">
+                    S/ {{ (
+                      (AppStore.modalDetalles.value.card.ventasInfo.servicios ? AppStore.modalDetalles.value.card.ventasInfo.servicios.reduce((sum, s) => sum + s.monto, 0) : 0) + 
+                      (AppStore.modalDetalles.value.card.ventasInfo.productos ? AppStore.modalDetalles.value.card.ventasInfo.productos.reduce((sum, p) => sum + (p.precio * p.cantidad), 0) : 0)
+                    ).toFixed(2) }}
+                  </span>
+                </div>
+              </div>
             </div>
             
           </template>

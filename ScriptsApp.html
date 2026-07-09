@@ -922,8 +922,7 @@
 
             return ordenado.map(row => {
                const idOatc = String(row[1] || '').trim(); // Col B (ID_OATC en OATC)
-               let montoServicio = 0;
-               let comisionServicio = 0;
+               const servicios = [];
                const ticketsEncontrados = [];
                
                if (idOatc) {
@@ -938,8 +937,17 @@
                      
                      // Limitar el cruce a una ventana de tiempo de 3 días para evitar colisiones de IDs cortos
                      if (tokensCaja.includes(idOatc) && (timeOatc === 0 || timeVc === 0 || diffDays <= 3)) {
-                        montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
-                        comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
+                        const sNombre = String(vc[6] || 'Servicio').trim() || 'Servicio';
+                        const sMonto = parseFloat(vc[12] || 0) || 0; // Col M
+                        const sComision = parseFloat(vc[13] || 0) || 0; // Col N
+                        
+                        const existing = servicios.find(s => s.nombre === sNombre);
+                        if (existing) {
+                           existing.monto += sMonto;
+                           existing.comision += sComision;
+                        } else {
+                           servicios.push({ nombre: sNombre, monto: sMonto, comision: sComision });
+                        }
                         
                         ticketsValidos.forEach(tId => {
                            if (tId && tokensCaja.includes(tId) && !ticketsEncontrados.includes(tId)) {
@@ -960,7 +968,7 @@
                            if (String(p[0] || '').trim() === sku) nombreProd = `${p[3]} ${p[4] || ''}`.trim();
                         });
                         productosComprados.push({
-                           ticket: tId, sku: sku, nombre: nombreProd, 
+                           nombre: nombreProd, 
                            cantidad: parseFloat(vd[4] || 0) || 0, 
                            precio: parseFloat(vd[6] || 0) || 0
                         });
@@ -968,8 +976,12 @@
                   });
                });
                
-               // Inyectamos la data sin mutar la longitud original del array
-               row.ventasInfo = { montoServicio, comisionServicio, productos: productosComprados };
+               if (servicios.length > 0 || productosComprados.length > 0) {
+                  row.ventasInfo = {
+                     servicios,
+                     productos: productosComprados
+                  };
+               }
                return row;
             });
           }
@@ -1498,8 +1510,7 @@
                   const idOatc = String(row[1] || '').trim();
                   
                   // Buscar en Registro ventas caja (Col C = ID_OATC y/o Ticket ID)
-                  let montoServicio = 0;
-                  let comisionServicio = 0;
+                  const servicios = [];
                   const ticketsEncontrados = [];
                   
                   const ventasCaja = window.AppStore.cacheDatos.value["Registro ventas caja"] || [];
@@ -1529,8 +1540,17 @@
                         const diffDays = (timeOatc > 0 && timeVc > 0) ? Math.abs(timeVc - timeOatc) / 86400000 : 0;
                         
                         if (tokensCaja.includes(idOatc) && (timeOatc === 0 || timeVc === 0 || diffDays <= 3)) {
-                           montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
-                           comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
+                           const sNombre = String(vc[6] || 'Servicio').trim() || 'Servicio';
+                           const sMonto = parseFloat(vc[12] || 0) || 0; // Col M
+                           const sComision = parseFloat(vc[13] || 0) || 0; // Col N
+                           
+                           const existing = servicios.find(s => s.nombre === sNombre);
+                           if (existing) {
+                              existing.monto += sMonto;
+                              existing.comision += sComision;
+                           } else {
+                              servicios.push({ nombre: sNombre, monto: sMonto, comision: sComision });
+                           }
                            
                            // Buscar si hay algún Ticket ID válido en esta misma celda Col C
                            ticketsValidos.forEach(tId => {
@@ -1571,16 +1591,17 @@
                   });
 
                   registrosCliente.push({
-                     hora: row[0], // Col A
-                     idTurno: row[1], // Col B
-                     tipo: row[2], // Col C
-                     fecha: row[3] && !String(row[3]).includes('|') ? row[3] : (row[0] || 'N/A'), // Fallback if D is Cliente
-                     clienteRaw1: row[3], // Col D
-                     clienteRaw2: row[4], // Col E
-                     agente: row[6], // Col G
-                     montoServicio: montoServicio,
-                     comisionServicio: comisionServicio,
-                     productos: productosComprados
+                     origen: 'OATC',
+                     idOatc: idOatc,
+                     fechaHora: row[0],
+                     fechaOatc: row[3],
+                     tipo: String(row[2] || '').trim(), // Col C = Servicio / Tipo de Atención
+                     colaborador: row[6], // Col G = Trabajador
+                     totalServicio: servicios.reduce((sum, s) => sum + s.monto, 0),
+                     ventasInfo: (servicios.length > 0 || productosComprados.length > 0) ? {
+                        servicios: servicios,
+                        productos: productosComprados
+                     } : null
                   });
                }
             });
