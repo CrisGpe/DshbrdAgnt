@@ -547,14 +547,14 @@
           let hojaReal = MAPA_PESTANAS[nuevaPestana] || nuevaPestana;
 
           const dataExistente = window.AppStore.cacheDatos.value[hojaReal];
-          if (!dataExistente || dataExistente.length === 0) {
+          if (!dataExistente || dataExistente?.length === 0) {
             solicitarMatrizAlServidor(hojaReal);
           }
 
           if (['Mi Historial', 'Mis Clientes', 'Mis Indicadores'].includes(nuevaPestana)) {
              const sheetsVentas = ["Registro ventas caja", "Vetas_Tickets", "Ventas_Detalle", "BBDD_Productos"];
              sheetsVentas.forEach(s => {
-               if (window.AppStore.cacheDatos.value[s].length === 0) {
+               if (!window.AppStore.cacheDatos.value[s] || window.AppStore.cacheDatos.value[s]?.length === 0) {
                   solicitarMatrizAlServidor(s);
                }
              });
@@ -562,7 +562,7 @@
 
           // Inyección especial: Para Jefe Operativo en Indicadores, necesitamos la matriz Agentes para poblar su Dropdown
           if (nuevaPestana === 'Mis Indicadores' && window.AppStore.agente.value.especialidad === 'Jefe Operativo') {
-             if (window.AppStore.cacheDatos.value['Agentes'].length === 0) {
+             if (!window.AppStore.cacheDatos.value['Agentes'] || window.AppStore.cacheDatos.value['Agentes']?.length === 0) {
                 solicitarMatrizAlServidor('Agentes');
              }
           }
