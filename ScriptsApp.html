@@ -927,13 +927,22 @@
                const ticketsEncontrados = [];
                
                if (idOatc) {
+                  const safeIdOatc = idOatc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                  const regexOatc = new RegExp(`\\b${safeIdOatc}\\b`);
+                  
                   ventasCaja.forEach(vc => {
                      const colC = String(vc[2] || '');
-                     if (colC.includes(idOatc)) {
+                     if (regexOatc.test(colC)) {
                         montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
                         comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
                         ticketsValidos.forEach(tId => {
-                           if (tId && colC.includes(tId)) ticketsEncontrados.push(tId);
+                           if (tId) {
+                              const safeTid = String(tId).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                              const regexTicket = new RegExp(`\\b${safeTid}\\b`);
+                              if (regexTicket.test(colC) && !ticketsEncontrados.includes(tId)) {
+                                 ticketsEncontrados.push(tId);
+                              }
+                           }
                         });
                      }
                   });
@@ -1508,16 +1517,23 @@
                   
                   // Cruzar con Ventas Caja
                   if (idOatc) {
+                     const safeIdOatc = idOatc.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                     const regexOatc = new RegExp(`\\b${safeIdOatc}\\b`);
+                     
                      ventasCaja.forEach(vc => {
                         const colC = String(vc[2] || '');
-                        if (colC.includes(idOatc)) {
+                        if (regexOatc.test(colC)) {
                            montoServicio += parseFloat(vc[12] || 0) || 0; // Col M
                            comisionServicio += parseFloat(vc[13] || 0) || 0; // Col N
                            
                            // Buscar si hay algún Ticket ID válido en esta misma celda Col C
                            ticketsValidos.forEach(tId => {
-                              if (tId && colC.includes(tId)) {
-                                 ticketsEncontrados.push(tId);
+                              if (tId) {
+                                 const safeTid = String(tId).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                                 const regexTicket = new RegExp(`\\b${safeTid}\\b`);
+                                 if (regexTicket.test(colC) && !ticketsEncontrados.includes(tId)) {
+                                    ticketsEncontrados.push(tId);
+                                 }
                               }
                            });
                         }
