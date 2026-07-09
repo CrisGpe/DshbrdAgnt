@@ -187,7 +187,22 @@
                     <div class="flex-1 relative group">
                       <select v-model="AppStore.wizardCita.value.datos.horaSelect" class="w-full bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-200 text-2xl text-center font-black rounded-xl p-4 border-2 border-slate-200 dark:border-slate-800 focus:outline-none focus:border-purple-500 transition-colors shadow-inner appearance-none cursor-pointer">
                         <option value="" disabled>HH</option>
-                        <option v-for="h in 15" :key="h" :value="String(h+6).padStart(2, '0')">{{String(h+6).padStart(2, '0')}}</option>
+                        <option value="07">07 AM</option>
+                        <option value="08">08 AM</option>
+                        <option value="09">09 AM</option>
+                        <option value="10">10 AM</option>
+                        <option value="11">11 AM</option>
+                        <option value="12">12 PM</option>
+                        <option value="13">01 PM</option>
+                        <option value="14">02 PM</option>
+                        <option value="15">03 PM</option>
+                        <option value="16">04 PM</option>
+                        <option value="17">05 PM</option>
+                        <option value="18">06 PM</option>
+                        <option value="19">07 PM</option>
+                        <option value="20">08 PM</option>
+                        <option value="21">09 PM</option>
+                        <option value="22">10 PM</option>
                       </select>
                     </div>
                     <span class="text-3xl font-black text-slate-300 dark:text-slate-700 self-center pb-2">:</span>
@@ -203,10 +218,10 @@
                   </div>
                   
                   <div class="flex flex-wrap gap-2 pt-2 justify-center">
-                    <button v-for="hora in ['09:00', '11:00', '13:00', '15:00', '17:00']" :key="hora" @click="AppStore.wizardCita.value.datos.horaSelect = hora.split(':')[0]; AppStore.wizardCita.value.datos.minutoSelect = hora.split(':')[1];" 
+                    <button v-for="obj in [{v:'09:00', l:'09 AM'}, {v:'11:00', l:'11 AM'}, {v:'13:00', l:'01 PM'}, {v:'15:00', l:'03 PM'}, {v:'17:00', l:'05 PM'}]" :key="obj.v" @click="AppStore.wizardCita.value.datos.horaSelect = obj.v.split(':')[0]; AppStore.wizardCita.value.datos.minutoSelect = obj.v.split(':')[1];" 
                             class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-colors"
-                            :class="(AppStore.wizardCita.value.datos.horaSelect + ':' + AppStore.wizardCita.value.datos.minutoSelect) === hora ? 'bg-purple-100 border-purple-500 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' : 'bg-white border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
-                      {{ hora }}
+                            :class="(AppStore.wizardCita.value.datos.horaSelect + ':' + AppStore.wizardCita.value.datos.minutoSelect) === obj.v ? 'bg-purple-100 border-purple-500 text-purple-700 dark:bg-purple-500/20 dark:text-purple-300' : 'bg-white border-slate-200 text-slate-600 dark:bg-slate-900 dark:border-slate-800 dark:text-slate-400'">
+                      {{ obj.l }}
                     </button>
                   </div>
                 </div>
@@ -245,7 +260,7 @@
                   <h5 class="text-[10px] font-black uppercase tracking-widest text-indigo-500 mb-2">Resumen</h5>
                   <div class="space-y-1">
                     <p class="text-xs font-bold text-slate-700 dark:text-slate-300">✨ {{ AppStore.wizardCita.value.datos.servicio || 'Servicio pendiente' }}</p>
-                    <p class="text-xs font-bold text-slate-700 dark:text-slate-300">📅 {{ AppStore.wizardCita.value.datos.fecha || '-' }} a las {{ AppStore.wizardCita.value.datos.horaSelect ? AppStore.wizardCita.value.datos.horaSelect + ':' + AppStore.wizardCita.value.datos.minutoSelect : '-' }}</p>
+                    <p class="text-xs font-bold text-slate-700 dark:text-slate-300">📅 {{ AppStore.wizardCita.value.datos.fecha || '-' }} a las {{ AppStore.wizardCita.value.datos.horaSelect ? (Number(AppStore.wizardCita.value.datos.horaSelect) > 12 ? String(Number(AppStore.wizardCita.value.datos.horaSelect) - 12).padStart(2, '0') : AppStore.wizardCita.value.datos.horaSelect) + ':' + AppStore.wizardCita.value.datos.minutoSelect + (Number(AppStore.wizardCita.value.datos.horaSelect) >= 12 ? ' PM' : ' AM') : '-' }}</p>
                   </div>
                 </div>
 
