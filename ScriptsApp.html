@@ -926,7 +926,6 @@
                const ticketsEncontrados = [];
                
                if (idOatc) {
-                  const timeOatc = parseDateRobust(row[3] || row[0]) || 0;
                   const agenteOatc = String(row[6] || '').trim().toLowerCase();
                   
                   ventasCaja.forEach(vc => {
@@ -935,10 +934,9 @@
                      const tokensCaja = colC.split(/[\s,]+/); // Separar por espacios o comas
                      
                      const timeVc = parseDateRobust(vc[0]) || 0;
-                     const diffDays = (timeOatc > 0 && timeVc > 0) ? Math.abs(timeVc - timeOatc) / 86400000 : 0;
                      
-                     // Limitar el cruce a una ventana de tiempo de 3 días y coincidencia de Agente
-                     if (tokensCaja.includes(idOatc) && (timeOatc === 0 || timeVc === 0 || diffDays <= 3) && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
+                     // Limitar el cruce al rango de fechas seleccionado en el filtro global de la app
+                     if (tokensCaja.includes(idOatc) && timeVc >= msInicio && timeVc <= msFin && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
                         const sNombre = String(vc[6] || 'Servicio').trim() || 'Servicio';
                         const sMonto = parseFloat(vc[12] || 0) || 0; // Col M
                         const sComision = parseFloat(vc[13] || 0) || 0; // Col N
@@ -1532,7 +1530,8 @@
                   
                   // Cruzar con Ventas Caja
                   if (idOatc) {
-                     const timeOatc = parseDateRobust(row[3] || row[0]) || 0;
+                     const msInicio = parseDateRobust(window.AppStore.filtroFechaInicio.value);
+                     const msFin = parseDateRobust(window.AppStore.filtroFechaFin.value) + 86399999;
                      const agenteOatc = String(row[6] || '').trim().toLowerCase();
                      
                      ventasCaja.forEach(vc => {
@@ -1541,9 +1540,9 @@
                         const tokensCaja = colC.split(/[\s,]+/);
                         
                         const timeVc = parseDateRobust(vc[0]) || 0;
-                        const diffDays = (timeOatc > 0 && timeVc > 0) ? Math.abs(timeVc - timeOatc) / 86400000 : 0;
                         
-                        if (tokensCaja.includes(idOatc) && (timeOatc === 0 || timeVc === 0 || diffDays <= 3) && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
+                        // Validar con el filtro de fechas global
+                        if (tokensCaja.includes(idOatc) && timeVc >= msInicio && timeVc <= msFin && (!agenteOatc || !agenteCaja || agenteOatc === agenteCaja)) {
                            const sNombre = String(vc[6] || 'Servicio').trim() || 'Servicio';
                            const sMonto = parseFloat(vc[12] || 0) || 0; // Col M
                            const sComision = parseFloat(vc[13] || 0) || 0; // Col N
