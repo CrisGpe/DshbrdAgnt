@@ -256,13 +256,15 @@
           if (!window.AppStore.cacheDatos.value['Clientes'] || window.AppStore.cacheDatos.value['Clientes'].length === 0) {
             solicitarMatrizAlServidor('Clientes');
           }
+          if (!window.AppStore.cacheDatos.value['OATC'] || window.AppStore.cacheDatos.value['OATC'].length === 0) {
+            solicitarMatrizAlServidor('OATC');
+          }
           mostrarDialogo({
             tipo: 'alert',
             titulo: 'Buscar Cliente',
             mensaje: 'Selecciona un cliente de tu lista:',
             mostrarSelectorClientes: true,
             onSeleccionarCliente: (clienteRaw) => {
-               // clienteRaw = [Timestamp, Nombre, Apellido, DNI, Cumpleanos, Celular, Correo, Agente]
                const nombreCompleto = `${clienteRaw[1]} ${clienteRaw[2]}`.trim();
                window.AppStore.wizardCita.value.datos.cliente = nombreCompleto;
             }
