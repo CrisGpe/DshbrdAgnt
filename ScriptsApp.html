@@ -1280,6 +1280,18 @@
         // =========================================================================
         // ACCIONES DE MODAL OATC (NUEVA FASE 2)
         // =========================================================================
+        
+        const obtenerEstadoBotonAtencion = (card) => {
+          if (!card) return { accion: 'terminar', icono: '✅', texto: 'Terminar Atención' };
+          const colS = String(card[18] || '').trim();
+          const colU = String(card[20] || '').toLowerCase().trim();
+          
+          if (['Asesoría', 'Cita'].includes(colS) && !colU.includes('atendiendo') && !colU.includes('curso') && !colU.includes('proceso')) {
+             return { accion: 'comenzar', icono: '▶️', texto: 'Comenzar Atención' };
+          }
+          return { accion: 'terminar', icono: '✅', texto: 'Terminar Atención' };
+        };
+
         const accionModalAtencion = (tipo) => {
           const card = window.AppStore.modalDetalles.value.card;
           if (!card) return;
@@ -1569,6 +1581,7 @@
           
           alternarMenuBurbujas: () => { window.AppStore.mostrarMenuBurbujas.value = !window.AppStore.mostrarMenuBurbujas.value; },
           seleccionarClienteDialogo,
+          obtenerEstadoBotonAtencion,
           accionModalAtencion,
           
           // Formateadores y utilitarios existentes
