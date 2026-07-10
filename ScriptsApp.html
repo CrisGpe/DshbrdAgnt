@@ -998,6 +998,7 @@
             const filterMsInicio = fechaIniStr ? new Date(fechaIniStr + "T00:00:00").getTime() : 0;
             const filterMsFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
             const agenteSeleccionado = window.AppStore.agente.value.nickname.toLowerCase().trim();
+            const nombreCompletoSeleccionado = String(window.AppStore.agente.value.nombre || '').toLowerCase().trim();
              
             vetasTickets.forEach(tk => {
                const tId = String(tk[0] || '').trim(); // Col A
@@ -1008,7 +1009,8 @@
                const metodo = String(tk[9] || '').toUpperCase();
                 
                if (tId && estado !== 'ANULADO' && metodo !== 'PRESTAMO' && !ticketsProcesadosG.has(tId)) {
-                  if (timeTk >= filterMsInicio && timeTk <= filterMsFin && agenteTk === agenteSeleccionado) {
+                  const matchAgente = (agenteTk === agenteSeleccionado || agenteTk === nombreCompletoSeleccionado || (agenteSeleccionado && agenteTk.includes(agenteSeleccionado)));
+                  if (timeTk >= filterMsInicio && timeTk <= filterMsFin && matchAgente) {
                      // Este ticket es una venta independiente del trabajador
                      const productosIndep = [];
                      ventasDetalle.forEach(vd => {
