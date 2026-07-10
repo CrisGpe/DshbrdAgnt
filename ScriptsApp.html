@@ -1030,13 +1030,13 @@
                       
                      if (productosIndep.length > 0) {
                         const fakeRow = [];
-                        fakeRow[0] = tk[1]; // Fecha
-                        fakeRow[1] = '';    // OATC id
-                        fakeRow[6] = tk[3]; // Agente
-                        fakeRow[7] = 'Completado'; // Estado visual
-                        fakeRow[14] = 'TKT-' + tId; // ID Visual para el Card
-                        fakeRow[17] = clienteTk; // Cliente
-                        fakeRow[18] = 'Venta de Producto'; // Tipo
+                        fakeRow[0] = tk[1]; // Col A: Timestamp/Hora
+                        fakeRow[1] = 'TKT-' + tId; // Col B: ID OATC (Usamos TKT-...)
+                        fakeRow[3] = tk[1]; // Col D: Fecha
+                        fakeRow[4] = clienteTk; // Col E: Cliente (Nombre)
+                        fakeRow[5] = 'Venta de Producto'; // Col F: Especialidad / Badge
+                        fakeRow[6] = tk[3]; // Col G: Agente
+                        fakeRow[7] = 'Finalizado'; // Col H: Estado (Finalizado para que el color sea verde/azul)
                         
                         fakeRow.ventasInfo = {
                            servicios: [],
