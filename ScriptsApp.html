@@ -910,12 +910,12 @@
             const ordenado = filtered.sort((a,b) => parseDateRobust(b[3]) - parseDateRobust(a[3]));
             // Enriquecer cada fila con la información de Ventas y ERP
             const ventasCaja = window.AppStore.cacheDatos.value["Registro ventas caja"] || [];
-            const vetasTickets = window.AppStore.cacheDatos.value["Vetas_Tickets"] || [];
+            const ventasTickets = window.AppStore.cacheDatos.value["Ventas_Tickets"] || [];
             const ventasDetalle = window.AppStore.cacheDatos.value["Ventas_Detalle"] || [];
             const bbddProductos = window.AppStore.cacheDatos.value["BBDD_Productos"] || [];
             
             const ticketsValidos = new Set();
-            vetasTickets.forEach(tk => {
+            ventasTickets.forEach(tk => {
                if (String(tk[6] || '').toUpperCase() !== 'ANULADO' && String(tk[9] || '').toUpperCase() !== 'PRESTAMO') {
                   ticketsValidos.add(String(tk[0] || '').trim());
                }
@@ -1000,7 +1000,7 @@
             const agenteSeleccionado = window.AppStore.agente.value.nickname.toLowerCase().trim();
             const nombreCompletoSeleccionado = String(window.AppStore.agente.value.nombre || '').toLowerCase().trim();
              
-            vetasTickets.forEach(tk => {
+            ventasTickets.forEach(tk => {
                const tId = String(tk[0] || '').trim(); // Col A
                const timeTk = parseDateRobust(tk[1]) || 0; // Col B
                const clienteTk = String(tk[2] || 'Anónimo').trim(); // Col C
@@ -1591,9 +1591,10 @@
                   // Buscar en Registro ventas caja (Col C = ID_OATC y/o Ticket ID)
                   const servicios = [];
                   const ticketsEncontrados = [];
+                  const recibosAsociados = new Set();
                   
                   const ventasCaja = window.AppStore.cacheDatos.value["Registro ventas caja"] || [];
-                  const vetasTickets = window.AppStore.cacheDatos.value["Vetas_Tickets"] || [];
+                  const ventasTickets = window.AppStore.cacheDatos.value["Ventas_Tickets"] || [];
                   const ventasDetalle = window.AppStore.cacheDatos.value["Ventas_Detalle"] || [];
                   const bbddProductos = window.AppStore.cacheDatos.value["BBDD_Productos"] || [];
                   
