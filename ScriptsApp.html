@@ -906,6 +906,7 @@
 
           // Paso D: Ordenamiento final
           if (t === "Mi Historial") {
+            const ticketsProcesadosG = new Set();
             const ordenado = filtered.sort((a,b) => parseDateRobust(b[3]) - parseDateRobust(a[3]));
             // Enriquecer cada fila con la información de Ventas y ERP
             const ventasCaja = window.AppStore.cacheDatos.value["Registro ventas caja"] || [];
@@ -920,7 +921,7 @@
                }
             });
 
-            return ordenado.map(row => {
+            const procesado = ordenado.map(row => {
                const idOatc = String(row[1] || '').trim(); // Col B (ID_OATC en OATC)
                const servicios = [];
                const ticketsEncontrados = [];
@@ -965,6 +966,7 @@
                
                const productosComprados = [];
                ticketsEncontrados.forEach(tId => {
+                  ticketsProcesadosG.add(tId);
                   ventasDetalle.forEach(vd => {
                      if (String(vd[1] || '').trim() === tId) {
                         const sku = String(vd[2] || '').trim();
@@ -989,6 +991,63 @@
                }
                return row;
             });
+
+            // Extraer Ventas Independientes de Productos
+            const fechaIniStr = window.AppStore.filtroFechaInicio.value;
+            const fechaFinStr = window.AppStore.filtroFechaFin.value;
+            const filterMsInicio = fechaIniStr ? new Date(fechaIniStr + "T00:00:00").getTime() : 0;
+            const filterMsFin = fechaFinStr ? new Date(fechaFinStr + "T23:59:59").getTime() : Infinity;
+            const agenteSeleccionado = window.AppStore.agente.value.nickname.toLowerCase().trim();
+             
+            vetasTickets.forEach(tk => {
+               const tId = String(tk[0] || '').trim(); // Col A
+               const timeTk = parseDateRobust(tk[1]) || 0; // Col B
+               const clienteTk = String(tk[2] || 'Anónimo').trim(); // Col C
+               const agenteTk = String(tk[3] || '').trim().toLowerCase(); // Col D
+               const estado = String(tk[6] || '').toUpperCase();
+               const metodo = String(tk[9] || '').toUpperCase();
+                
+               if (tId && estado !== 'ANULADO' && metodo !== 'PRESTAMO' && !ticketsProcesadosG.has(tId)) {
+                  if (timeTk >= filterMsInicio && timeTk <= filterMsFin && agenteTk === agenteSeleccionado) {
+                     // Este ticket es una venta independiente del trabajador
+                     const productosIndep = [];
+                     ventasDetalle.forEach(vd => {
+                        if (String(vd[1] || '').trim() === tId) {
+                           const sku = String(vd[2] || '').trim();
+                           let nombreProd = sku;
+                           bbddProductos.forEach(p => {
+                              if (String(p[0] || '').trim() === sku) nombreProd = `${p[3]} ${p[4] || ''}`.trim();
+                           });
+                           productosIndep.push({
+                              nombre: nombreProd, 
+                              cantidad: parseFloat(vd[4] || 0) || 0, 
+                              precio: parseFloat(vd[6] || 0) || 0
+                           });
+                        }
+                     });
+                      
+                     if (productosIndep.length > 0) {
+                        const fakeRow = [];
+                        fakeRow[0] = tk[1]; // Fecha
+                        fakeRow[1] = '';    // OATC id
+                        fakeRow[6] = tk[3]; // Agente
+                        fakeRow[7] = 'Completado'; // Estado visual
+                        fakeRow[14] = 'TKT-' + tId; // ID Visual para el Card
+                        fakeRow[17] = clienteTk; // Cliente
+                        fakeRow[18] = 'Venta de Producto'; // Tipo
+                        
+                        fakeRow.ventasInfo = {
+                           servicios: [],
+                           productos: productosIndep
+                        };
+                        procesado.push(fakeRow);
+                     }
+                  }
+               }
+            });
+             
+            // Reordenar por fecha (recientes primero)
+            return procesado.sort((a,b) => parseDateRobust(b[0]) - parseDateRobust(a[0]));
           }
           if (t === "Mi Agenda") return filtered.sort((a,b) => parseDateRobust(a[1]) - parseDateRobust(b[1])); // Próximas primero
           return filtered;
