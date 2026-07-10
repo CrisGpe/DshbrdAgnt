@@ -1008,8 +1008,17 @@
                const estado = String(tk[6] || '').toUpperCase();
                const metodo = String(tk[9] || '').toUpperCase();
                 
+               if (tId === 'BS-00005151') {
+                 console.log(">>> TICKET BS-00005151 ENCONTRADO EN Ventas_Tickets <<<", {timeTk, agenteTk, estado, metodo, procesado: ticketsProcesadosG.has(tId)});
+               }
+                
                if (tId && estado !== 'ANULADO' && metodo !== 'PRESTAMO' && !ticketsProcesadosG.has(tId)) {
                   const matchAgente = (agenteTk === agenteSeleccionado || agenteTk === nombreCompletoSeleccionado || (agenteSeleccionado && agenteTk.includes(agenteSeleccionado)));
+                  
+                  if (tId === 'BS-00005151') {
+                    console.log(">>> VALIDACION BS-00005151 <<<", {matchAgente, enRangoFechas: (timeTk >= filterMsInicio && timeTk <= filterMsFin)});
+                  }
+                  
                   if (timeTk >= filterMsInicio && timeTk <= filterMsFin && matchAgente) {
                      // Este ticket es una venta independiente del trabajador
                      const productosIndep = [];
@@ -1027,6 +1036,10 @@
                            });
                         }
                      });
+                     
+                     if (tId === 'BS-00005151') {
+                       console.log(">>> PRODUCTOS ENCONTRADOS BS-00005151 <<<", productosIndep.length);
+                     }
                       
                      if (productosIndep.length > 0) {
                         const fakeRow = [];
