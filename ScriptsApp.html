@@ -54,8 +54,8 @@
       // Data caches (Matriz de memoria local)      
       loginForm: Vue.ref({ nickname: '', pin: '', sede: 'RD' }),
       listaNicknamesDisponibles: Vue.ref([]),
-      cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [], "Registro ventas caja": [], "Vetas_Tickets": [], "Ventas_Detalle": [], "BBDD_Productos": [] }),
-      cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [], "Registro ventas caja": [], "Vetas_Tickets": [], "Ventas_Detalle": [], "BBDD_Productos": [] }),
+      cacheDatos: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [], "Registro ventas caja": [], "Ventas_Tickets": [], "Ventas_Detalle": [], "BBDD_Productos": [] }),
+      cacheEncabezados: Vue.ref({ "Borrador": [], "OATC": [], "Agentes": [], "Clientes": [], "Registro Citas": [], "Registro ventas caja": [], "Ventas_Tickets": [], "Ventas_Detalle": [], "BBDD_Productos": [] }),
       filtroFechaInicio: Vue.ref(fechaAyerStr),
       filtroFechaFin: Vue.ref(fechaAyerStr),
       filtroBusquedaCliente: Vue.ref(''), // Búsqueda de Mis Clientes
@@ -552,7 +552,7 @@
           }
 
           if (['Mi Historial', 'Mis Clientes', 'Mis Indicadores'].includes(nuevaPestana)) {
-             const sheetsVentas = ["Registro ventas caja", "Vetas_Tickets", "Ventas_Detalle", "BBDD_Productos"];
+             const sheetsVentas = ["Registro ventas caja", "Ventas_Tickets", "Ventas_Detalle", "BBDD_Productos"];
              sheetsVentas.forEach(s => {
                if (!window.AppStore.cacheDatos.value[s] || window.AppStore.cacheDatos.value[s]?.length === 0) {
                   solicitarMatrizAlServidor(s);
@@ -584,7 +584,7 @@
           }
           
           if (['Mi Historial', 'Mis Clientes', 'Mis Indicadores'].includes(tab)) {
-             const sheetsVentas = ["Registro ventas caja", "Vetas_Tickets", "Ventas_Detalle", "BBDD_Productos"];
+             const sheetsVentas = ["Registro ventas caja", "Ventas_Tickets", "Ventas_Detalle", "BBDD_Productos"];
              sheetsVentas.forEach(s => {
                window.AppStore.cacheDatos.value[s] = [];
                solicitarMatrizAlServidor(s);
