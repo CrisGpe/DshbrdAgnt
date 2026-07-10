@@ -1031,7 +1031,7 @@
                      if (productosIndep.length > 0) {
                         const fakeRow = [];
                         fakeRow[0] = tk[1]; // Col A: Timestamp/Hora
-                        fakeRow[1] = 'TKT-' + tId; // Col B: ID OATC (Usamos TKT-...)
+                        fakeRow[1] = tId; // Col B: ID OATC (Sin prefijo)
                         fakeRow[3] = tk[1]; // Col D: Fecha
                         fakeRow[4] = clienteTk; // Col E: Cliente (Nombre)
                         fakeRow[5] = 'Venta de Producto'; // Col F: Especialidad / Badge
