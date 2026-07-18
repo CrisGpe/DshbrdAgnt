@@ -22,6 +22,13 @@ const SEDES = {
     idVentas: "1w2ZiQPfDfUWM6ODpHQoKn14FGBwwNhzIKxe5-RmEfBw",      // Fallback
     idErp: "1w2ZiQPfDfUWM6ODpHQoKn14FGBwwNhzIKxe5-RmEfBw",         // Fallback
     nombre: "Sede Luxury" 
+  },
+  "Gloss": { 
+    idAdmin: "1SXuedQigLxVUF2oxn65wEZ5-HnDDiVdy7lY7HaweVC4",       // ID Unificado
+    idOperaciones: "1SXuedQigLxVUF2oxn65wEZ5-HnDDiVdy7lY7HaweVC4", // ID Unificado
+    idVentas: "1SXuedQigLxVUF2oxn65wEZ5-HnDDiVdy7lY7HaweVC4",      // Fallback
+    idErp: "1SXuedQigLxVUF2oxn65wEZ5-HnDDiVdy7lY7HaweVC4",         // Fallback
+    nombre: "Sede Gloss" 
   }
 };
 
