@@ -17,7 +17,7 @@
  * @return {Object} Perfil con privilegios de Especialidad o rechazo controlado.
  */
 function loginAgente(nickname, pin, sede) {
-  const sedeActiva = (sede && (sede === "RD" || sede === "Luxury")) ? sede : "RD";
+  const sedeActiva = (sede && (sede === "RD" || sede === "Luxury" || sede === "Gloss")) ? sede : "RD";
   Logger.log("[SISTEMA ACCESO] Intento de login para Nickname: " + nickname + " | Sede: " + sedeActiva);
   
   try {
@@ -105,7 +105,7 @@ function loginAgente(nickname, pin, sede) {
  * Provee la lista única de nicknames filtrando únicamente a los agentes activos.
  */
 function obtenerNicknamesPorSede(sede) {
-  const sedeActiva = (sede && (sede === "RD" || sede === "Luxury")) ? sede : "RD";
+  const sedeActiva = (sede && (sede === "RD" || sede === "Luxury" || sede === "Gloss")) ? sede : "RD";
   
   try {
     const hoja = getHoja(sedeActiva, "Agentes");
