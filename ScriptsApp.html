@@ -489,7 +489,26 @@
               const ndef = new NDEFReader();
               await ndef.scan({ signal: controllerNfc.signal });
               
-              ndef.addEventListener("reading", () => {
+              ndef.addEventListener("reading", ({ message, serialNumber }) => {
+                let textoTag = "";
+                if (message && message.records) {
+                  for (const record of message.records) {
+                    if (record.recordType === "text") {
+                      const textDecoder = new TextDecoder(record.encoding || "utf-8");
+                      textoTag += textDecoder.decode(record.data) + " ";
+                    }
+                  }
+                }
+                textoTag = (textoTag || serialNumber || '').toUpperCase().trim();
+                const sedeActual = (window.AppStore.agente.value.sede || window.AppStore.loginForm.value.sede || "RD").toUpperCase().trim();
+                
+                // Validar si el texto grabado en el Tag contiene el identificador de la Sede activa (RD, LUXURY, GLOSS)
+                if (textoTag && !textoTag.includes(sedeActual)) {
+                  if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
+                  mostrarToast("⚠️ El Tag NFC leído (" + textoTag + ") no pertenece a la Sede " + sedeActual + ".", "error");
+                  return; // Mantener la lectura activa para que vuelva a intentar con el tag correcto
+                }
+
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 ejecutarEnvioAlertaConNfc(true);
               });

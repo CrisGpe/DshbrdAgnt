@@ -52,11 +52,85 @@ function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc) {
     
     // 3. Inserta atómicamente la fila al final del libro
     hojaAlertas.appendRow(filaNueva);
+
+    // 4. Si la alerta es auto-confirmada por NFC, escribir atómicamente en la hoja "Borrador"
+    if (esAutoNfc) {
+      actualizarAsistenciaBorrador(nickname, mensaje, sede);
+    }
     
     return { exito: true };
     
   } catch (error) {
     Logger.log("[ALERTAS CRÍTICO] Fallo al registrar alerta: " + error.toString());
     return { exito: false, mensaje: error.toString() };
+  }
+}
+
+/**
+ * Escribe las marcas de tiempo en la pestaña "Borrador" para el control diario de asistencia.
+ * Col A: Fecha (DD/MM/YYYY)
+ * Col B: Nombre / Trabajador
+ * Col C: Hora de Ingreso (HH:MM AM/PM)  -> "Ya llegué"
+ * Col D: Inicio Refrigerio (HH:MM AM/PM) -> "Voy a comer"
+ * Col E: Fin Refrigerio (HH:MM AM/PM)    -> "Regresé de comer" / "Regresé"
+ * Col F: Hora de Salida (HH:MM AM/PM)    -> "Acabó mi día"
+ */
+function actualizarAsistenciaBorrador(nickname, mensaje, sede) {
+  try {
+    const sheetBorrador = getHoja(sede, "Borrador");
+    const lastRow = sheetBorrador.getLastRow();
+    
+    const tz = Session.getScriptTimeZone();
+    const hoyStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
+    const horaActual12 = Utilities.formatDate(new Date(), tz, "hh:mm a").toUpperCase();
+    
+    // Mapear la columna objetivo según el mensaje de la alerta
+    let colIndex = 0; // 1-based (C=3, D=4, E=5, F=6)
+    if (mensaje === "Ya llegué") colIndex = 3;
+    else if (mensaje === "Voy a comer") colIndex = 4;
+    else if (mensaje === "Regresé de comer" || mensaje === "Regresé") colIndex = 5;
+    else if (mensaje === "Acabó mi día") colIndex = 6;
+    
+    if (colIndex === 0) return; // No es una alerta de asistencia
+    
+    let filaEncontrada = -1;
+    
+    if (lastRow >= 2) {
+      const data = sheetBorrador.getRange(2, 1, lastRow - 1, 6).getValues();
+      const nickNorm = String(nickname || '').toLowerCase().trim();
+      
+      for (let i = 0; i < data.length; i++) {
+        const fechaCelda = data[i][0];
+        let fechaStr = "";
+        if (fechaCelda instanceof Date) {
+          fechaStr = Utilities.formatDate(fechaCelda, tz, "dd/MM/yyyy");
+        } else {
+          fechaStr = String(fechaCelda || '').trim();
+        }
+        
+        const trabajadorCelda = String(data[i][1] || '').toLowerCase().trim();
+        
+        if ((fechaStr === hoyStr || fechaStr.startsWith(hoyStr)) && trabajadorCelda === nickNorm) {
+          filaEncontrada = i + 2; // Índice real de fila en la hoja
+          break;
+        }
+      }
+    }
+    
+    if (filaEncontrada > 0) {
+      // La fila para el día de hoy ya existe: verificar si la columna objetivo está libre
+      const celdaTarget = sheetBorrador.getRange(filaEncontrada, colIndex);
+      const valorActual = celdaTarget.getValue();
+      if (!valorActual || String(valorActual).trim() === '') {
+        celdaTarget.setValue(horaActual12);
+      }
+    } else {
+      // No existe fila previa para el trabajador el día de hoy: crear nueva fila en Borrador
+      const nuevaFila = [hoyStr, nickname, '', '', '', ''];
+      nuevaFila[colIndex - 1] = horaActual12;
+      sheetBorrador.appendRow(nuevaFila);
+    }
+  } catch (err) {
+    Logger.log("[ASISTENCIA BORRADOR ERROR] " + err.toString());
   }
 }
