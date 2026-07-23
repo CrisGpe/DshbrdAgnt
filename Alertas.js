@@ -16,8 +16,8 @@
  * @param {string} sede - Identificador de la base de datos ("RD" o "Luxury").
  * @return {Object} Objeto de estado { exito: boolean, mensaje?: string }
  */
-function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc) {
-  Logger.log("[ALERTAS] Registrando alerta de " + nickname + " en " + sede + ": " + mensaje + " | AutoNFC: " + autoConfirmadoNfc);
+function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc, especialidad) {
+  Logger.log("[ALERTAS] Registrando alerta de " + nickname + " en " + sede + ": " + mensaje + " | AutoNFC: " + autoConfirmadoNfc + " | Esp: " + especialidad);
   
   try {
     // 1. Obtiene la hoja correcta de Alertas usando el enrutador maestro.
@@ -34,7 +34,7 @@ function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc) {
     const estado = esAutoNfc ? "Resuelto (Auto NFC)" : "Pendiente";
     const horaResuelta = esAutoNfc ? fechaHoraStr : ""; 
     
-    // Estructura de Columnas:
+    // Estructura de Columnas en Alertas:
     // A: ID (1)
     // B: Fecha/Hora (2)
     // C: Trabajador (3)
@@ -55,7 +55,7 @@ function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc) {
 
     // 4. Si la alerta es auto-confirmada por NFC, escribir atómicamente en la hoja "Borrador"
     if (esAutoNfc) {
-      actualizarAsistenciaBorrador(nickname, mensaje, sede);
+      actualizarAsistenciaBorrador(nickname, mensaje, sede, especialidad);
     }
     
     return { exito: true };
@@ -67,15 +67,20 @@ function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc) {
 }
 
 /**
- * Escribe las marcas de tiempo en la pestaña "Borrador" para el control diario de asistencia.
+ * Escribe las marcas de tiempo y estados en la pestaña "Borrador" para el control diario de asistencia.
  * Col A: Fecha (DD/MM/YYYY)
  * Col B: Nombre / Trabajador
  * Col C: Hora de Ingreso (HH:MM AM/PM)  -> "Ya llegué"
  * Col D: Inicio Refrigerio (HH:MM AM/PM) -> "Voy a comer"
  * Col E: Fin Refrigerio (HH:MM AM/PM)    -> "Regresé de comer" / "Regresé"
  * Col F: Hora de Salida (HH:MM AM/PM)    -> "Acabó mi día"
+ * Col I: Estado ("Disponible", "En refrigerio", "Ausente")
+ * Col J: Num Estado (Disponible=0, En refrigerio=3, Ausente=5)
+ * Col K: Especialidad ("Estilismo", "Cosmiatría", "Administracion")
+ * Col L: Num Especialidad (Estilismo=0, Cosmiatría=1, Administracion=2)
+ * Col M: Hora con Segundos ("HH:MM:SS AM/PM") -> Solo en Ingreso ("Ya llegué") o Salida ("Acabó mi día")
  */
-function actualizarAsistenciaBorrador(nickname, mensaje, sede) {
+function actualizarAsistenciaBorrador(nickname, mensaje, sede, especialidad) {
   try {
     const sheetBorrador = getHoja(sede, "Borrador");
     const lastRow = sheetBorrador.getLastRow();
@@ -83,20 +88,58 @@ function actualizarAsistenciaBorrador(nickname, mensaje, sede) {
     const tz = Session.getScriptTimeZone();
     const hoyStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
     const horaActual12 = Utilities.formatDate(new Date(), tz, "hh:mm a").toUpperCase();
+    const horaActualSegundos12 = Utilities.formatDate(new Date(), tz, "hh:mm:ss a").toUpperCase();
     
-    // Mapear la columna objetivo según el mensaje de la alerta
-    let colIndex = 0; // 1-based (C=3, D=4, E=5, F=6)
-    if (mensaje === "Ya llegué") colIndex = 3;
-    else if (mensaje === "Voy a comer") colIndex = 4;
-    else if (mensaje === "Regresé de comer" || mensaje === "Regresé") colIndex = 5;
-    else if (mensaje === "Acabó mi día") colIndex = 6;
+    // Mapear la columna objetivo (C=3, D=4, E=5, F=6) y los estados (Col I y J)
+    let colIndex = 0; 
+    let estadoTexto = "";
+    let estadoNum = 0;
+    let esIngresoOSalida = false;
+
+    if (mensaje === "Ya llegué") {
+      colIndex = 3; // Col C
+      estadoTexto = "Disponible";
+      estadoNum = 0;
+      esIngresoOSalida = true;
+    } else if (mensaje === "Voy a comer") {
+      colIndex = 4; // Col D
+      estadoTexto = "En refrigerio";
+      estadoNum = 3;
+      esIngresoOSalida = false;
+    } else if (mensaje === "Regresé de comer" || mensaje === "Regresé") {
+      colIndex = 5; // Col E
+      estadoTexto = "Disponible";
+      estadoNum = 0;
+      esIngresoOSalida = false;
+    } else if (mensaje === "Acabó mi día") {
+      colIndex = 6; // Col F
+      estadoTexto = "Ausente";
+      estadoNum = 5;
+      esIngresoOSalida = true;
+    }
     
     if (colIndex === 0) return; // No es una alerta de asistencia
+    
+    // Mapeo de Especialidad (Col K y L)
+    const espNorm = String(especialidad || 'Estilismo').trim();
+    let espTexto = espNorm;
+    let espNum = 0;
+    
+    if (espNorm.toLowerCase().includes('estilism')) {
+      espTexto = "Estilismo";
+      espNum = 0;
+    } else if (espNorm.toLowerCase().includes('cosmiatr')) {
+      espTexto = "Cosmiatría";
+      espNum = 1;
+    } else if (espNorm.toLowerCase().includes('admin') || espNorm.toLowerCase().includes('jefe') || espNorm.toLowerCase().includes('operativ')) {
+      espTexto = "Administracion";
+      espNum = 2;
+    }
     
     let filaEncontrada = -1;
     
     if (lastRow >= 2) {
-      const data = sheetBorrador.getRange(2, 1, lastRow - 1, 6).getValues();
+      const data = sheetBorrador.getRange(2, 1, lastRow - 1, 13).getValues();
       const nickNorm = String(nickname || '').toLowerCase().trim();
       
       for (let i = 0; i < data.length; i++) {
@@ -118,16 +161,38 @@ function actualizarAsistenciaBorrador(nickname, mensaje, sede) {
     }
     
     if (filaEncontrada > 0) {
-      // La fila para el día de hoy ya existe: verificar si la columna objetivo está libre
+      // Fila existe: Actualizar Col C, D, E, o F según la alerta si la casilla está vacía
       const celdaTarget = sheetBorrador.getRange(filaEncontrada, colIndex);
       const valorActual = celdaTarget.getValue();
       if (!valorActual || String(valorActual).trim() === '') {
         celdaTarget.setValue(horaActual12);
       }
+      
+      // Actualizar Col I (Estado), Col J (Num Estado), Col K (Especialidad), Col L (Num Especialidad)
+      sheetBorrador.getRange(filaEncontrada, 9).setValue(estadoTexto); // Col I
+      sheetBorrador.getRange(filaEncontrada, 10).setValue(estadoNum);  // Col J
+      sheetBorrador.getRange(filaEncontrada, 11).setValue(espTexto);   // Col K
+      sheetBorrador.getRange(filaEncontrada, 12).setValue(espNum);     // Col L
+      
+      // Actualizar Col M (HH:MM:SS AM/PM) solo en Ingreso ("Ya llegué") o Salida ("Acabó mi día")
+      if (esIngresoOSalida) {
+        sheetBorrador.getRange(filaEncontrada, 13).setValue(horaActualSegundos12); // Col M
+      }
+
     } else {
-      // No existe fila previa para el trabajador el día de hoy: crear nueva fila en Borrador
-      const nuevaFila = [hoyStr, nickname, '', '', '', ''];
-      nuevaFila[colIndex - 1] = horaActual12;
+      // No existe fila previa para el trabajador el día de hoy: Crear nueva fila de 13 columnas (A -> M)
+      const nuevaFila = new Array(13).fill('');
+      nuevaFila[0] = hoyStr;
+      nuevaFila[1] = nickname;
+      nuevaFila[colIndex - 1] = horaActual12; // Col C, D, E, o F (índice 2, 3, 4, 5)
+      nuevaFila[8] = estadoTexto; // Col I (Índice 8)
+      nuevaFila[9] = estadoNum;   // Col J (Índice 9)
+      nuevaFila[10] = espTexto;   // Col K (Índice 10)
+      nuevaFila[11] = espNum;     // Col L (Índice 11)
+      if (esIngresoOSalida) {
+        nuevaFila[12] = horaActualSegundos12; // Col M (Índice 12)
+      }
+      
       sheetBorrador.appendRow(nuevaFila);
     }
   } catch (err) {

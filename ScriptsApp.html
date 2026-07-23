@@ -447,6 +447,7 @@
                 const msj = autoNfc ? "⚡ Alerta '" + tipoAlerta + "' auto-confirmada con NFC." : "🚨 Alerta '" + tipoAlerta + "' enviada a recepción.";
                 mostrarToast(msj, autoNfc ? "success" : "info");
                 solicitarMatrizAlServidor("Alertas");
+                if (autoNfc) solicitarMatrizAlServidor("Borrador");
                 resolve();
               })
               .withFailureHandler((err) => { 
@@ -454,7 +455,7 @@
                 mostrarToast("⚠️ Error al registrar alerta: " + (err.message || err), "error");
                 reject(err);
               })
-              .registrarAlertaBotonera(window.AppStore.agente.value.nombre, tipoAlerta, window.AppStore.agente.value.sede, autoNfc);
+              .registrarAlertaBotonera(window.AppStore.agente.value.nombre, tipoAlerta, window.AppStore.agente.value.sede, autoNfc, window.AppStore.agente.value.especialidad);
           });
         };
 
