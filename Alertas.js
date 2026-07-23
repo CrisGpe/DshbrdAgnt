@@ -16,12 +16,11 @@
  * @param {string} sede - Identificador de la base de datos ("RD" o "Luxury").
  * @return {Object} Objeto de estado { exito: boolean, mensaje?: string }
  */
-function registrarAlertaBotonera(nickname, mensaje, sede) {
-  Logger.log("[ALERTAS] Registrando alerta de " + nickname + " en " + sede + ": " + mensaje);
+function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc) {
+  Logger.log("[ALERTAS] Registrando alerta de " + nickname + " en " + sede + ": " + mensaje + " | AutoNFC: " + autoConfirmadoNfc);
   
   try {
     // 1. Obtiene la hoja correcta de Alertas usando el enrutador maestro.
-    // getHoja ya envía cualquier hoja que no sea "Agentes" al ID de Operaciones.
     const hojaAlertas = getHoja(sede, "Alertas");
     
     // 2. Genera el payload de la fila
@@ -31,8 +30,9 @@ function registrarAlertaBotonera(nickname, mensaje, sede) {
     // Formatear la fecha para Recepción (DD/MM/YYYY HH:MM:SS)
     const fechaHoraStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
     
-    const estado = "Pendiente";
-    const horaResuelta = ""; // Vacío al inicio
+    const esAutoNfc = autoConfirmadoNfc === true || autoConfirmadoNfc === "true";
+    const estado = esAutoNfc ? "Resuelto (Auto NFC)" : "Pendiente";
+    const horaResuelta = esAutoNfc ? fechaHoraStr : ""; 
     
     // Estructura de Columnas:
     // A: ID (1)

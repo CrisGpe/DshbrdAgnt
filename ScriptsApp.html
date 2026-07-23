@@ -104,6 +104,15 @@
         onSubmit: null
       }),
 
+      // UX Modal Escaneo NFC (Tag Ntag215)
+      modalNfc: Vue.ref({
+        visible: false,
+        tipoAlerta: '',
+        segundosRestantes: 30,
+        procesando: false,
+        soportado: false
+      }),
+
       // UX Wizard Citas 10x
       wizardCita: Vue.ref({
         visible: false,
@@ -407,7 +416,27 @@
             .obtenerMatrizPestanaPolimorfica(sede, nombreHojaReal);
         };
 
-        const dispararAlertaBotonera = (tipoAlerta) => {
+        let timerNfc = null;
+        let controllerNfc = null;
+
+        const cancelarLecturaNFC = () => {
+          if (timerNfc) clearInterval(timerNfc);
+          timerNfc = null;
+          if (controllerNfc) {
+            try { controllerNfc.abort(); } catch (e) {}
+            controllerNfc = null;
+          }
+          window.AppStore.modalNfc.value.visible = false;
+          window.AppStore.modalNfc.value.procesando = false;
+        };
+
+        const ejecutarEnvioAlertaConNfc = (autoNfc) => {
+          const tipo = window.AppStore.modalNfc.value.tipoAlerta;
+          cancelarLecturaNFC();
+          return dispararAlertaBotonera(tipo, autoNfc);
+        };
+
+        const dispararAlertaBotonera = (tipoAlerta, autoNfc = false) => {
           if (window.AppStore.procesandoAlerta.value) return Promise.reject("Ya procesando");
           window.AppStore.procesandoAlerta.value = true;
 
@@ -415,7 +444,9 @@
             google.script.run
               .withSuccessHandler(() => {
                 window.AppStore.procesandoAlerta.value = false;
-                mostrarToast("🚨 Alerta '" + tipoAlerta + "' registrada con éxito.", "success");
+                const msj = autoNfc ? "⚡ Alerta '" + tipoAlerta + "' auto-confirmada con NFC." : "🚨 Alerta '" + tipoAlerta + "' enviada a recepción.";
+                mostrarToast(msj, autoNfc ? "success" : "info");
+                solicitarMatrizAlServidor("Alertas");
                 resolve();
               })
               .withFailureHandler((err) => { 
@@ -423,7 +454,63 @@
                 mostrarToast("⚠️ Error al registrar alerta: " + (err.message || err), "error");
                 reject(err);
               })
-              .registrarAlertaBotonera(window.AppStore.agente.value.nombre, tipoAlerta, window.AppStore.agente.value.sede);
+              .registrarAlertaBotonera(window.AppStore.agente.value.nombre, tipoAlerta, window.AppStore.agente.value.sede, autoNfc);
+          });
+        };
+
+        const evaluarAlertaAsistencia = async (tipoAlerta) => {
+          const alertasConNfc = ["Ya llegué", "Voy a comer", "Regresé de comer", "Regresé", "Acabó mi día"];
+          if (!alertasConNfc.includes(tipoAlerta)) {
+            return dispararAlertaBotonera(tipoAlerta, false);
+          }
+
+          const nfcSoportado = ('NDEFReader' in window);
+          window.AppStore.modalNfc.value = {
+            visible: true,
+            tipoAlerta: tipoAlerta,
+            segundosRestantes: 30,
+            procesando: false,
+            soportado: nfcSoportado
+          };
+
+          if (timerNfc) clearInterval(timerNfc);
+          timerNfc = setInterval(() => {
+            if (window.AppStore.modalNfc.value.segundosRestantes > 1) {
+              window.AppStore.modalNfc.value.segundosRestantes--;
+            } else {
+              mostrarToast("⏱️ Tiempo de escaneo NFC agotado. Se enviará a recepción.", "info");
+              ejecutarEnvioAlertaConNfc(false);
+            }
+          }, 1000);
+
+          if (nfcSoportado) {
+            try {
+              controllerNfc = new AbortController();
+              const ndef = new NDEFReader();
+              await ndef.scan({ signal: controllerNfc.signal });
+              
+              ndef.addEventListener("reading", () => {
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                ejecutarEnvioAlertaConNfc(true);
+              });
+
+              ndef.addEventListener("readingerror", () => {
+                mostrarToast("⚠️ Error al leer Tag NFC, reintente.", "error");
+              });
+            } catch (err) {
+              console.warn("NFC Error/Cancel:", err);
+            }
+          }
+        };
+
+        const obtenerEstadoAlertaPendiente = (tipoAlerta) => {
+          const miNombre = (window.AppStore.agente.value.nombre || '').toLowerCase().trim();
+          const alertas = window.AppStore.cacheDatos.value["Alertas"] || [];
+          return alertas.some(a => {
+            const trabajador = String(a[2] || '').toLowerCase().trim();
+            const mensaje = String(a[3] || '').trim();
+            const estado = String(a[4] || '').toLowerCase().trim();
+            return (trabajador === miNombre && mensaje === tipoAlerta && estado === 'pendiente');
           });
         };
 
@@ -1836,6 +1923,10 @@
           cambiarPestana,
           cargarMasResultados,
           dispararAlertaBotonera,
+          evaluarAlertaAsistencia,
+          cancelarLecturaNFC,
+          ejecutarEnvioAlertaConNfc,
+          obtenerEstadoAlertaPendiente,
           cargarNicknamesSede,
           ejecutarLogin,
           // Manejo de Sesión
