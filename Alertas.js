@@ -90,11 +90,7 @@ function actualizarAsistenciaBorrador(nickname, mensaje, sede, especialidad) {
     const horaActual12 = Utilities.formatDate(new Date(), tz, "hh:mm a").toUpperCase();
     const horaActualSegundos12 = Utilities.formatDate(new Date(), tz, "hh:mm:ss a").toUpperCase();
     
-    // Mapear la columna objetivo (C=3, D=4, E=5, F=6) y los estados (Col I y J)
-    let colIndex = 0; 
-    let estadoTexto = "";
-    let estadoNum = 0;
-    let esIngresoOSalida = false;
+    const msgNorm = String(mensaje || '').toLowerCase().trim();
 
     // Diccionario de mapeo estricto e inmutable para evitar solapamiento de palabras (ej. "regresé de comer" vs "voy a comer")
     const MAPA_ASISTENCIA = {
