@@ -448,6 +448,9 @@
   <!-- Inyección Síncrona Máster de Vue 3 -->
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   
+  <script>
+    window.URL_PARAMS = <?!= urlParams ?>;
+  </script>
   <!-- Inyección de la Capa de Lógica, Estados y Caché Remota -->
   <?!= include('ScriptsApp.html'); ?>
 </body>

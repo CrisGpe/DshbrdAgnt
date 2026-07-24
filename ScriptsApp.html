@@ -606,6 +606,11 @@
                   window.AppStore.filtroCola.value = 'Todos';
                   cambiarPestana('Borrador'); // Arranque estándar por tabla para Admin
                 }
+                
+                // Si había una acción NFC pendiente desde la apertura por URL (iPhone)
+                if (window.AppStore.pendingNfcAction) {
+                  evaluarProcesarUrlParamsNfc();
+                }
               } else {
                 mostrarToast(res.mensaje || "PIN incorrecto.", "error");
               }
@@ -615,6 +620,33 @@
               mostrarToast("Error de conexión: " + (err.message || err), "error");
             })
             .loginAgente(form.nickname, form.pin, form.sede);
+        };
+
+        const evaluarProcesarUrlParamsNfc = () => {
+          try {
+            const params = window.URL_PARAMS || {};
+            const tagParam = String(params.nfc || params.tag || '').toUpperCase().trim();
+            const accionParam = String(params.accion || params.alerta || 'Ya llegué').trim();
+
+            if (tagParam) {
+              if (window.AppStore.agente.value && window.AppStore.agente.value.autenticado) {
+                const sedeActual = String(window.AppStore.agente.value.sede || '').toUpperCase().trim();
+                const coincideSede = tagParam.includes(sedeActual) || (sedeActual === "RD" && (tagParam.includes("RD") || tagParam.includes("RECEP")));
+
+                if (coincideSede) {
+                  mostrarToast("⚡ Marcación presencial auto-confirmada vía Tag NFC (" + tagParam + ")", "success");
+                  dispararAlertaBotonera(accionParam, true);
+                } else {
+                  mostrarToast("⚠️ El Tag NFC (" + tagParam + ") no corresponde a tu Sede activa (" + sedeActual + ").", "error");
+                }
+              } else {
+                window.AppStore.pendingNfcAction = { tag: tagParam, accion: accionParam };
+                mostrarToast("📲 Tag NFC presencial detectado. Ingresa tu PIN para auto-confirmar.", "info");
+              }
+            }
+          } catch (e) {
+            console.error("URL Params NFC Error:", e);
+          }
         };
 
         const cerrarSesion = () => {
@@ -859,6 +891,7 @@
           } else {
             cargarNicknamesSede();
           }
+          evaluarProcesarUrlParamsNfc();
         });
 
         const obtenerEncabezadosTabla = Vue.computed(() => {

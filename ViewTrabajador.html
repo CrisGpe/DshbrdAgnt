@@ -1132,8 +1132,13 @@
           {{ AppStore.modalNfc.value.debugMsj }}
         </div>
 
-        <div v-if="!AppStore.modalNfc.value.soportado" class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-semibold">
-          ⚠️ NFC no soportado en este navegador/celular. Puedes enviar como remota.
+        <div v-if="!AppStore.modalNfc.value.soportado" class="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-300 text-xs font-medium text-left space-y-1">
+          <div class="font-bold flex items-center gap-1 text-amber-500">
+            <span>🍎</span> Dispositivo iPhone (iOS):
+          </div>
+          <p class="text-[11px] leading-normal">
+            En iPhone, aproxima tu teléfono <strong>directamente al Tag NFC de la sede</strong> (incluso con la pantalla bloqueada) y toca la notificación de Safari para confirmar tu asistencia presencial al instante.
+          </p>
         </div>
 
         <div class="flex flex-col gap-2 pt-2">
