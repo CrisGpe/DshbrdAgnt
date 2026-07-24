@@ -96,31 +96,22 @@ function actualizarAsistenciaBorrador(nickname, mensaje, sede, especialidad) {
     let estadoNum = 0;
     let esIngresoOSalida = false;
 
-    const msgNorm = String(mensaje || '').toLowerCase().trim();
+    // Diccionario de mapeo estricto e inmutable para evitar solapamiento de palabras (ej. "regresé de comer" vs "voy a comer")
+    const MAPA_ASISTENCIA = {
+      "ya llegué":        { col: 3, estado: "Disponible",   num: 0, esExtremo: true },
+      "voy a comer":      { col: 4, estado: "En refrigerio", num: 3, esExtremo: false },
+      "regresé de comer": { col: 5, estado: "Disponible",   num: 0, esExtremo: false },
+      "regresé":          { col: 5, estado: "Disponible",   num: 0, esExtremo: false },
+      "acabó mi día":     { col: 6, estado: "Ausente",      num: 5, esExtremo: true }
+    };
 
-    if (msgNorm.includes("llegu") || msgNorm === "ya llegué") {
-      colIndex = 3; // Col C (Hora de Ingreso)
-      estadoTexto = "Disponible";
-      estadoNum = 0;
-      esIngresoOSalida = true;
-    } else if (msgNorm.includes("comer") || msgNorm === "voy a comer") {
-      colIndex = 4; // Col D (Inicio Refrigerio)
-      estadoTexto = "En refrigerio";
-      estadoNum = 3;
-      esIngresoOSalida = false;
-    } else if (msgNorm.includes("regres") || msgNorm === "regresé de comer" || msgNorm === "regresé") {
-      colIndex = 5; // Col E (Fin Refrigerio)
-      estadoTexto = "Disponible";
-      estadoNum = 0;
-      esIngresoOSalida = false;
-    } else if (msgNorm.includes("acab") || msgNorm === "acabó mi día") {
-      colIndex = 6; // Col F (Hora de Salida)
-      estadoTexto = "Ausente";
-      estadoNum = 5;
-      esIngresoOSalida = true;
-    }
-    
-    if (colIndex === 0) return; // No es una alerta de asistencia
+    const regla = MAPA_ASISTENCIA[msgNorm];
+    if (!regla) return; // No es una alerta de asistencia
+
+    const colIndex = regla.col;
+    const estadoTexto = regla.estado;
+    const estadoNum = regla.num;
+    const esIngresoOSalida = regla.esExtremo;
     
     // Mapeo de Especialidad (Col K y L)
     const espNorm = String(especialidad || 'Estilismo').trim();
