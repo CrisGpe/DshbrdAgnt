@@ -114,6 +114,9 @@
         debugMsj: ''
       }),
 
+      // Estado de validación física presencial vía URL (iPhone / Tag Touch)
+      nfcPresencialValidado: Vue.ref(false),
+
       // UX Wizard Citas 10x
       wizardCita: Vue.ref({
         visible: false,
@@ -490,6 +493,13 @@
             return dispararAlertaBotonera(tipoAlerta, false);
           }
 
+          // Si la presencia presencial ya fue validada con el Tag (vía URL en iPhone)
+          if (window.AppStore.nfcPresencialValidado.value) {
+            window.AppStore.nfcPresencialValidado.value = false; // Consumir el token
+            mostrarToast("⚡ Marcación presencial auto-confirmada con Tag NFC.", "success");
+            return dispararAlertaBotonera(tipoAlerta, true);
+          }
+
           const nfcSoportado = ('NDEFReader' in window);
           window.AppStore.modalNfc.value = {
             visible: true,
@@ -497,7 +507,7 @@
             segundosRestantes: 30,
             procesando: false,
             soportado: nfcSoportado,
-            debugMsj: nfcSoportado ? "📡 Listo para aproximar Tag NFC Ntag215..." : "⚠️ Sensor NFC no disponible en este navegador."
+            debugMsj: nfcSoportado ? "📡 Listo para aproximar Tag NFC Ntag215..." : "🍎 En iPhone: Aproxime su celular al Tag NFC del local para validar presencia presencial."
           };
 
           if (timerNfc) clearInterval(timerNfc);
@@ -626,7 +636,7 @@
           try {
             const params = window.URL_PARAMS || {};
             const tagParam = String(params.nfc || params.tag || '').toUpperCase().trim();
-            const accionParam = String(params.accion || params.alerta || 'Ya llegué').trim();
+            const accionParam = params.accion || params.alerta;
 
             if (tagParam) {
               if (window.AppStore.agente.value && window.AppStore.agente.value.autenticado) {
@@ -634,14 +644,19 @@
                 const coincideSede = tagParam.includes(sedeActual) || (sedeActual === "RD" && (tagParam.includes("RD") || tagParam.includes("RECEP")));
 
                 if (coincideSede) {
-                  mostrarToast("⚡ Marcación presencial auto-confirmada vía Tag NFC (" + tagParam + ")", "success");
-                  dispararAlertaBotonera(accionParam, true);
+                  window.AppStore.nfcPresencialValidado.value = true;
+                  if (accionParam) {
+                    mostrarToast("⚡ Marcación presencial auto-confirmada vía Tag NFC (" + tagParam + ")", "success");
+                    dispararAlertaBotonera(accionParam, true);
+                  } else {
+                    mostrarToast("📡 Presencia presencial validada vía Tag NFC. Presiona tu botón de asistencia.", "success");
+                  }
                 } else {
                   mostrarToast("⚠️ El Tag NFC (" + tagParam + ") no corresponde a tu Sede activa (" + sedeActual + ").", "error");
                 }
               } else {
                 window.AppStore.pendingNfcAction = { tag: tagParam, accion: accionParam };
-                mostrarToast("📲 Tag NFC presencial detectado. Ingresa tu PIN para auto-confirmar.", "info");
+                mostrarToast("📲 Tag NFC presencial detectado. Ingresa tu PIN para validar tu asistencia.", "info");
               }
             }
           } catch (e) {
