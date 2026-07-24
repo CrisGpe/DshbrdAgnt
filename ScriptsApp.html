@@ -494,6 +494,10 @@
             return dispararAlertaBotonera(tipoAlerta, false);
           }
 
+          // Guardar acción seleccionada en localStorage para sobrevivir a la recarga de página en iPhone Safari
+          localStorage.setItem('pending_nfc_action', tipoAlerta);
+          localStorage.setItem('pending_nfc_timestamp', String(Date.now()));
+
           // Verificar si hay una validación presencial por NFC activa y que no haya expirado (límite 30 segundos)
           const ahora = Date.now();
           const esValidoPresencial = window.AppStore.nfcPresencialValidado.value && 
@@ -501,6 +505,8 @@
 
           if (esValidoPresencial) {
             window.AppStore.nfcPresencialValidado.value = false; // Consumir el token
+            localStorage.removeItem('pending_nfc_action');
+            localStorage.removeItem('pending_nfc_timestamp');
             mostrarToast("⚡ Marcación '" + tipoAlerta + "' auto-confirmada presencialmente.", "success");
             return dispararAlertaBotonera(tipoAlerta, true);
           }
@@ -658,8 +664,21 @@
                 const coincideSede = tagParam.includes(sedeActual) || (sedeActual === "RD" && (tagParam.includes("RD") || tagParam.includes("RECEP")));
 
                 if (coincideSede) {
-                  // Si hay un modal activo esperando confirmación NFC
-                  if (window.AppStore.modalNfc.value.visible && window.AppStore.modalNfc.value.tipoAlerta) {
+                  // Verificar si había un botón presionado en los últimos 45 segundos (iPhone Safari reload)
+                  const pendingAction = localStorage.getItem('pending_nfc_action');
+                  const pendingTime = parseInt(localStorage.getItem('pending_nfc_timestamp') || '0', 10);
+                  const esReciente = pendingAction && ((Date.now() - pendingTime) <= 45000);
+
+                  // Limpiar localStorage
+                  localStorage.removeItem('pending_nfc_action');
+                  localStorage.removeItem('pending_nfc_timestamp');
+
+                  if (esReciente) {
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    cancelarLecturaNFC();
+                    mostrarToast("⚡ Marcación '" + pendingAction + "' auto-confirmada presencialmente vía Tag NFC.", "success");
+                    dispararAlertaBotonera(pendingAction, true);
+                  } else if (window.AppStore.modalNfc.value.visible && window.AppStore.modalNfc.value.tipoAlerta) {
                     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                     ejecutarEnvioAlertaConNfc(true);
                   } else {
