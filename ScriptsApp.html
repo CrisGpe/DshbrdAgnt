@@ -116,6 +116,7 @@
 
       // Estado de validación física presencial vía URL (iPhone / Tag Touch)
       nfcPresencialValidado: Vue.ref(false),
+      nfcPresencialTimestamp: Vue.ref(0),
 
       // UX Wizard Citas 10x
       wizardCita: Vue.ref({
@@ -493,12 +494,19 @@
             return dispararAlertaBotonera(tipoAlerta, false);
           }
 
-          // Si la presencia presencial ya fue validada con el Tag (vía URL en iPhone)
-          if (window.AppStore.nfcPresencialValidado.value) {
+          // Verificar si hay una validación presencial por NFC activa y que no haya expirado (límite 30 segundos)
+          const ahora = Date.now();
+          const esValidoPresencial = window.AppStore.nfcPresencialValidado.value && 
+                                     ((ahora - window.AppStore.nfcPresencialTimestamp.value) <= 30000);
+
+          if (esValidoPresencial) {
             window.AppStore.nfcPresencialValidado.value = false; // Consumir el token
-            mostrarToast("⚡ Marcación presencial auto-confirmada con Tag NFC.", "success");
+            mostrarToast("⚡ Marcación '" + tipoAlerta + "' auto-confirmada presencialmente.", "success");
             return dispararAlertaBotonera(tipoAlerta, true);
           }
+
+          // Si el token expiró o no existe, limpiar estado
+          window.AppStore.nfcPresencialValidado.value = false;
 
           const nfcSoportado = ('NDEFReader' in window);
           window.AppStore.modalNfc.value = {
@@ -637,6 +645,13 @@
             const params = window.URL_PARAMS || {};
             const tagParam = String(params.nfc || params.tag || '').toUpperCase().trim();
 
+            // Limpiar inmediatamente los parámetros de la URL de la barra del navegador para evitar re-ejecución al presionar F5 o refrescar
+            if (window.history && window.history.replaceState && window.location.search) {
+              const cleanUrl = window.location.origin + window.location.pathname;
+              window.history.replaceState({}, document.title, cleanUrl);
+            }
+            window.URL_PARAMS = {}; // Limpiar la variable global
+
             if (tagParam) {
               if (window.AppStore.agente.value && window.AppStore.agente.value.autenticado) {
                 const sedeActual = String(window.AppStore.agente.value.sede || '').toUpperCase().trim();
@@ -644,7 +659,8 @@
 
                 if (coincideSede) {
                   window.AppStore.nfcPresencialValidado.value = true;
-                  mostrarToast("📡 Presencia presencial validada vía Tag NFC (" + tagParam + "). Presiona tu botón de asistencia.", "success");
+                  window.AppStore.nfcPresencialTimestamp.value = Date.now();
+                  mostrarToast("📡 Presencia presencial validada vía Tag NFC (" + tagParam + ") por 30s. Presiona tu botón de asistencia.", "success");
                 } else {
                   mostrarToast("⚠️ El Tag NFC (" + tagParam + ") no corresponde a tu Sede activa (" + sedeActual + ").", "error");
                 }
