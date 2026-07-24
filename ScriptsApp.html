@@ -447,8 +447,15 @@
 
           return new Promise((resolve, reject) => {
             google.script.run
-              .withSuccessHandler(() => {
+              .withSuccessHandler((res) => {
                 window.AppStore.procesandoAlerta.value = false;
+                if (res && res.yaExiste) {
+                  mostrarToast(res.mensaje || "⚠️ Asistencia ya registrada previamente.", "info");
+                  solicitarMatrizAlServidor("Alertas");
+                  solicitarMatrizAlServidor("Borrador");
+                  resolve();
+                  return;
+                }
                 const msj = autoNfc ? "⚡ Alerta '" + tipoAlerta + "' auto-confirmada con NFC." : "🚨 Alerta '" + tipoAlerta + "' enviada a recepción.";
                 mostrarToast(msj, autoNfc ? "success" : "info");
                 solicitarMatrizAlServidor("Alertas");

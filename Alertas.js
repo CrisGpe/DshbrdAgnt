@@ -9,38 +9,90 @@
  */
 
 /**
+ * Verifica si el trabajador ya tiene registrada la marcación de asistencia especificada para el día de hoy en Borrador.
+ */
+function validarRegistroAsistenciaPrevio(nickname, mensaje, sede) {
+  try {
+    const sheetBorrador = getHoja(sede, "Borrador");
+    const lastRow = sheetBorrador.getLastRow();
+    if (lastRow < 2) return { yaExiste: false };
+
+    const tz = Session.getScriptTimeZone();
+    const hoyStr = Utilities.formatDate(new Date(), tz, "dd/MM/yyyy");
+    const msgNorm = String(mensaje || '').toLowerCase().trim();
+
+    const MAPA_ASISTENCIA = {
+      "ya llegué":        { col: 3, label: "Ingreso ('Ya llegué')" },
+      "voy a comer":      { col: 4, label: "Inicio de Refrigerio ('Voy a comer')" },
+      "regresé de comer": { col: 5, label: "Fin de Refrigerio ('Regresé de comer')" },
+      "regresé":          { col: 5, label: "Fin de Refrigerio ('Regresé de comer')" },
+      "acabó mi día":     { col: 6, label: "Salida del día ('Acabó mi día')" }
+    };
+
+    const regla = MAPA_ASISTENCIA[msgNorm];
+    if (!regla) return { yaExiste: false }; // No es una alerta de asistencia estandarizada
+
+    const data = sheetBorrador.getRange(2, 1, lastRow - 1, 13).getValues();
+    const nickNorm = String(nickname || '').toLowerCase().trim();
+
+    for (let i = 0; i < data.length; i++) {
+      const fechaCelda = data[i][0];
+      let fechaStr = "";
+      if (fechaCelda instanceof Date) {
+        fechaStr = Utilities.formatDate(fechaCelda, tz, "dd/MM/yyyy");
+      } else {
+        fechaStr = String(fechaCelda || '').trim();
+      }
+
+      const trabajadorCelda = String(data[i][1] || '').toLowerCase().trim();
+
+      if ((fechaStr === hoyStr || fechaStr.startsWith(hoyStr)) && trabajadorCelda === nickNorm) {
+        const valExistente = data[i][regla.col - 1]; // Índice 0-based
+        if (valExistente && String(valExistente).trim() !== '') {
+          return {
+            yaExiste: true,
+            horaRegistrada: String(valExistente).trim(),
+            label: regla.label
+          };
+        }
+        break;
+      }
+    }
+  } catch (e) {
+    Logger.log("Error validando asistencia previa: " + e.toString());
+  }
+  return { yaExiste: false };
+}
+
+/**
  * Registra una nueva alerta en el libro de operaciones de la sede.
- * 
- * @param {string} nickname - Apodo del agente que dispara la alerta.
- * @param {string} mensaje - Tipo de alerta o mensaje (ej. 'Ya llegué', 'Bar: 2 Cafés').
- * @param {string} sede - Identificador de la base de datos ("RD" o "Luxury").
- * @return {Object} Objeto de estado { exito: boolean, mensaje?: string }
  */
 function registrarAlertaBotonera(nickname, mensaje, sede, autoConfirmadoNfc, especialidad) {
   Logger.log("[ALERTAS] Registrando alerta de " + nickname + " en " + sede + ": " + mensaje + " | AutoNFC: " + autoConfirmadoNfc + " | Esp: " + especialidad);
   
   try {
+    // 0. Validar si el trabajador ya tiene registrada esta asistencia hoy
+    const checkPrevio = validarRegistroAsistenciaPrevio(nickname, mensaje, sede);
+    if (checkPrevio.yaExiste) {
+      return { 
+        exito: true, 
+        yaExiste: true, 
+        mensaje: "⚠️ Ya registraste tu " + checkPrevio.label + " hoy a las " + checkPrevio.horaRegistrada + "."
+      };
+    }
+
     // 1. Obtiene la hoja correcta de Alertas usando el enrutador maestro.
     const hojaAlertas = getHoja(sede, "Alertas");
     
     // 2. Genera el payload de la fila
     const timestamp = new Date().getTime();
     const idUnico = "ALT-" + timestamp;
-    
-    // Formatear la fecha para Recepción (DD/MM/YYYY HH:MM:SS)
     const fechaHoraStr = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), "dd/MM/yyyy HH:mm:ss");
     
     const esAutoNfc = autoConfirmadoNfc === true || autoConfirmadoNfc === "true";
     const estado = esAutoNfc ? "Resuelto (Auto NFC)" : "Pendiente";
     const horaResuelta = esAutoNfc ? fechaHoraStr : ""; 
     
-    // Estructura de Columnas en Alertas:
-    // A: ID (1)
-    // B: Fecha/Hora (2)
-    // C: Trabajador (3)
-    // D: Mensaje (4)
-    // E: Estado (5)
-    // F: Hora_resuelta (6)
     const filaNueva = [
       idUnico,
       fechaHoraStr,
