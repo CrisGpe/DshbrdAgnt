@@ -1127,6 +1127,11 @@
           </span>
         </div>
 
+        <!-- Caja de diagnóstico de lectura NFC en tiempo real -->
+        <div v-if="AppStore.modalNfc.value.debugMsj" class="p-2.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-300 text-[11px] font-mono font-bold leading-tight break-all">
+          {{ AppStore.modalNfc.value.debugMsj }}
+        </div>
+
         <div v-if="!AppStore.modalNfc.value.soportado" class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-[11px] font-semibold">
           ⚠️ NFC no soportado en este navegador/celular. Puedes enviar como remota.
         </div>

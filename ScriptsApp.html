@@ -110,7 +110,8 @@
         tipoAlerta: '',
         segundosRestantes: 30,
         procesando: false,
-        soportado: false
+        soportado: false,
+        debugMsj: ''
       }),
 
       // UX Wizard Citas 10x
@@ -459,6 +460,30 @@
           });
         };
 
+        const decodificarRecordNfc = (record) => {
+          try {
+            if (!record || !record.data) return "";
+            if (record.recordType === "text") {
+              const textDecoder = new TextDecoder(record.encoding || "utf-8");
+              const rawData = new Uint8Array(record.data.buffer, record.data.byteOffset, record.data.byteLength);
+              if (rawData.length > 0) {
+                const statusByte = rawData[0];
+                const langLen = statusByte & 0x3F; // Longitud del código de idioma (ej: "en" = 2)
+                if (rawData.length > 1 + langLen) {
+                  return textDecoder.decode(rawData.subarray(1 + langLen));
+                }
+              }
+              return textDecoder.decode(record.data);
+            } else {
+              const textDecoder = new TextDecoder("utf-8");
+              return textDecoder.decode(record.data);
+            }
+          } catch (e) {
+            console.error("NFC Record decode error:", e);
+            return "";
+          }
+        };
+
         const evaluarAlertaAsistencia = async (tipoAlerta) => {
           const alertasConNfc = ["Ya llegué", "Voy a comer", "Regresé de comer", "Regresé", "Acabó mi día"];
           if (!alertasConNfc.includes(tipoAlerta)) {
@@ -471,7 +496,8 @@
             tipoAlerta: tipoAlerta,
             segundosRestantes: 30,
             procesando: false,
-            soportado: nfcSoportado
+            soportado: nfcSoportado,
+            debugMsj: nfcSoportado ? "📡 Listo para aproximar Tag NFC Ntag215..." : "⚠️ Sensor NFC no disponible en este navegador."
           };
 
           if (timerNfc) clearInterval(timerNfc);
@@ -490,24 +516,31 @@
               const ndef = new NDEFReader();
               await ndef.scan({ signal: controllerNfc.signal });
               
+              window.AppStore.modalNfc.value.debugMsj = "📡 Escaneando... Aproxime su celular al Tag Ntag215.";
+
               ndef.addEventListener("reading", ({ message, serialNumber }) => {
-                let textoTag = "";
-                if (message && message.records) {
+                let textoExtraido = "";
+                if (message && message.records && message.records.length > 0) {
                   for (const record of message.records) {
-                    if (record.recordType === "text") {
-                      const textDecoder = new TextDecoder(record.encoding || "utf-8");
-                      textoTag += textDecoder.decode(record.data) + " ";
-                    }
+                    const txt = decodificarRecordNfc(record);
+                    if (txt) textoExtraido += txt + " ";
                   }
                 }
-                textoTag = (textoTag || serialNumber || '').toUpperCase().trim();
+                
+                const textoFinal = (textoExtraido + " " + (serialNumber || '')).toUpperCase().trim();
                 const sedeActual = (window.AppStore.agente.value.sede || window.AppStore.loginForm.value.sede || "RD").toUpperCase().trim();
                 
-                // Validar si el texto grabado en el Tag contiene el identificador de la Sede activa (RD, LUXURY, GLOSS)
-                if (textoTag && !textoTag.includes(sedeActual)) {
+                console.log("[NFC LEÍDO]", { textoFinal, sedeActual, serialNumber });
+                window.AppStore.modalNfc.value.debugMsj = "🏷️ Leído: '" + textoFinal + "'";
+
+                // Validar si el texto grabado en el Tag contiene la Sede activa (RD, LUXURY, GLOSS)
+                const coincideSede = textoFinal.includes(sedeActual) || (sedeActual === "RD" && (textoFinal.includes("RD") || textoFinal.includes("RECEP")));
+
+                if (!coincideSede) {
                   if (navigator.vibrate) navigator.vibrate([300, 100, 300]);
-                  mostrarToast("⚠️ El Tag NFC leído (" + textoTag + ") no pertenece a la Sede " + sedeActual + ".", "error");
-                  return; // Mantener la lectura activa para que vuelva a intentar con el tag correcto
+                  window.AppStore.modalNfc.value.debugMsj = "⚠️ Sede errónea: Tag ('" + textoFinal + "') vs Sede Usuario ('" + sedeActual + "')";
+                  mostrarToast("⚠️ El Tag NFC (" + textoFinal + ") no corresponde a la Sede " + sedeActual + ". Verifique su sesión.", "error");
+                  return; // Mantener la lectura activa para reintentar
                 }
 
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
@@ -515,10 +548,14 @@
               });
 
               ndef.addEventListener("readingerror", () => {
-                mostrarToast("⚠️ Error al leer Tag NFC, reintente.", "error");
+                window.AppStore.modalNfc.value.debugMsj = "⚠️ Error de lectura al aproximar Tag.";
+                mostrarToast("⚠️ Error al leer Tag NFC. Reintente aproximar el chip.", "error");
               });
             } catch (err) {
               console.warn("NFC Error/Cancel:", err);
+              const msgErr = err.message || err;
+              window.AppStore.modalNfc.value.debugMsj = "⚠️ No se pudo iniciar escaneo NFC: " + msgErr;
+              mostrarToast("⚠️ NFC no inició: " + msgErr + ". Puede pulsar 'Emitir como Pendiente'.", "error");
             }
           }
         };
