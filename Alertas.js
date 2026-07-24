@@ -96,23 +96,25 @@ function actualizarAsistenciaBorrador(nickname, mensaje, sede, especialidad) {
     let estadoNum = 0;
     let esIngresoOSalida = false;
 
-    if (mensaje === "Ya llegué") {
-      colIndex = 3; // Col C
+    const msgNorm = String(mensaje || '').toLowerCase().trim();
+
+    if (msgNorm.includes("llegu") || msgNorm === "ya llegué") {
+      colIndex = 3; // Col C (Hora de Ingreso)
       estadoTexto = "Disponible";
       estadoNum = 0;
       esIngresoOSalida = true;
-    } else if (mensaje === "Voy a comer") {
-      colIndex = 4; // Col D
+    } else if (msgNorm.includes("comer") || msgNorm === "voy a comer") {
+      colIndex = 4; // Col D (Inicio Refrigerio)
       estadoTexto = "En refrigerio";
       estadoNum = 3;
       esIngresoOSalida = false;
-    } else if (mensaje === "Regresé de comer" || mensaje === "Regresé") {
-      colIndex = 5; // Col E
+    } else if (msgNorm.includes("regres") || msgNorm === "regresé de comer" || msgNorm === "regresé") {
+      colIndex = 5; // Col E (Fin Refrigerio)
       estadoTexto = "Disponible";
       estadoNum = 0;
       esIngresoOSalida = false;
-    } else if (mensaje === "Acabó mi día") {
-      colIndex = 6; // Col F
+    } else if (msgNorm.includes("acab") || msgNorm === "acabó mi día") {
+      colIndex = 6; // Col F (Hora de Salida)
       estadoTexto = "Ausente";
       estadoNum = 5;
       esIngresoOSalida = true;

@@ -636,7 +636,6 @@
           try {
             const params = window.URL_PARAMS || {};
             const tagParam = String(params.nfc || params.tag || '').toUpperCase().trim();
-            const accionParam = params.accion || params.alerta;
 
             if (tagParam) {
               if (window.AppStore.agente.value && window.AppStore.agente.value.autenticado) {
@@ -645,17 +644,12 @@
 
                 if (coincideSede) {
                   window.AppStore.nfcPresencialValidado.value = true;
-                  if (accionParam) {
-                    mostrarToast("⚡ Marcación presencial auto-confirmada vía Tag NFC (" + tagParam + ")", "success");
-                    dispararAlertaBotonera(accionParam, true);
-                  } else {
-                    mostrarToast("📡 Presencia presencial validada vía Tag NFC. Presiona tu botón de asistencia.", "success");
-                  }
+                  mostrarToast("📡 Presencia presencial validada vía Tag NFC (" + tagParam + "). Presiona tu botón de asistencia.", "success");
                 } else {
                   mostrarToast("⚠️ El Tag NFC (" + tagParam + ") no corresponde a tu Sede activa (" + sedeActual + ").", "error");
                 }
               } else {
-                window.AppStore.pendingNfcAction = { tag: tagParam, accion: accionParam };
+                window.AppStore.pendingNfcAction = { tag: tagParam };
                 mostrarToast("📲 Tag NFC presencial detectado. Ingresa tu PIN para validar tu asistencia.", "info");
               }
             }
