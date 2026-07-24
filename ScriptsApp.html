@@ -523,8 +523,8 @@
             if (window.AppStore.modalNfc.value.segundosRestantes > 1) {
               window.AppStore.modalNfc.value.segundosRestantes--;
             } else {
-              mostrarToast("⏱️ Tiempo de escaneo NFC agotado. Se enviará a recepción.", "info");
-              ejecutarEnvioAlertaConNfc(false);
+              mostrarToast("⏱️ Tiempo de validación presencial agotado.", "info");
+              cancelarLecturaNFC();
             }
           }, 1000);
 
@@ -658,9 +658,15 @@
                 const coincideSede = tagParam.includes(sedeActual) || (sedeActual === "RD" && (tagParam.includes("RD") || tagParam.includes("RECEP")));
 
                 if (coincideSede) {
-                  window.AppStore.nfcPresencialValidado.value = true;
-                  window.AppStore.nfcPresencialTimestamp.value = Date.now();
-                  mostrarToast("📡 Presencia presencial validada vía Tag NFC (" + tagParam + ") por 30s. Presiona tu botón de asistencia.", "success");
+                  // Si hay un modal activo esperando confirmación NFC
+                  if (window.AppStore.modalNfc.value.visible && window.AppStore.modalNfc.value.tipoAlerta) {
+                    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+                    ejecutarEnvioAlertaConNfc(true);
+                  } else {
+                    window.AppStore.nfcPresencialValidado.value = true;
+                    window.AppStore.nfcPresencialTimestamp.value = Date.now();
+                    mostrarToast("📡 Presencia presencial validada vía Tag NFC (" + tagParam + ") por 30s. Presiona tu botón de asistencia.", "success");
+                  }
                 } else {
                   mostrarToast("⚠️ El Tag NFC (" + tagParam + ") no corresponde a tu Sede activa (" + sedeActual + ").", "error");
                 }
